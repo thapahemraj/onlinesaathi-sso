@@ -95,9 +95,23 @@ const DashboardLayout = () => {
                             onClick={handleLogout}
                             className="w-full flex items-center gap-3 px-4 py-3 text-[15px] text-[#323130] hover:bg-gray-200 rounded-md transition-colors mt-8 text-left"
                         >
-                            <LogOut size={20} strokeWidth={1.5} />
                             Sign out
                         </button>
+
+                        {user?.role === 'admin' && (
+                            <NavLink
+                                to="/dashboard/admin"
+                                className={({ isActive }) =>
+                                    `flex items-center gap-3 px-4 py-3 text-[15px] rounded-md transition-colors mt-4 border-t border-gray-200 ${isActive
+                                        ? 'bg-white shadow-sm font-semibold text-[#0078D4]'
+                                        : 'text-[#0078D4] hover:bg-gray-200'
+                                    }`
+                                }
+                            >
+                                <Shield size={20} strokeWidth={1.5} />
+                                Admin Center
+                            </NavLink>
+                        )}
                     </nav>
                 </aside>
 

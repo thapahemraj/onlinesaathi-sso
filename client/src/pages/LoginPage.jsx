@@ -19,8 +19,35 @@ const LoginPage = () => {
     const [otpInput, setOtpInput] = useState('');
     const [newPassword, setNewPassword] = useState('');
 
-    const { login } = useAuth();
+    const { login, user, loading } = useAuth();
     const navigate = useNavigate();
+
+    const [showMenu, setShowMenu] = useState(false);
+
+    // Auto-redirect if already logged in
+    useEffect(() => {
+        if (!loading && user) {
+            // Check for returnUrl
+            const params = new URLSearchParams(window.location.search);
+            const returnUrl = params.get('returnUrl') || params.get('redirect');
+
+            if (returnUrl) {
+                window.location.href = returnUrl;
+            } else if (user.role === 'admin') {
+                navigate('/dashboard/admin');
+            } else {
+                navigate('/dashboard');
+            }
+        }
+    }, [user, loading, navigate]);
+
+    const handleForgetAccount = (e) => {
+        e.stopPropagation();
+        localStorage.removeItem('rememberedUser');
+        setRememberedUser(null);
+        setStep(1);
+        setShowMenu(false);
+    };
 
     useEffect(() => {
         const storedUser = localStorage.getItem('rememberedUser');
@@ -73,7 +100,18 @@ const LoginPage = () => {
                     email: userData.email,
                     profilePicture: userData.profilePicture
                 }));
-                navigate('/dashboard');
+
+                // Check for returnUrl/redirectUrl in query params
+                const params = new URLSearchParams(window.location.search);
+                const returnUrl = params.get('returnUrl') || params.get('redirect');
+
+                if (returnUrl) {
+                    window.location.href = returnUrl;
+                } else if (userData.role === 'admin') {
+                    navigate('/dashboard/admin');
+                } else {
+                    navigate('/dashboard');
+                }
             } catch (err) {
                 setError(err.response?.data?.message || 'Login failed');
             }
@@ -203,7 +241,25 @@ const LoginPage = () => {
                                             <div className="text-[#1b1b1b] text-sm truncate">{rememberedUser.email}</div>
                                             <div className="text-[#666] text-xs mt-0.5">Signed in</div>
                                         </div>
-                                        <MoreHorizontal size={20} className="text-gray-500" />
+                                        <div className="relative">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+                                                className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                                            >
+                                                <MoreHorizontal size={20} className="text-gray-500" />
+                                            </button>
+
+                                            {showMenu && (
+                                                <div className="absolute right-0 top-full mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-50 py-1">
+                                                    <button
+                                                        onClick={handleForgetAccount}
+                                                        className="w-full text-left px-4 py-2 text-sm text-[#1b1b1b] hover:bg-gray-100"
+                                                    >
+                                                        Forget
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Use Another Account */}

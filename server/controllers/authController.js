@@ -38,6 +38,7 @@ const registerUser = async (req, res) => {
             _id: user._id,
             username: user.username,
             email: user.email,
+            role: user.role,
         });
     } else {
         res.status(400).json({ message: 'Invalid user data' });
@@ -64,6 +65,7 @@ const loginUser = async (req, res) => {
             _id: user._id,
             username: user.username,
             email: user.email,
+            role: user.role,
         });
     } else {
         res.status(401).json({ message: 'Invalid email or password' });
@@ -92,6 +94,7 @@ const getUserProfile = async (req, res) => {
             _id: user._id,
             username: user.username,
             email: user.email,
+            role: user.role,
             profilePicture: user.profilePicture
         });
     } else {

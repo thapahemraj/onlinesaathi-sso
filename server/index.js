@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'], // Vite & CRA defaults
+    origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001'], // Vite, CRA, Docusaurus
     credentials: true
 }));
 
@@ -24,6 +24,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/admin/applications', require('./routes/applicationRoutes'));
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
