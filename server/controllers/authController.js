@@ -117,17 +117,28 @@ const getUserProfile = async (req, res) => {
 // @route   POST /api/auth/check-email
 // @access  Public
 const checkEmail = async (req, res) => {
+    console.log("checkEmail: Request received");
     try {
         const { email } = req.body;
+        console.log("checkEmail: Email extracted:", email);
+
+        if (!email) {
+            console.log("checkEmail: No email provided");
+            return res.status(400).json({ message: 'Email required' });
+        }
+
+        console.log("checkEmail: Querying DB...");
         const user = await User.findOne({ email });
+        console.log("checkEmail: DB Query Result:", user ? "Found" : "Not Found");
+
         if (user) {
             res.json({ exists: true });
         } else {
             res.json({ exists: false });
         }
     } catch (error) {
-        console.error('Check Email Error:', error);
-        res.status(500).json({ message: 'Server error checking email' });
+        console.error('Check Email Error Stack:', error);
+        res.status(500).json({ message: 'Server error checking email', error: error.message });
     }
 };
 
