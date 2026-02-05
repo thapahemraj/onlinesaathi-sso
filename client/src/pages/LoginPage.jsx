@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, MoreHorizontal, User as UserIcon } from 'lucide-react';
 import axios from 'axios';
 
 const LoginPage = () => {
@@ -12,6 +12,9 @@ const LoginPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+    // Remembered Account State
+    const [rememberedUser, setRememberedUser] = useState(null);
+
     // Add missing state for Forgot Password flow
     const [otpInput, setOtpInput] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -19,11 +22,19 @@ const LoginPage = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    // Re-using the same styling classes as RegisterPage for consistency
+    useEffect(() => {
+        const storedUser = localStorage.getItem('rememberedUser');
+        if (storedUser) {
+            try {
+                setRememberedUser(JSON.parse(storedUser));
+                // If we have a remembered user, we stay on step 1 but show the card instead of form
+            } catch (e) {
+                localStorage.removeItem('rememberedUser');
+            }
+        }
+    }, []);
+
     const inputClasses = "w-full h-10 px-3 border-b border-[#868686] hover:border-[#323130] focus:border-[#0067b8] focus:border-b-2 outline-none text-[15px] placeholder-gray-500 transition-colors bg-transparent pt-3 pb-1";
-    // NOTE: Microsoft inputs usually are border-top/left/right transparent and border-bottom visible, OR full border. 
-    // The screenshot shows a full border input for "Enter code" but possibly "Floating Label" style. 
-    // Sticking to the previous full border rounded-md but adding the icon container.
     const inputClassesRounded = "w-full h-9 px-3 border border-[#868686] rounded-md hover:border-[#323130] focus:border-[#0067b8] focus:border-2 outline-none text-[15px] placeholder-gray-500 transition-colors";
 
     const buttonClasses = "bg-[#0067b8] text-white px-9 py-1.5 min-w-[108px] hover:bg-[#005da6] shadow-sm rounded-md text-[15px] font-semibold transition-colors";
@@ -41,35 +52,33 @@ const LoginPage = () => {
             }
 
             try {
-                // Check if user exists
                 const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/check-email`, { email });
 
                 if (res.data.exists) {
-                    // User exists -> Show password screen
                     setStep(2);
                 } else {
-                    // User does NOT exist -> Redirect to Register flow with email
                     navigate('/register', { state: { email } });
                 }
             } catch (err) {
                 console.error(err);
-                // Fallback: If backend error (or 404), maybe just assume login? 
-                // But for "Unified Flow", we specifically want to handle "not found".
-                // If API fails, let's show generic error or network error.
                 setError('Something went wrong. Please try again.');
             }
         }
         else if (step === 2) {
-            // Attempt Login
             try {
-                await login(email, password);
+                const userData = await login(email, password);
+                // Save to localStorage for "Remembered Account" feature
+                localStorage.setItem('rememberedUser', JSON.stringify({
+                    username: userData.username,
+                    email: userData.email,
+                    profilePicture: userData.profilePicture
+                }));
                 navigate('/dashboard');
             } catch (err) {
                 setError(err.response?.data?.message || 'Login failed');
             }
         }
         else if (step === 3) {
-            // Initiate Forgot Password (send mock email)
             try {
                 const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, { email });
                 console.log("Mock OTP:", res.data.mockOtp);
@@ -80,18 +89,14 @@ const LoginPage = () => {
             }
         }
         else if (step === 4) {
-            // Verify OTP - we'll just move to next step, actual verify happens at final reset or separate endpoint.
-            // But here we'll assume we pass OTP to the reset endpoint.
             if (!otpInput) {
                 setError('Please enter the code.');
                 setIsLoading(false);
                 return;
             }
-            // Optional: verify OTP here via API if wanted, but doing it in final step is easier for now.
             setStep(5);
         }
         else if (step === 5) {
-            // Reset Password
             if (newPassword.length < 8) {
                 setError('Password must be at least 8 characters.');
                 setIsLoading(false);
@@ -103,7 +108,6 @@ const LoginPage = () => {
                     otp: otpInput,
                     newPassword
                 });
-                // Success - Go back to login (Step 2) with password cleared
                 setStep(2);
                 setPassword('');
                 setError('Password changed! Please sign in.');
@@ -121,7 +125,6 @@ const LoginPage = () => {
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, { email });
             console.log("Resent OTP:", res.data.mockOtp);
-            // Optional: Show a temporary success message instead of just clearing error
             alert(`Code sent to ${email}`);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to resend code');
@@ -137,6 +140,17 @@ const LoginPage = () => {
         setError('');
         setPassword('');
     };
+
+    const handleAccountClick = () => {
+        setEmail(rememberedUser.email);
+        setStep(2); // Go directly to password step
+    };
+
+    const handleUseAnotherAccount = () => {
+        setRememberedUser(null);
+        setEmail('');
+        setStep(1);
+    }
 
     return (
         <div className="min-h-screen w-full relative flex items-center justify-center bg-white md:bg-[#f0f2f5]">
@@ -164,45 +178,78 @@ const LoginPage = () => {
                 )}
 
                 <div className="w-full">
-
                     {/* Header Logo */}
                     <div className="mb-4 flex justify-center">
-                        <img src={import.meta.env.VITE_LOGO_URL} alt="Online Saathi" className="h-6" />
+                        <img src={import.meta.env.VITE_LOGO_URL} alt="Online Saathi" className="h-10" />
                     </div>
 
-                    {/* --- STEP 1: EMAIL ENTRY --- */}
+                    {/* --- STEP 1: EMAIL ENTRY or REMEMBERED ACCOUNT --- */}
                     {step === 1 && (
                         <div className="animate-fade-in">
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-6 leading-tight">Sign in</h2>
+                            {rememberedUser ? (
+                                <>
+                                    <h2 className="text-2xl font-bold text-[#1b1b1b] mb-4 leading-tight">Pick an account</h2>
 
-                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
+                                    {/* Remembered User Card */}
+                                    <div
+                                        onClick={handleAccountClick}
+                                        className="flex items-center gap-4 p-4 hover:bg-[#f2f2f2] cursor-pointer rounded-none border border-transparent hover:border-gray-200 transition-colors mb-2 -mx-4 sm:mx-0"
+                                    >
+                                        <div className="w-10 h-10 rounded-full bg-[#0078D4] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                            {rememberedUser?.username?.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div className="flex-1 overflow-hidden">
+                                            <div className="text-[#1b1b1b] font-semibold truncate">{rememberedUser.username}</div>
+                                            <div className="text-[#1b1b1b] text-sm truncate">{rememberedUser.email}</div>
+                                            <div className="text-[#666] text-xs mt-0.5">Signed in</div>
+                                        </div>
+                                        <MoreHorizontal size={20} className="text-gray-500" />
+                                    </div>
 
-                            <form onSubmit={handleNext}>
-                                <div className="mb-4">
-                                    <input
-                                        type="email"
-                                        className={inputClassesRounded}
-                                        placeholder="Email, phone, or Skype"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        autoFocus
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <span className="text-[13px] text-[#1b1b1b]">
-                                        No account? <Link to="/register" className="text-[#0067b8] hover:underline">Create one!</Link>
-                                    </span>
-                                </div>
-                                <div className="mb-6">
-                                    <span className="text-[#0067b8] text-[13px] hover:underline cursor-pointer">Sign in with a security key</span>
-                                </div>
-
-                                <div className="flex justify-end">
-                                    <button type="submit" className={buttonClasses} disabled={isLoading}>
-                                        {isLoading ? 'Checking...' : 'Next'}
-                                    </button>
-                                </div>
-                            </form>
+                                    {/* Use Another Account */}
+                                    <div
+                                        onClick={handleUseAnotherAccount}
+                                        className="flex items-center gap-4 p-4 hover:bg-[#f2f2f2] cursor-pointer transition-colors mb-6 -mx-4 sm:mx-0"
+                                    >
+                                        <div className="w-10 h-10 flex items-center justify-center shrink-0">
+                                            <div className="w-8 h-8 rounded-full border-2 border-[#1b1b1b] flex items-center justify-center">
+                                                <span className="text-xl font-light pb-0.5">+</span>
+                                            </div>
+                                        </div>
+                                        <div className="text-[#1b1b1b] font-semibold text-[15px]">Use another account</div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <h2 className="text-2xl font-bold text-[#1b1b1b] mb-6 leading-tight">Sign in</h2>
+                                    {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
+                                    <form onSubmit={handleNext}>
+                                        <div className="mb-4">
+                                            <input
+                                                type="email"
+                                                className={inputClassesRounded}
+                                                placeholder="Email, phone, or Skype"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                autoFocus
+                                            />
+                                        </div>
+                                        <div className="mb-4">
+                                            <span className="text-[13px] text-[#1b1b1b]">
+                                                No account? <Link to="/register" className="text-[#0067b8] hover:underline">Create one!</Link>
+                                            </span>
+                                        </div>
+                                        <div className="mb-6">
+                                            <span className="text-[#0067b8] text-[13px] hover:underline cursor-pointer">Sign in with a security key</span>
+                                        </div>
+                                        <div className="flex justify-end">
+                                            <button type="submit" className={buttonClasses} disabled={isLoading}>
+                                                {isLoading ? 'Checking...' : 'Next'}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </>
+                            )}
                         </div>
                     )}
 
@@ -210,11 +257,23 @@ const LoginPage = () => {
                     {step === 2 && (
                         <div className="animate-fade-in">
                             {/* Email Pill Badge */}
-                            <div className="flex justify-center mb-4">
-                                <div className="bg-white border hover:bg-gray-50 cursor-pointer border-gray-200 rounded-full px-3 py-1 flex items-center gap-2 shadow-sm transition-colors text-sm text-[#1b1b1b]">
-                                    {email}
+                            {!rememberedUser && (
+                                <div className="flex justify-center mb-4">
+                                    <div className="bg-white border hover:bg-gray-50 cursor-pointer border-gray-200 rounded-full px-3 py-1 flex items-center gap-2 shadow-sm transition-colors text-sm text-[#1b1b1b]">
+                                        {email}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+
+                            {/* If remembered user, show simpler header */}
+                            {rememberedUser && (
+                                <div className="mb-6" onClick={() => setStep(1)} role="button">
+                                    <div className="flex items-center gap-2 hover:bg-gray-100 p-2 -ml-2 rounded transition-colors cursor-pointer w-fit">
+                                        <ArrowLeft size={16} className="text-[#1b1b1b]" />
+                                        <div className="text-[#1b1b1b] text-sm">{email}</div>
+                                    </div>
+                                </div>
+                            )}
 
                             <h2 className="text-2xl font-bold text-[#1b1b1b] mb-4 leading-tight">Enter password</h2>
 
