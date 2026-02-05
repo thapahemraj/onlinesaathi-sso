@@ -7,14 +7,17 @@ const {
     getUserProfile,
     sendVerificationCode,
     verifyVerificationCode,
+    checkEmail,
+    forgotPassword,
+    resetPassword
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.post('/check-email', require('../controllers/authController').checkEmail);
-router.post('/forgot-password', require('../controllers/authController').forgotPassword);
-router.post('/reset-password', require('../controllers/authController').resetPassword);
+router.post('/check-email', checkEmail);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 router.post('/logout', logoutUser);
 router.post('/send-verification', sendVerificationCode);
 router.post('/verify-code', verifyVerificationCode);

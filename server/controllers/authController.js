@@ -117,12 +117,17 @@ const getUserProfile = async (req, res) => {
 // @route   POST /api/auth/check-email
 // @access  Public
 const checkEmail = async (req, res) => {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-    if (user) {
-        res.json({ exists: true });
-    } else {
-        res.json({ exists: false });
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (user) {
+            res.json({ exists: true });
+        } else {
+            res.json({ exists: false });
+        }
+    } catch (error) {
+        console.error('Check Email Error:', error);
+        res.status(500).json({ message: 'Server error checking email' });
     }
 };
 
