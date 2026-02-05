@@ -139,7 +139,7 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen w-full relative flex items-center justify-center bg-[#f0f2f5]">
+        <div className="min-h-screen w-full relative flex items-center justify-center bg-white md:bg-[#f0f2f5]">
             {/* Background Image */}
             <div className="absolute inset-0 z-0 hidden md:block"
                 style={{
@@ -150,7 +150,7 @@ const LoginPage = () => {
             </div>
 
             {/* Login Card */}
-            <div className="z-10 w-full max-w-[440px] bg-white shadow-xl p-11 rounded-xl transition-all duration-300 relative">
+            <div className="z-10 w-full max-w-[440px] bg-white md:shadow-xl p-8 md:p-11 md:rounded-xl transition-all duration-300 relative">
 
                 {/* Back Button (Absolute Top Left) */}
                 {step > 1 && (
@@ -342,7 +342,7 @@ const LoginPage = () => {
             </div>
 
             {/* Footer */}
-            <div className="absolute bottom-0 w-full z-10 hidden md:flex justify-end px-4 py-2 text-xs text-black/60 gap-4">
+            <div className="absolute bottom-0 w-full z-10 flex flex-wrap justify-center md:justify-end px-4 py-2 text-xs text-black/60 gap-4">
                 <span className="hover:underline cursor-pointer">Terms of use</span>
                 <span className="hover:underline cursor-pointer">Privacy & cookies</span>
                 <span className="hover:underline cursor-pointer">...</span>

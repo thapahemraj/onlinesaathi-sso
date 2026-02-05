@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import axios from 'axios';
+import CustomAlert from '../components/CustomAlert';
 
 const RegisterPage = () => {
     // Steps: 1=Email, 2=Password, 3=Name, 4=Details(Country/DOB), 5=Verify(OTP)
@@ -24,8 +25,18 @@ const RegisterPage = () => {
     const [otp, setOtp] = useState('');
 
     const [error, setError] = useState('');
+    // Custom Alert State
+    const [alertConfig, setAlertConfig] = useState({ show: false, message: '', type: 'success' });
+
     const { register } = useAuth();
     const navigate = useNavigate();
+
+    const showAlert = (message, type = 'success') => {
+        setAlertConfig({ show: true, message, type });
+        if (type !== 'loading') {
+            setTimeout(() => setAlertConfig(prev => ({ ...prev, show: false })), 3000);
+        }
+    };
 
     const handleNext = (e) => {
         e.preventDefault();
@@ -57,14 +68,19 @@ const RegisterPage = () => {
                 setError('Please enter your birthdate.');
                 return;
             }
+
             // Trigger email send
+            showAlert('Sending verification code...', 'loading');
+
             axios.post(`${import.meta.env.VITE_API_URL}/auth/send-verification`, { email })
                 .then(res => {
                     console.log("OTP sent:", res.data);
+                    showAlert('Verification code sent to your email!', 'success');
                     setStep(5);
                 })
                 .catch(err => {
-                    setError(err.response?.data?.message || 'Failed to send verification code.');
+                    showAlert(err.response?.data?.message || 'Failed to send verification code.', 'error');
+                    // Keep error visible slightly longer or let user dismiss
                 });
         }
         // Step 5 is handled by handleSubmit
@@ -84,14 +100,16 @@ const RegisterPage = () => {
 
         try {
             // Verify OTP
+            showAlert('Verifying code...', 'loading');
             await axios.post(`${import.meta.env.VITE_API_URL}/auth/verify-code`, { email, otp });
 
             // Combine names for the simple backend 'username' field
             const fullName = `${firstName} ${lastName}`;
             await register(fullName, email, password);
+            showAlert('Registration successful!', 'success');
             navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.message || 'Verification or registration failed');
+            showAlert(err.response?.data?.message || 'Verification or registration failed', 'error');
         }
     };
 
@@ -100,7 +118,14 @@ const RegisterPage = () => {
     const buttonClasses = "w-full bg-[#0067b8] text-white py-2 hover:bg-[#005da6] shadow-sm rounded-md text-[15px] font-semibold transition-colors mt-4";
 
     return (
-        <div className="min-h-screen w-full relative flex items-center justify-center bg-[#f0f2f5]">
+        <div className="min-h-screen w-full relative flex items-center justify-center bg-white md:bg-[#f0f2f5]">
+            <CustomAlert
+                isOpen={alertConfig.show}
+                message={alertConfig.message}
+                type={alertConfig.type}
+                onClose={() => setAlertConfig(prev => ({ ...prev, show: false }))}
+            />
+
             {/* Background Image */}
             <div className="absolute inset-0 z-0 hidden md:block"
                 style={{
@@ -111,7 +136,7 @@ const RegisterPage = () => {
             </div>
 
             {/* Card */}
-            <div className="z-10 w-full max-w-[440px] bg-white shadow-xl p-11 rounded-xl transition-all duration-300">
+            <div className="z-10 w-full max-w-[440px] bg-white md:shadow-xl p-8 md:p-11 md:rounded-xl transition-all duration-300">
                 <div className="w-full">
 
                     {/* Header Logo */}
@@ -342,7 +367,7 @@ const RegisterPage = () => {
             </div>
 
             {/* Footer */}
-            <div className="absolute bottom-0 w-full z-10 hidden md:flex justify-end px-4 py-2 text-xs text-black/60 gap-4">
+            <div className="absolute bottom-0 w-full z-10 flex flex-wrap justify-center md:justify-end px-4 py-2 text-xs text-black/60 gap-4">
                 <span className="hover:underline cursor-pointer">Terms of use</span>
                 <span className="hover:underline cursor-pointer">Privacy & cookies</span>
                 <span className="hover:underline cursor-pointer">...</span>
