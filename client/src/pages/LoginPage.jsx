@@ -42,7 +42,7 @@ const LoginPage = () => {
 
             try {
                 // Check if user exists
-                const res = await axios.post('http://localhost:5000/api/auth/check-email', { email });
+                const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/check-email`, { email });
 
                 if (res.data.exists) {
                     // User exists -> Show password screen
@@ -71,7 +71,7 @@ const LoginPage = () => {
         else if (step === 3) {
             // Initiate Forgot Password (send mock email)
             try {
-                const res = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+                const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, { email });
                 console.log("Mock OTP:", res.data.mockOtp);
                 alert(`OTP sent successfully to ${email}`);
                 setStep(4);
@@ -98,7 +98,7 @@ const LoginPage = () => {
                 return;
             }
             try {
-                await axios.post('http://localhost:5000/api/auth/reset-password', {
+                await axios.post(`${import.meta.env.VITE_API_URL}/auth/reset-password`, {
                     email,
                     otp: otpInput,
                     newPassword
@@ -119,7 +119,7 @@ const LoginPage = () => {
         setIsLoading(true);
         setError('');
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, { email });
             console.log("Resent OTP:", res.data.mockOtp);
             // Optional: Show a temporary success message instead of just clearing error
             alert(`Code sent to ${email}`);
@@ -143,7 +143,7 @@ const LoginPage = () => {
             {/* Background Image */}
             <div className="absolute inset-0 z-0 hidden md:block"
                 style={{
-                    backgroundImage: "url('https://aadcdn.msauth.net/shared/1.0/content/images/backgrounds/4_eae2dd7eb3a55636dc2d74f4fa4c386e.svg')",
+                    backgroundImage: `url('${import.meta.env.VITE_BG_IMAGE_URL}')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }}>
@@ -167,13 +167,13 @@ const LoginPage = () => {
 
                     {/* Header Logo */}
                     <div className="mb-4 flex justify-center">
-                        <img src="https://aadcdn.msauth.net/shared/1.0/content/images/microsoft_logo_564db913a7fa0ca42727161c6d031bef.svg" alt="Microsoft" className="h-6" />
+                        <img src={import.meta.env.VITE_LOGO_URL} alt="Online Saathi" className="h-6" />
                     </div>
 
                     {/* --- STEP 1: EMAIL ENTRY --- */}
                     {step === 1 && (
                         <div className="animate-fade-in">
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight">Sign in</h2>
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-6 leading-tight">Sign in</h2>
 
                             {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 

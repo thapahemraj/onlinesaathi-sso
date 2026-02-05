@@ -17,7 +17,7 @@ const registerUser = async (req, res) => {
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-        return res.status(400).json({ message: 'User already exists' });
+        return res.status(400).json({ message: 'You are already registered' });
     }
 
     const user = await User.create({
@@ -138,7 +138,7 @@ const forgotPassword = async (req, res) => {
     try {
         await sendEmail({
             email: user.email,
-            subject: 'Your Microsoft account password reset code',
+            subject: 'Your Online Saathi account password reset code',
             message,
         });
 
@@ -177,6 +177,57 @@ const resetPassword = async (req, res) => {
     res.json({ message: 'Password updated successfully' });
 };
 
+// Exports moved to bottom
+
+const Verification = require('../models/Verification');
+
+// @desc    Send Registration Verification Code
+// @route   POST /api/auth/send-verification
+// @access  Public
+const sendVerificationCode = async (req, res) => {
+    const { email } = req.body;
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4 digit code
+
+    // Upsert verification record
+    await Verification.findOneAndUpdate(
+        { email },
+        { email, otp, createdAt: Date.now() },
+        { upsert: true, new: true }
+    );
+
+    const message = `Your Online Saathi verification code is: ${otp}`;
+
+    try {
+        await sendEmail({
+            email,
+            subject: 'Verify your email address',
+            message,
+        });
+
+        res.json({ message: 'Verification code sent', mockOtp: process.env.NODE_ENV === 'development' ? otp : null });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Email could not be sent' });
+    }
+};
+
+// @desc    Verify Registration Code (Optional check before register)
+// @route   POST /api/auth/verify-code
+// @access  Public
+const verifyVerificationCode = async (req, res) => {
+    const { email, otp } = req.body;
+
+    // Check if verification record exists
+    const record = await Verification.findOne({ email, otp });
+
+    if (record) {
+        res.json({ success: true, message: 'Code verified' });
+    } else {
+        res.status(400).json({ success: false, message: 'Invalid or expired code' });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
@@ -185,5 +236,7 @@ module.exports = {
     checkEmail,
     forgotPassword,
     resetPassword,
+    sendVerificationCode,
+    verifyVerificationCode,
 };
 
