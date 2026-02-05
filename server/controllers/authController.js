@@ -28,10 +28,14 @@ const registerUser = async (req, res) => {
 
     if (user) {
         const token = generateToken(user._id);
+
+        // Determine cookie options based on environment
+        const isProduction = process.env.NODE_ENV !== 'development';
+
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production
-            sameSite: 'strict',
+            secure: isProduction, // Secure in production
+            sameSite: isProduction ? 'none' : 'strict', // None for cross-site (different Vercel domains)
             maxAge: 30 * 24 * 60 * 60 * 1000,
         });
         res.status(201).json({
@@ -55,10 +59,13 @@ const loginUser = async (req, res) => {
 
     if (user && (await user.matchPassword(password))) {
         const token = generateToken(user._id);
+
+        const isProduction = process.env.NODE_ENV !== 'development';
+
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development',
-            sameSite: 'strict',
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'strict',
             maxAge: 30 * 24 * 60 * 60 * 1000,
         });
         res.json({
@@ -76,8 +83,12 @@ const loginUser = async (req, res) => {
 // @route   POST /api/auth/logout
 // @access  Public
 const logoutUser = (req, res) => {
+    const isProduction = process.env.NODE_ENV !== 'development';
+
     res.cookie('token', '', {
         httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'strict',
         expires: new Date(0),
     });
     res.status(200).json({ message: 'Logged out' });
