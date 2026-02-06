@@ -35,12 +35,27 @@ app.use('/api/admin/orgs', require('./routes/organizationRoutes'));
 app.use('/api/admin/audit', require('./routes/auditRoutes'));
 
 // Swagger Documentation
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpecs = require('./config/swagger');
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+// Swagger Documentation
+try {
+    const swaggerUi = require('swagger-ui-express');
+    const swaggerSpecs = require('./config/swagger');
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+} catch (err) {
+    console.error("Swagger setup failed:", err);
+}
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        success: false,
+        message: 'A server error has occurred',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
 });
 
 // Export for Vercel Serverless

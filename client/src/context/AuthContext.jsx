@@ -34,8 +34,8 @@ export const AuthProvider = ({ children }) => {
         return data;
     };
 
-    const register = async (username, email, password) => {
-        const { data } = await axios.post('/auth/register', { username, email, password });
+    const register = async (username, email, password, phoneNumber, firebaseUid) => {
+        const { data } = await axios.post('/auth/register', { username, email, password, phoneNumber, firebaseUid });
         setUser(data);
         return data;
     };

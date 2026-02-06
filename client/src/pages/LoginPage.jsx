@@ -91,6 +91,7 @@ const LoginPage = () => {
             } catch (err) {
                 console.error(err);
                 setError('Something went wrong. Please try again.');
+                setIsLoading(false);
             }
         }
         else if (step === 2) {
