@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff, MoreHorizontal, User as UserIcon } from 'lucide-react';
 import axios from 'axios';
+import MsInput from '../components/MsInput';
 
 const LoginPage = () => {
     const [step, setStep] = useState(1);
@@ -18,6 +19,7 @@ const LoginPage = () => {
     // Add missing state for Forgot Password flow
     const [otpInput, setOtpInput] = useState('');
     const [newPassword, setNewPassword] = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
     const { login, user, loading } = useAuth();
     const navigate = useNavigate();
@@ -64,7 +66,7 @@ const LoginPage = () => {
     const inputClasses = "w-full h-10 px-3 border-b border-[#868686] hover:border-[#323130] focus:border-[#0067b8] focus:border-b-2 outline-none text-[15px] placeholder-gray-500 transition-colors bg-transparent pt-3 pb-1";
     const inputClassesRounded = "w-full h-9 px-3 border border-[#868686] rounded-md hover:border-[#323130] focus:border-[#0067b8] focus:border-2 outline-none text-[15px] placeholder-gray-500 transition-colors";
 
-    const buttonClasses = "bg-[#0067b8] text-white px-9 py-1.5 min-w-[108px] hover:bg-[#005da6] shadow-sm rounded-md text-[15px] font-semibold transition-colors";
+    const buttonClasses = "w-full bg-[#0067b8] text-white px-9 py-1.5 min-w-[108px] hover:bg-[#005da6] shadow-sm rounded-md text-[15px] font-semibold transition-colors";
 
     const handleNext = async (e) => {
         e.preventDefault();
@@ -137,6 +139,11 @@ const LoginPage = () => {
         else if (step === 5) {
             if (newPassword.length < 8) {
                 setError('Password must be at least 8 characters.');
+                setIsLoading(false);
+                return;
+            }
+            if (newPassword !== confirmNewPassword) {
+                setError('Passwords do not match.');
                 setIsLoading(false);
                 return;
             }
@@ -226,7 +233,8 @@ const LoginPage = () => {
                         <div className="animate-fade-in">
                             {rememberedUser ? (
                                 <>
-                                    <h2 className="text-2xl font-bold text-[#1b1b1b] mb-4 leading-tight">Pick an account</h2>
+                                    <h2 className="text-2xl font-bold text-[#1b1b1b] mb-4 leading-tight text-center">Pick an account</h2>
+                                    <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">Select an account to sign in.</p>
 
                                     {/* Remembered User Card */}
                                     <div
@@ -277,14 +285,14 @@ const LoginPage = () => {
                                 </>
                             ) : (
                                 <>
-                                    <h2 className="text-2xl font-bold text-[#1b1b1b] mb-6 leading-tight">Sign in</h2>
+                                    <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Sign in</h2>
+                                    <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">to continue to Online Saathi</p>
                                     {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
                                     <form onSubmit={handleNext}>
                                         <div className="mb-4">
-                                            <input
+                                            <MsInput
                                                 type="email"
-                                                className={inputClassesRounded}
-                                                placeholder="Email, phone, or Skype"
+                                                label="Enter email or phone"
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 autoFocus
@@ -298,7 +306,7 @@ const LoginPage = () => {
                                         <div className="mb-6">
                                             <span className="text-[#0067b8] text-[13px] hover:underline cursor-pointer">Sign in with a security key</span>
                                         </div>
-                                        <div className="flex justify-end">
+                                        <div className="flex justify-end w-full">
                                             <button type="submit" className={buttonClasses} disabled={isLoading}>
                                                 {isLoading ? 'Checking...' : 'Next'}
                                             </button>
@@ -323,24 +331,24 @@ const LoginPage = () => {
 
                             {/* If remembered user, show simpler header */}
                             {rememberedUser && (
-                                <div className="mb-6" onClick={() => setStep(1)} role="button">
-                                    <div className="flex items-center gap-2 hover:bg-gray-100 p-2 -ml-2 rounded transition-colors cursor-pointer w-fit">
+                                <div className="mb-6 flex justify-center" onClick={() => setStep(1)} role="button">
+                                    <div className="flex items-center gap-2 hover:bg-gray-100 p-2 px-3 rounded transition-colors cursor-pointer w-fit">
                                         <ArrowLeft size={16} className="text-[#1b1b1b]" />
                                         <div className="text-[#1b1b1b] text-sm">{email}</div>
                                     </div>
                                 </div>
                             )}
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-4 leading-tight">Enter password</h2>
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Enter password</h2>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">Please enter your password.</p>
 
                             {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
                             <form onSubmit={handleNext}>
                                 <div className="mb-4 relative">
-                                    <input
+                                    <MsInput
                                         type={showPassword ? "text" : "password"}
-                                        className={`${inputClassesRounded} pr-10`}
-                                        placeholder="Password"
+                                        label="Password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         autoFocus
@@ -357,7 +365,7 @@ const LoginPage = () => {
                                 <div className="mb-6">
                                     <button type="button" onClick={() => setStep(3)} className="text-[#0067b8] text-[13px] hover:underline">Forgot password?</button>
                                 </div>
-                                <div className="flex justify-end">
+                                <div className="flex justify-end w-full">
                                     <button type="submit" className={buttonClasses} disabled={isLoading}>
                                         {isLoading ? 'Signing in...' : 'Sign in'}
                                     </button>
@@ -374,13 +382,13 @@ const LoginPage = () => {
                                 <span className="text-[#1b1b1b] font-semibold">{email}</span>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight">Verify your identity</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b]">We will send a verification code to your email.</p>
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Verify your identity</h2>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">We will send a verification code to your email.</p>
 
                             {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
                             <form onSubmit={handleNext}>
-                                <div className="flex justify-end mt-8">
+                                <div className="flex justify-end mt-8 w-full">
                                     <button type="submit" className={buttonClasses} disabled={isLoading}>
                                         {isLoading ? 'Sending...' : 'Get code'}
                                     </button>
@@ -397,17 +405,16 @@ const LoginPage = () => {
                                 <span className="text-[#1b1b1b] font-semibold">{email}</span>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-4 leading-tight">Enter code</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b]">We sent a code to <span className="font-semibold">{email}</span>. Please enter it below.</p>
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-4 leading-tight text-center">Enter code</h2>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">We sent a code to <span className="font-semibold">{email}</span>. Please enter it below.</p>
 
                             {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
                             <form onSubmit={handleNext}>
                                 <div className="mb-6">
-                                    <input
+                                    <MsInput
                                         type="text"
-                                        className={inputClassesRounded}
-                                        placeholder="Code"
+                                        label="Code"
                                         value={otpInput}
                                         onChange={(e) => setOtpInput(e.target.value)}
                                         autoFocus
@@ -418,7 +425,7 @@ const LoginPage = () => {
                                         {isLoading ? 'Sending...' : 'Didn\'t receive the code? Resend it'}
                                     </button>
                                 </div>
-                                <div className="flex justify-end">
+                                <div className="flex justify-end w-full">
                                     <button type="submit" className={buttonClasses} disabled={isLoading}>
                                         Next
                                     </button>
@@ -430,23 +437,30 @@ const LoginPage = () => {
                     {/* --- STEP 5: RESET PASSWORD --- */}
                     {step === 5 && (
                         <div className="animate-fade-in">
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight">Reset password</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b]">Create a new password for your account.</p>
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Reset password</h2>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">Create a new password for your account.</p>
 
                             {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
                             <form onSubmit={handleNext}>
                                 <div className="mb-4">
-                                    <input
+                                    <MsInput
                                         type="password"
-                                        className={inputClasses}
-                                        placeholder="New password"
+                                        label="New password"
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
                                         autoFocus
                                     />
                                 </div>
-                                <div className="flex justify-end mt-8">
+                                <div className="mb-4">
+                                    <MsInput
+                                        type="password"
+                                        label="Confirm new password"
+                                        value={confirmNewPassword}
+                                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex justify-end mt-8 w-full">
                                     <button type="submit" className={buttonClasses} disabled={isLoading}>Sign in</button>
                                 </div>
                             </form>
@@ -457,10 +471,20 @@ const LoginPage = () => {
             </div>
 
             {/* Footer */}
-            <div className="absolute bottom-0 w-full z-10 flex flex-wrap justify-center md:justify-end px-4 py-2 text-xs text-black/60 gap-4">
-                <span className="hover:underline cursor-pointer">Terms of use</span>
-                <span className="hover:underline cursor-pointer">Privacy & cookies</span>
-                <span className="hover:underline cursor-pointer">...</span>
+            {/* Footer */}
+            <div className="absolute bottom-0 w-full z-10 flex flex-col items-center justify-end px-4 py-2 gap-1 mb-4">
+                <div className="flex flex-wrap justify-center gap-6 text-xs text-black/60">
+                    <span className="hover:underline cursor-pointer">Help and feedback</span>
+                    <span className="hover:underline cursor-pointer">Terms of use</span>
+                    <span className="hover:underline cursor-pointer">Privacy and cookies</span>
+                </div>
+                {/* Privacy Text */}
+                <div className="text-xs text-black/60 text-center mt-1">
+                    <span className="hover:underline cursor-pointer">...</span>
+                </div>
+                <div className="text-xs text-black/60 text-center">
+                    Use private browsing if this is not your device. <span className="text-[#0067b8] hover:underline cursor-pointer">Learn more</span>
+                </div>
             </div>
         </div>
     );

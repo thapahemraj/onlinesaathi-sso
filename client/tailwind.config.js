@@ -6,6 +6,13 @@ export default {
     ],
     theme: {
         extend: {
+            screens: {
+                'sm': '350px',
+                'md': '450px',
+                'lg': '1024px',
+                'xl': '1280px',
+                '2xl': '1536px',
+            },
             colors: {
                 ms: {
                     blue: '#0078D4',

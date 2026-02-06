@@ -12,9 +12,16 @@ const generateToken = (id) => {
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
-    const { username, email, password } = req.body;
+    const { username, email, password, phoneNumber, firebaseUid } = req.body;
 
-    const userExists = await User.findOne({ $or: [{ email }, { username }] });
+    // Check for existing user by email, username, or phone
+    const query = [
+        { email },
+        { username }
+    ];
+    if (phoneNumber) query.push({ phoneNumber });
+
+    const userExists = await User.findOne({ $or: query });
 
     if (userExists) {
         return res.status(400).json({ message: 'User already exists' });
@@ -24,6 +31,8 @@ const registerUser = async (req, res) => {
         username,
         email,
         password,
+        phoneNumber,
+        firebaseUid
     });
 
     if (user) {
@@ -53,9 +62,16 @@ const registerUser = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
+    // Allow 'email' to serve as a generic identifier (email or phone)
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    // Find user by email OR phoneNumber
+    const user = await User.findOne({
+        $or: [
+            { email: email },
+            { phoneNumber: email }
+        ]
+    });
 
     if (user && (await user.matchPassword(password))) {
         const token = generateToken(user._id);
@@ -113,22 +129,31 @@ const getUserProfile = async (req, res) => {
     }
 };
 
-// @desc    Check if email exists
+// @desc    Check if email or phone exists
 // @route   POST /api/auth/check-email
 // @access  Public
 const checkEmail = async (req, res) => {
     console.log("checkEmail: Request received");
     try {
-        const { email } = req.body;
-        console.log("checkEmail: Email extracted:", email);
+        // Support 'email' key (legacy) or 'identifier' key
+        const { email, identifier } = req.body;
+        const queryValue = identifier || email;
 
-        if (!email) {
-            console.log("checkEmail: No email provided");
-            return res.status(400).json({ message: 'Email required' });
+        console.log("checkEmail: Identifier extracted:", queryValue);
+
+        if (!queryValue) {
+            console.log("checkEmail: No identifier provided");
+            return res.status(400).json({ message: 'Email or Phone required' });
         }
 
         console.log("checkEmail: Querying DB...");
-        const user = await User.findOne({ email });
+        // Check both email and phoneNumber fields
+        const user = await User.findOne({
+            $or: [
+                { email: queryValue },
+                { phoneNumber: queryValue }
+            ]
+        });
         console.log("checkEmail: DB Query Result:", user ? "Found" : "Not Found");
 
         if (user) {
@@ -137,8 +162,8 @@ const checkEmail = async (req, res) => {
             res.json({ exists: false });
         }
     } catch (error) {
-        console.error('Check Email Error Stack:', error);
-        res.status(500).json({ message: 'Server error checking email', error: error.message });
+        console.error('Check Email/Phone Error Stack:', error);
+        res.status(500).json({ message: 'Server error checking identifier', error: error.message });
     }
 };
 

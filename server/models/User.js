@@ -9,12 +9,23 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true,
-        unique: true
+        required: false,
+        unique: true,
+        sparse: true
+    },
+    phoneNumber: {
+        type: String,
+        required: false,
+        unique: true,
+        sparse: true
+    },
+    firebaseUid: {
+        type: String,
+        required: false
     },
     password: {
         type: String,
-        required: false // Optional if using OAuth only
+        required: false // Optional if using OAuth or Phone Auth
     },
     provider: {
         type: String,
