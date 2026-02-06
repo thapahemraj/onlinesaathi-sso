@@ -13,6 +13,8 @@ export const AuthProvider = ({ children }) => {
     axios.defaults.withCredentials = true;
     axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+    console.log("AuthContext: Using API URL:", axios.defaults.baseURL);
+
     useEffect(() => {
         const checkUser = async () => {
             try {

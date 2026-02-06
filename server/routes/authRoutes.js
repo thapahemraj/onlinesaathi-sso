@@ -240,4 +240,50 @@ router.post('/verify-code', verifyVerificationCode);
  */
 router.get('/profile', protect, getUserProfile);
 
+/**
+ * @swagger
+ * /auth/.well-known/openid-configuration:
+ *   get:
+ *     summary: OIDC Discovery Endpoint
+ *     description: Returns the OpenID Connect configuration for setting up this SSO as an Identity Provider (IDP).
+ *     tags: [OIDC]
+ *     responses:
+ *       200:
+ *         description: OIDC Configuration JSON
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 issuer:
+ *                   type: string
+ *                   example: "https://onlinesaathi-sso.vercel.app"
+ *                 authorization_endpoint:
+ *                   type: string
+ *                   example: "https://onlinesaathi-sso.vercel.app/oauth/authorize"
+ *                 token_endpoint:
+ *                   type: string
+ *                   example: "https://onlinesaathi-sso.vercel.app/oauth/token"
+ *                 userinfo_endpoint:
+ *                   type: string
+ *                   example: "https://onlinesaathi-sso.vercel.app/api/auth/profile"
+ *                 jwks_uri:
+ *                   type: string
+ *                   example: "https://onlinesaathi-sso.vercel.app/oauth/jwks"
+ */
+router.get('/.well-known/openid-configuration', (req, res) => {
+    // Mock OIDC Discovery response
+    res.json({
+        issuer: process.env.VITE_API_URL || "https://onlinesaathi-sso.vercel.app",
+        authorization_endpoint: `${process.env.VITE_API_URL || "https://onlinesaathi-sso.vercel.app"}/oauth/authorize`,
+        token_endpoint: `${process.env.VITE_API_URL || "https://onlinesaathi-sso.vercel.app"}/oauth/token`,
+        userinfo_endpoint: `${process.env.VITE_API_URL || "https://onlinesaathi-sso.vercel.app"}/api/auth/profile`,
+        jwks_uri: `${process.env.VITE_API_URL || "https://onlinesaathi-sso.vercel.app"}/oauth/jwks`,
+        response_types_supported: ["code", "token", "id_token"],
+        subject_types_supported: ["public"],
+        id_token_signing_alg_values_supported: ["RS256"]
+    });
+});
+
+
 module.exports = router;

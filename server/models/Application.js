@@ -3,39 +3,38 @@ const mongoose = require('mongoose');
 const applicationSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     clientId: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        index: true
     },
     clientSecret: {
-        type: String, // In a real app, this should be hashed. Storing plain for "view once" demo simplicity or we can hash it and never show again.
-        // Let's store it plaintext for this demo to allow "Show Secret" functionality easily without complex key management.
-        // In PROD, store hash and only show once at creation.
+        type: String,
         required: true
     },
     redirectUris: [{
-        type: String
+        type: String,
+        required: true
     }],
-    homepageUrl: {
-        type: String
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
     description: {
         type: String
     },
-    logoUrl: {
+    website: {
         type: String
     },
-    isEnabled: {
-        type: Boolean,
-        default: true
-    },
-    createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
-}, { timestamps: true });
+});
 
 module.exports = mongoose.model('Application', applicationSchema);

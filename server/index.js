@@ -29,6 +29,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/oauth', require('./routes/oauthRoutes')); // Mount OAuth
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/admin/applications', require('./routes/applicationRoutes'));
 app.use('/api/admin/orgs', require('./routes/organizationRoutes'));
