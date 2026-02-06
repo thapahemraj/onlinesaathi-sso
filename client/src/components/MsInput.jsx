@@ -16,7 +16,7 @@ const MsInput = ({ type = "text", label, value, onChange, error, ...props }) => 
         <div className="relative w-full mb-2">
             <div
                 className={`
-                    relative border rounded-none
+                    relative border rounded-md
                     ${error ? 'border-[#e81123]' : isFocused ? 'border-[#0067b8] border-b-2' : 'border-[#868686] border-b'}
                     bg-white h-[36px] transition-colors
                 `}

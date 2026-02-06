@@ -25,7 +25,7 @@ app.use(cors({
 connectDB();
 
 app.get('/', (req, res) => {
-    res.send('SSO System API is working nicely!');
+    res.redirect('/api-docs');
 });
 
 app.use('/api/auth', require('./routes/authRoutes'));
@@ -33,6 +33,11 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/admin/applications', require('./routes/applicationRoutes'));
 app.use('/api/admin/orgs', require('./routes/organizationRoutes'));
 app.use('/api/admin/audit', require('./routes/auditRoutes'));
+
+// Swagger Documentation
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./config/swagger');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

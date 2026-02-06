@@ -290,9 +290,7 @@ const RegisterPage = () => {
                                         {usePhone ? "Use your email address" : "Use a phone number instead"}
                                     </button>
                                 </div>
-                                <div className="mb-4">
-                                    {!usePhone && <button type="button" className="text-[#0067b8] text-[13px] hover:underline hover:text-[#005da6]">Get a new email address</button>}
-                                </div>
+
                                 <div className="mb-8">
                                     <span className="text-[13px] text-[#1b1b1b]">
                                         Already have an account? <Link to="/login" className="text-[#0067b8] hover:underline">Sign in</Link>
@@ -419,7 +417,7 @@ const RegisterPage = () => {
 
                                 <div className="mb-6">
                                     <h3 className="block text-xs font-semibold text-[#1b1b1b] mb-1.5">Country/region</h3>
-                                    <div className="relative border border-[#868686] border-b border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-b-2 bg-white h-[36px] transition-colors">
+                                    <div className="relative border border-[#868686] border-b border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-b-2 bg-white h-[36px] transition-colors rounded-md">
                                         <select
                                             className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none"
                                             value={country}
@@ -441,7 +439,7 @@ const RegisterPage = () => {
                                     <div className="flex gap-2">
                                         {/* Month */}
                                         <div className="relative w-1/2">
-                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors">
+                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
                                                 <select
                                                     className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
                                                     value={birthMonth}
@@ -461,7 +459,7 @@ const RegisterPage = () => {
 
                                         {/* Day */}
                                         <div className="relative w-1/4">
-                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors">
+                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
                                                 <select
                                                     className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
                                                     value={birthDay}
@@ -481,7 +479,7 @@ const RegisterPage = () => {
 
                                         {/* Year */}
                                         <div className="relative w-1/3">
-                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors">
+                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
                                                 <select
                                                     className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
                                                     value={birthYear}
