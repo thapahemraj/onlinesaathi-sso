@@ -274,7 +274,14 @@ const sendVerificationCode = async (req, res) => {
 // @route   POST /api/auth/verify-code
 // @access  Public
 const verifyVerificationCode = async (req, res) => {
-    const { email, otp } = req.body;
+    let { email, otp } = req.body;
+
+    if (!email || !otp) {
+        return res.status(400).json({ success: false, message: "Email and OTP are required" });
+    }
+
+    email = email.trim();
+    otp = otp.trim();
 
     // Check if verification record exists
     const record = await Verification.findOne({ email, otp });

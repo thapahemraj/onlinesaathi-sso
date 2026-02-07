@@ -218,358 +218,362 @@ const RegisterPage = () => {
             navigate('/dashboard');
         } catch (err) {
             console.error(err);
-            showAlert(err.message || 'Verification or registration failed', 'error');
+        } catch (err) {
+            console.error(err);
+            const errorMessage = err.response?.data?.message || err.message || 'Verification or registration failed';
+            showAlert(errorMessage, 'error');
         }
-    };
+    }
+};
 
-    // Input classes for consistency
-    const inputClasses = "w-full h-9 px-3 border border-[#868686] rounded-md hover:border-[#323130] focus:border-[#0067b8] focus:border-2 outline-none text-[15px] placeholder-gray-500 transition-colors";
-    const buttonClasses = "w-full bg-[#0067b8] text-white py-2 hover:bg-[#005da6] shadow-sm rounded-md text-[15px] font-semibold transition-colors mt-4";
+// Input classes for consistency
+const inputClasses = "w-full h-9 px-3 border border-[#868686] rounded-md hover:border-[#323130] focus:border-[#0067b8] focus:border-2 outline-none text-[15px] placeholder-gray-500 transition-colors";
+const buttonClasses = "w-full bg-[#0067b8] text-white py-2 hover:bg-[#005da6] shadow-sm rounded-md text-[15px] font-semibold transition-colors mt-4";
 
-    return (
-        <div className="min-h-screen w-full relative flex items-center justify-center bg-white md:bg-[#f0f2f5]">
-            <CustomAlert
-                isOpen={alertConfig.show}
-                message={alertConfig.message}
-                type={alertConfig.type}
-                onClose={() => setAlertConfig(prev => ({ ...prev, show: false }))}
-            />
+return (
+    <div className="min-h-screen w-full relative flex items-center justify-center bg-white md:bg-[#f0f2f5]">
+        <CustomAlert
+            isOpen={alertConfig.show}
+            message={alertConfig.message}
+            type={alertConfig.type}
+            onClose={() => setAlertConfig(prev => ({ ...prev, show: false }))}
+        />
 
-            {/* Background Image */}
-            <div className="absolute inset-0 z-0 hidden md:block"
-                style={{
-                    backgroundImage: `url('${import.meta.env.VITE_BG_IMAGE_URL}')`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center'
-                }}>
-            </div>
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0 hidden md:block"
+            style={{
+                backgroundImage: `url('${import.meta.env.VITE_BG_IMAGE_URL}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+            }}>
+        </div>
 
-            {/* Card */}
-            <div className="z-10 w-full max-w-[440px] bg-white md:shadow-xl p-8 md:p-11 md:rounded-xl transition-all duration-300">
-                <div className="w-full">
+        {/* Card */}
+        <div className="z-10 w-full max-w-[440px] bg-white md:shadow-xl p-8 md:p-11 md:rounded-xl transition-all duration-300">
+            <div className="w-full">
 
-                    {/* Header Logo */}
-                    <div className="mb-8 flex justify-center">
-                        <img src={import.meta.env.VITE_LOGO_URL} alt="Microsoft" className="h-10" />
+                {/* Header Logo */}
+                <div className="mb-8 flex justify-center">
+                    <img src={import.meta.env.VITE_LOGO_URL} alt="Microsoft" className="h-10" />
+                </div>
+
+                {/* --- STEP 1: EMAIL --- */}
+                {step === 1 && (
+                    <div className="animate-fade-in">
+                        <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Create account</h2>
+                        <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">Get started with your free account.</p>
+
+                        {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
+
+                        <form onSubmit={handleNext}>
+                            <div className="mb-6">
+                                {usePhone ? (
+                                    <MsInput
+                                        type="tel"
+                                        label="Phone number"
+                                        value={phoneNumber}
+                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <MsInput
+                                        type="email"
+                                        label="Enter your email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        autoFocus
+                                    />
+                                )}
+                            </div>
+                            <div className="mb-4">
+                                <button
+                                    type="button"
+                                    onClick={() => { setUsePhone(!usePhone); setError(''); }}
+                                    className="text-[#0067b8] text-[13px] hover:underline hover:text-[#005da6]"
+                                >
+                                    {usePhone ? "Use your email address" : "Use a phone number instead"}
+                                </button>
+                            </div>
+
+                            <div className="mb-8">
+                                <span className="text-[13px] text-[#1b1b1b]">
+                                    Already have an account? <Link to="/login" className="text-[#0067b8] hover:underline">Sign in</Link>
+                                </span>
+                            </div>
+                            <div className="flex justify-end w-full">
+                                <button type="submit" className={buttonClasses}>Next</button>
+                            </div>
+                        </form>
                     </div>
+                )}
 
-                    {/* --- STEP 1: EMAIL --- */}
-                    {step === 1 && (
-                        <div className="animate-fade-in">
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Create account</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">Get started with your free account.</p>
-
-                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
-
-                            <form onSubmit={handleNext}>
-                                <div className="mb-6">
-                                    {usePhone ? (
-                                        <MsInput
-                                            type="tel"
-                                            label="Phone number"
-                                            value={phoneNumber}
-                                            onChange={(e) => setPhoneNumber(e.target.value)}
-                                            autoFocus
-                                        />
-                                    ) : (
-                                        <MsInput
-                                            type="email"
-                                            label="Enter your email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            autoFocus
-                                        />
-                                    )}
-                                </div>
-                                <div className="mb-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => { setUsePhone(!usePhone); setError(''); }}
-                                        className="text-[#0067b8] text-[13px] hover:underline hover:text-[#005da6]"
-                                    >
-                                        {usePhone ? "Use your email address" : "Use a phone number instead"}
-                                    </button>
-                                </div>
-
-                                <div className="mb-8">
-                                    <span className="text-[13px] text-[#1b1b1b]">
-                                        Already have an account? <Link to="/login" className="text-[#0067b8] hover:underline">Sign in</Link>
-                                    </span>
-                                </div>
-                                <div className="flex justify-end w-full">
-                                    <button type="submit" className={buttonClasses}>Next</button>
-                                </div>
-                            </form>
+                {/* --- STEP 2: PASSWORD --- */}
+                {step === 2 && (
+                    <div className="animate-fade-in">
+                        <div className="flex justify-center mb-6">
+                            <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
+                                <ArrowLeft size={20} className="text-[#646464]" />
+                                <span className="text-sm">{usePhone ? phoneNumber : email}</span>
+                            </button>
                         </div>
-                    )}
 
-                    {/* --- STEP 2: PASSWORD --- */}
-                    {step === 2 && (
-                        <div className="animate-fade-in">
-                            <div className="flex justify-center mb-6">
-                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
-                                    <ArrowLeft size={20} className="text-[#646464]" />
-                                    <span className="text-sm">{usePhone ? phoneNumber : email}</span>
+                        <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Create a password</h2>
+                        <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">Enter the password you would like to use with your account.</p>
+
+                        {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
+
+                        <form onSubmit={handleNext}>
+                            <div className="mb-8 relative">
+                                <MsInput
+                                    type={showPassword ? "text" : "password"}
+                                    label="Create password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    autoFocus
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700 z-10 cursor-pointer"
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </button>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Create a password</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">Enter the password you would like to use with your account.</p>
-
-                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
-
-                            <form onSubmit={handleNext}>
-                                <div className="mb-8 relative">
-                                    <MsInput
-                                        type={showPassword ? "text" : "password"}
-                                        label="Create password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        autoFocus
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        onMouseDown={(e) => e.preventDefault()}
-                                        className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700 z-10 cursor-pointer"
-                                    >
-                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                    </button>
-                                </div>
-
-                                <div className="mb-8 relative">
-                                    <MsInput
-                                        type={showConfirmPassword ? "text" : "password"}
-                                        label="Confirm password"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        onMouseDown={(e) => e.preventDefault()}
-                                        className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700 z-10 cursor-pointer"
-                                    >
-                                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                    </button>
-                                </div>
-                                <div className="flex justify-end w-full">
-                                    <button type="submit" className={buttonClasses}>Next</button>
-                                </div>
-                            </form>
-                        </div>
-                    )}
-
-                    {/* --- STEP 3: NAME --- */}
-                    {step === 3 && (
-                        <div className="animate-fade-in">
-                            <div className="flex justify-center mb-6">
-                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
-                                    <ArrowLeft size={20} className="text-[#646464]" />
-                                    <span className="text-sm">{usePhone ? phoneNumber : email}</span>
+                            <div className="mb-8 relative">
+                                <MsInput
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    label="Confirm password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700 z-10 cursor-pointer"
+                                >
+                                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </button>
                             </div>
-
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">What's your name?</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">We need a little more info before we're done.</p>
-
-                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
-
-                            <form onSubmit={handleNext}>
-                                <div className="mb-6 space-y-4">
-                                    <MsInput
-                                        type="text"
-                                        label="First name"
-                                        value={firstName}
-                                        onChange={(e) => setFirstName(e.target.value)}
-                                        autoFocus
-                                    />
-                                    <MsInput
-                                        type="text"
-                                        label="Last name"
-                                        value={lastName}
-                                        onChange={(e) => setLastName(e.target.value)}
-                                    />
-                                </div>
-                                <div className="flex justify-end mt-8 w-full">
-                                    <button type="submit" className={buttonClasses}>Next</button>
-                                </div>
-                            </form>
-                        </div>
-                    )}
-
-                    {/* --- STEP 4: DETAILS (Country/DOB) --- */}
-                    {step === 4 && (
-                        <div className="animate-fade-in">
-                            <div className="flex justify-center mb-6">
-                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
-                                    <ArrowLeft size={20} className="text-[#646464]" />
-                                    <span className="text-sm">{usePhone ? phoneNumber : email}</span>
-                                </button>
+                            <div className="flex justify-end w-full">
+                                <button type="submit" className={buttonClasses}>Next</button>
                             </div>
+                        </form>
+                    </div>
+                )}
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">What's your birthdate?</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">We need this to ensure the account is age-appropriate.</p>
+                {/* --- STEP 3: NAME --- */}
+                {step === 3 && (
+                    <div className="animate-fade-in">
+                        <div className="flex justify-center mb-6">
+                            <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
+                                <ArrowLeft size={20} className="text-[#646464]" />
+                                <span className="text-sm">{usePhone ? phoneNumber : email}</span>
+                            </button>
+                        </div>
 
-                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
+                        <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">What's your name?</h2>
+                        <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">We need a little more info before we're done.</p>
 
-                            <form onSubmit={handleNext}>
+                        {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
-                                <div className="mb-6">
-                                    <h3 className="block text-xs font-semibold text-[#1b1b1b] mb-1.5">Country/region</h3>
-                                    <div className="relative border border-[#868686] border-b border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-b-2 bg-white h-[36px] transition-colors rounded-md">
-                                        <select
-                                            className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none"
-                                            value={country}
-                                            onChange={(e) => setCountry(e.target.value)}
-                                        >
-                                            <option value="India">India</option>
-                                            <option value="United States">United States</option>
-                                            <option value="United Kingdom">United Kingdom</option>
-                                            <option value="Nepal">Nepal</option>
-                                        </select>
-                                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                                        </div>
+                        <form onSubmit={handleNext}>
+                            <div className="mb-6 space-y-4">
+                                <MsInput
+                                    type="text"
+                                    label="First name"
+                                    value={firstName}
+                                    onChange={(e) => setFirstName(e.target.value)}
+                                    autoFocus
+                                />
+                                <MsInput
+                                    type="text"
+                                    label="Last name"
+                                    value={lastName}
+                                    onChange={(e) => setLastName(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex justify-end mt-8 w-full">
+                                <button type="submit" className={buttonClasses}>Next</button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                {/* --- STEP 4: DETAILS (Country/DOB) --- */}
+                {step === 4 && (
+                    <div className="animate-fade-in">
+                        <div className="flex justify-center mb-6">
+                            <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
+                                <ArrowLeft size={20} className="text-[#646464]" />
+                                <span className="text-sm">{usePhone ? phoneNumber : email}</span>
+                            </button>
+                        </div>
+
+                        <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">What's your birthdate?</h2>
+                        <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">We need this to ensure the account is age-appropriate.</p>
+
+                        {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
+
+                        <form onSubmit={handleNext}>
+
+                            <div className="mb-6">
+                                <h3 className="block text-xs font-semibold text-[#1b1b1b] mb-1.5">Country/region</h3>
+                                <div className="relative border border-[#868686] border-b border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-b-2 bg-white h-[36px] transition-colors rounded-md">
+                                    <select
+                                        className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none"
+                                        value={country}
+                                        onChange={(e) => setCountry(e.target.value)}
+                                    >
+                                        <option value="India">India</option>
+                                        <option value="United States">United States</option>
+                                        <option value="United Kingdom">United Kingdom</option>
+                                        <option value="Nepal">Nepal</option>
+                                    </select>
+                                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="mb-4">
-                                    <h3 className="block text-xs font-semibold text-[#1b1b1b] mb-1.5">Birthdate</h3>
-                                    <div className="flex gap-2">
-                                        {/* Month */}
-                                        <div className="relative w-1/2">
-                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
-                                                <select
-                                                    className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
-                                                    value={birthMonth}
-                                                    onChange={(e) => setBirthMonth(e.target.value)}
-                                                >
-                                                    <option value="" disabled></option>
-                                                    {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
-                                                        <option key={m} value={m}>{m}</option>
-                                                    ))}
-                                                </select>
-                                                <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] ${birthMonth ? 'top-0 text-xs text-[#0067b8] -translate-y-1/2 bg-white px-1' : 'top-1.5 text-[15px]'}`}>Month</label>
-                                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                                    <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                                                </div>
+                            <div className="mb-4">
+                                <h3 className="block text-xs font-semibold text-[#1b1b1b] mb-1.5">Birthdate</h3>
+                                <div className="flex gap-2">
+                                    {/* Month */}
+                                    <div className="relative w-1/2">
+                                        <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
+                                            <select
+                                                className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
+                                                value={birthMonth}
+                                                onChange={(e) => setBirthMonth(e.target.value)}
+                                            >
+                                                <option value="" disabled></option>
+                                                {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
+                                                    <option key={m} value={m}>{m}</option>
+                                                ))}
+                                            </select>
+                                            <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] ${birthMonth ? 'top-0 text-xs text-[#0067b8] -translate-y-1/2 bg-white px-1' : 'top-1.5 text-[15px]'}`}>Month</label>
+                                            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                                <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        {/* Day */}
-                                        <div className="relative w-1/4">
-                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
-                                                <select
-                                                    className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
-                                                    value={birthDay}
-                                                    onChange={(e) => setBirthDay(e.target.value)}
-                                                >
-                                                    <option value="" disabled></option>
-                                                    {[...Array(31)].map((_, i) => (
-                                                        <option key={i + 1} value={i + 1}>{i + 1}</option>
-                                                    ))}
-                                                </select>
-                                                <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] ${birthDay ? 'top-0 text-xs text-[#0067b8] -translate-y-1/2 bg-white px-1' : 'top-1.5 text-[15px]'}`}>Day</label>
-                                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                                    <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                                                </div>
+                                    {/* Day */}
+                                    <div className="relative w-1/4">
+                                        <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
+                                            <select
+                                                className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
+                                                value={birthDay}
+                                                onChange={(e) => setBirthDay(e.target.value)}
+                                            >
+                                                <option value="" disabled></option>
+                                                {[...Array(31)].map((_, i) => (
+                                                    <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                                ))}
+                                            </select>
+                                            <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] ${birthDay ? 'top-0 text-xs text-[#0067b8] -translate-y-1/2 bg-white px-1' : 'top-1.5 text-[15px]'}`}>Day</label>
+                                            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                                <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        {/* Year */}
-                                        <div className="relative w-1/3">
-                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
-                                                <select
-                                                    className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
-                                                    value={birthYear}
-                                                    onChange={(e) => setBirthYear(e.target.value)}
-                                                >
-                                                    <option value="" disabled></option>
-                                                    {[...Array(100)].map((_, i) => (
-                                                        <option key={i} value={2024 - i}>{2024 - i}</option>
-                                                    ))}
-                                                </select>
-                                                <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] ${birthYear ? 'top-0 text-xs text-[#0067b8] -translate-y-1/2 bg-white px-1' : 'top-1.5 text-[15px]'}`}>Year</label>
-                                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                                    <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                                                </div>
+                                    {/* Year */}
+                                    <div className="relative w-1/3">
+                                        <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
+                                            <select
+                                                className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
+                                                value={birthYear}
+                                                onChange={(e) => setBirthYear(e.target.value)}
+                                            >
+                                                <option value="" disabled></option>
+                                                {[...Array(100)].map((_, i) => (
+                                                    <option key={i} value={2024 - i}>{2024 - i}</option>
+                                                ))}
+                                            </select>
+                                            <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] ${birthYear ? 'top-0 text-xs text-[#0067b8] -translate-y-1/2 bg-white px-1' : 'top-1.5 text-[15px]'}`}>Year</label>
+                                            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                                <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
-
-                                <div className="flex justify-end mt-8 w-full">
-                                    <button type="submit" className={buttonClasses}>Next</button>
-                                </div>
-                            </form>
-                        </div>
-                    )}
-
-                    {/* --- STEP 5: VERIFY (OTP) --- */}
-                    {step === 5 && (
-                        <div className="animate-fade-in">
-                            <div className="flex justify-center mb-6">
-                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
-                                    <ArrowLeft size={20} className="text-[#646464]" />
-                                    <span className="text-sm">{usePhone ? phoneNumber : email}</span>
-                                </button>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Verify {usePhone ? 'phone' : 'email'}</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">
-                                Enter the code we sent to <span className="font-semibold">{usePhone ? phoneNumber : email}</span>.
-                                <br />If you didn't receive the {usePhone ? 'code' : 'email'}, check your junk folder or <button className="text-[#0067b8] hover:underline">try again</button>.
-                            </p>
-                            <div id="recaptcha-container"></div>
 
-                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
+                            <div className="flex justify-end mt-8 w-full">
+                                <button type="submit" className={buttonClasses}>Next</button>
+                            </div>
+                        </form>
+                    </div>
+                )}
 
-                            <form onSubmit={handleSubmit}>
-                                <div className="mb-6 space-y-4">
-                                    <MsInput
-                                        type="text"
-                                        label="Code"
-                                        value={otp}
-                                        onChange={(e) => setOtp(e.target.value)}
-                                        autoFocus
-                                        maxLength={6}
-                                        className="text-center tracking-widest"
-                                    />
-                                </div>
-                                <div className="mb-4 flex items-start gap-2">
-                                    <input type="checkbox" id="info" defaultChecked className="mt-1 w-4 h-4 border-gray-400 rounded-none" />
-                                    <label htmlFor="info" className="text-[13px] text-[#1b1b1b]">I would like information, tips, and offers about Online Saathi products and services.</label>
-                                </div>
-
-                                <div className="flex justify-end mt-8 w-full">
-                                    <button type="submit" className={buttonClasses}>Next</button>
-                                </div>
-                            </form>
+                {/* --- STEP 5: VERIFY (OTP) --- */}
+                {step === 5 && (
+                    <div className="animate-fade-in">
+                        <div className="flex justify-center mb-6">
+                            <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
+                                <ArrowLeft size={20} className="text-[#646464]" />
+                                <span className="text-sm">{usePhone ? phoneNumber : email}</span>
+                            </button>
                         </div>
-                    )}
 
-                </div>
-            </div >
+                        <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Verify {usePhone ? 'phone' : 'email'}</h2>
+                        <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">
+                            Enter the code we sent to <span className="font-semibold">{usePhone ? phoneNumber : email}</span>.
+                            <br />If you didn't receive the {usePhone ? 'code' : 'email'}, check your junk folder or <button className="text-[#0067b8] hover:underline">try again</button>.
+                        </p>
+                        <div id="recaptcha-container"></div>
 
-            {/* Footer */}
-            {/* Footer */}
-            <div className="absolute bottom-0 w-full z-10 flex flex-col items-center justify-end px-4 py-2 gap-1 mb-4">
-                <div className="flex flex-wrap justify-center gap-6 text-xs text-black/60">
-                    <span className="hover:underline cursor-pointer">Help and feedback</span>
-                    <span className="hover:underline cursor-pointer">Terms of use</span>
-                    <span className="hover:underline cursor-pointer">Privacy and cookies</span>
-                </div>
-                <div className="text-xs text-black/60 text-center mt-1">
-                    <span className="hover:underline cursor-pointer">...</span>
-                </div>
-                <div className="text-xs text-black/60 text-center">
-                    Use private browsing if this is not your device. <span className="text-[#0067b8] hover:underline cursor-pointer">Learn more</span>
-                </div>
+                        {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
+
+                        <form onSubmit={handleSubmit}>
+                            <div className="mb-6 space-y-4">
+                                <MsInput
+                                    type="text"
+                                    label="Code"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    autoFocus
+                                    maxLength={6}
+                                    className="text-center tracking-widest"
+                                />
+                            </div>
+                            <div className="mb-4 flex items-start gap-2">
+                                <input type="checkbox" id="info" defaultChecked className="mt-1 w-4 h-4 border-gray-400 rounded-none" />
+                                <label htmlFor="info" className="text-[13px] text-[#1b1b1b]">I would like information, tips, and offers about Online Saathi products and services.</label>
+                            </div>
+
+                            <div className="flex justify-end mt-8 w-full">
+                                <button type="submit" className={buttonClasses}>Next</button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
             </div>
         </div >
-    );
+
+        {/* Footer */}
+        {/* Footer */}
+        <div className="absolute bottom-0 w-full z-10 flex flex-col items-center justify-end px-4 py-2 gap-1 mb-4">
+            <div className="flex flex-wrap justify-center gap-6 text-xs text-black/60">
+                <span className="hover:underline cursor-pointer">Help and feedback</span>
+                <span className="hover:underline cursor-pointer">Terms of use</span>
+                <span className="hover:underline cursor-pointer">Privacy and cookies</span>
+            </div>
+            <div className="text-xs text-black/60 text-center mt-1">
+                <span className="hover:underline cursor-pointer">...</span>
+            </div>
+            <div className="text-xs text-black/60 text-center">
+                Use private browsing if this is not your device. <span className="text-[#0067b8] hover:underline cursor-pointer">Learn more</span>
+            </div>
+        </div>
+    </div >
+);
 };
 
 export default RegisterPage;
