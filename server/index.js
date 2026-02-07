@@ -35,6 +35,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/auth/webauthn', require('./routes/webauthnRoutes')); // WebAuthn / Biometrics
 app.use('/api/oauth', require('./routes/oauthRoutes')); // Mount OAuth
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/admin/applications', require('./routes/applicationRoutes'));

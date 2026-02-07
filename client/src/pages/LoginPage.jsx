@@ -5,6 +5,7 @@ import { ArrowLeft, Eye, EyeOff, MoreHorizontal, User as UserIcon } from 'lucide
 import axios from 'axios';
 import MsInput from '../components/MsInput';
 import CustomAlert from '../components/CustomAlert';
+import BiometricLogin from '../components/BiometricLogin';
 
 const LoginPage = () => {
     const [step, setStep] = useState(1);
@@ -336,9 +337,22 @@ const LoginPage = () => {
                                             />
                                         </div>
                                         <div className="mb-4">
-                                            <span className="text-[13px] text-[#1b1b1b] dark:text-gray-300">
+                                            <div className="text-[13px] text-[#666] dark:text-gray-400 mt-4">
                                                 No account? <Link to="/register" className="text-[#0067b8] dark:text-[#4f93ce] hover:underline">Create one!</Link>
-                                            </span>
+                                            </div>
+
+                                            {/* Biometric Login Option */}
+                                            <BiometricLogin
+                                                email={email}
+                                                onSuccess={(data) => {
+                                                    // Handle successful biometric login
+                                                    // We need to manually set user state or reload
+                                                    // For now, let's redirect to dashboard if we get a token
+                                                    // Ideally, we should use a loginWithToken method from AuthContext
+                                                    window.location.href = '/dashboard';
+                                                }}
+                                                onError={(msg) => showAlert(msg, 'error')}
+                                            />
                                         </div>
                                         <div className="mb-6">
                                             <span className="text-[#0067b8] dark:text-[#4f93ce] text-[13px] hover:underline cursor-pointer">Sign in with a security key</span>

@@ -1,4 +1,5 @@
 import { Shield, Key, RefreshCw, Smartphone } from 'lucide-react';
+import BiometricSetup from '../../components/BiometricSetup';
 
 const SecurityOption = ({ title, description, action, icon: Icon }) => (
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-6 border-b border-gray-100 last:border-0 gap-4">
@@ -53,6 +54,11 @@ const Security = () => {
                     action="View my activity"
                     icon={RefreshCw}
                 />
+            </div>
+
+            <div className="mt-8">
+                <h2 className="text-xl font-bold text-[#323130] dark:text-white mb-4">Advanced Security</h2>
+                <BiometricSetup />
             </div>
         </div>
     );

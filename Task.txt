@@ -1,0 +1,94 @@
+Task: Adjust Responsive Breakpoint
+ Locate the 770px breakpoint in the codebase
+ Change the breakpoint to 450px
+ Verify the changes
+Task: UI Polish
+ Create Microsoft-style Floating Label Input component
+ Replace inputs in LoginPage with new component
+ Verify input styling
+ Replace inputs in RegisterPage with MsInput
+ Center h2 headers in auth cards
+ Fix floating label background intersection
+ Center and update footer links/text
+ Make buttons full width (remove align-right)
+ Add short descriptions below all h2 headers
+ Implement Eye icon for password and remove checkbox
+ Center alignment for back buttons/navigation
+ Add Confirm Password field and validation in RegisterPage
+ Center-align all description text paragraphs
+Task: Firebase Phone Authentication
+ Install Firebase SDK and initialize client
+ Update User model to support phoneNumber
+ Update authController for Phone Auth logic
+ implement Phone Auth in RegisterPage
+ Implement Phone/Email support in LoginPage
+ Add Confirm Password to Reset Password flow in LoginPage
+ Style Birthday inputs as MsInput in RegisterPage
+Task: Swagger API Documentation
+ Install swagger-jsdoc and swagger-ui-express
+ Create Swagger configuration file
+ Integrate Swagger UI in index.js
+ Add JSDoc comments to Auth Routes
+Task: Fix Vercel Deployment Issues
+ Update db.js for serverless (remove process.exit)
+ Fix Swagger path resolution for Vercel
+ Add global error handler to index.js
+ Verify Frontend Fallbacks
+ Add OIDC Discovery Endpoint to Swagger
+ Create OAuth Setup Guide
+ Implement OAuth Authorization & Token Endpoints
+Task: Update Documentation Site
+ Remove GitHub links and icons
+ Add User Profile icon/link to Navbar
+ Create API Reference page
+ Add comprehensive "Getting Started" content
+Task: System-based Dark Mode
+ Configure Tailwind for system preference (media strategy)
+
+ Add Dark Mode Background Image support
+
+ Update LoginPage to switch backgrounds based on theme
+
+ Polish Dark Mode colors for Login Card
+
+ Apply Dark Mode styles to RegisterPage (Background, Card, Text)
+
+ Apply Dark Mode to DashboardLayout
+
+ Apply Dark Mode to Dashboard Page Content
+
+ Apply Dark Mode to AdminLayout
+
+ Review and Polish Global UI (Modals, Alerts, etc.)
+
+Task: Standardize Alerts & Fix OTP
+ Investigate and Fix OTP Sending Error
+ Replace all native alert() with 
+CustomAlert
+ in 
+RegisterPage.jsx
+ Replace all native alert() with 
+CustomAlert
+ in 
+LoginPage.jsx
+ Verify Alert Consistency across Auth Pages
+Task: Advanced Security Features
+Phase 1: WebAuthn (Biometrics)
+ Create Authenticator Mongoose Model
+ Implement WebAuthn Registration Endpoints (/register/options, /register/verify)
+ Implement WebAuthn Login Endpoints (/login/options, /login/verify)
+ Create Frontend 
+BiometricSetup
+ Component
+ Create Frontend 
+BiometricLogin
+ Component
+Phase 2: Device Binding
+ Create Device Mongoose Model
+ Implement Device Detection Logic (UserAgent + Fingerprint)
+ Update Login Flow to check/save 'Known Devices'
+ Create "Manage Devices" UI in Dashboard
+Phase 3: Anti-Abuse
+ Implement Rate Limiting on Auth Routes
+ Add reCAPTCHA/Turnstile Integration
+ Verify Biometric Login and Activity Logs
