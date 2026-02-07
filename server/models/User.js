@@ -48,15 +48,7 @@ const userSchema = new mongoose.Schema({
         default: null
     },
     resetPasswordToken: String,
-    resetPasswordExpire: Date,
-    // WebAuthn/Passkeys
-    webauthnCredentials: [{
-        credentialID: String,
-        credentialPublicKey: Buffer,
-        counter: Number,
-        transports: [String]
-    }],
-    currentChallenge: String
+    resetPasswordExpire: Date
 }, { timestamps: true });
 
 // Encrypt password using bcrypt

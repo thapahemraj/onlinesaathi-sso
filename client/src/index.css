@@ -4,6 +4,6 @@
 
 @layer base {
   body {
-    @apply bg-ms-gray text-ms-text font-segoe antialiased dark:bg-black dark:text-white transition-colors duration-200;
+    @apply bg-ms-gray text-ms-text font-segoe antialiased;
   }
 }

@@ -7,7 +7,6 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import axios from 'axios';
 import CustomAlert from '../components/CustomAlert';
 import MsInput from '../components/MsInput';
-import { useTheme } from '../context/ThemeContext';
 
 const RegisterPage = () => {
     // Steps: 1=Email, 2=Password, 3=Name, 4=Details(Country/DOB), 5=Verify(OTP)
@@ -222,13 +221,8 @@ const RegisterPage = () => {
     const inputClasses = "w-full h-9 px-3 border border-[#868686] rounded-md hover:border-[#323130] focus:border-[#0067b8] focus:border-2 outline-none text-[15px] placeholder-gray-500 transition-colors";
     const buttonClasses = "w-full bg-[#0067b8] text-white py-2 hover:bg-[#005da6] shadow-sm rounded-md text-[15px] font-semibold transition-colors mt-4";
 
-    const { theme } = useTheme();
-    const bgImage = theme === 'dark'
-        ? 'https://logincdn.msauth.net/shared/5/images/fluent_web_dark_2_bf5f23287bc9f60c9be2.svg'
-        : import.meta.env.VITE_BG_IMAGE_URL;
-
     return (
-        <div className="min-h-screen w-full relative flex items-center justify-center bg-white dark:bg-[#1b1b1b] md:bg-[#f0f2f5] dark:md:bg-[#000000]">
+        <div className="min-h-screen w-full relative flex items-center justify-center bg-white md:bg-[#f0f2f5]">
             <CustomAlert
                 isOpen={alertConfig.show}
                 message={alertConfig.message}
@@ -239,14 +233,14 @@ const RegisterPage = () => {
             {/* Background Image */}
             <div className="absolute inset-0 z-0 hidden md:block"
                 style={{
-                    backgroundImage: `url('${bgImage}')`,
+                    backgroundImage: `url('${import.meta.env.VITE_BG_IMAGE_URL}')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }}>
             </div>
 
             {/* Card */}
-            <div className="z-10 w-full max-w-[440px] bg-white dark:bg-[#1b1b1b] md:shadow-xl p-8 md:p-11 md:rounded-xl transition-all duration-300 border-transparent dark:border dark:border-[#323130]">
+            <div className="z-10 w-full max-w-[440px] bg-white md:shadow-xl p-8 md:p-11 md:rounded-xl transition-all duration-300">
                 <div className="w-full">
 
                     {/* Header Logo */}
@@ -257,10 +251,10 @@ const RegisterPage = () => {
                     {/* --- STEP 1: EMAIL --- */}
                     {step === 1 && (
                         <div className="animate-fade-in">
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] dark:text-white mb-2 leading-tight text-center">Create account</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-white text-center">Get started with your free account.</p>
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Create account</h2>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">Get started with your free account.</p>
 
-                            {error && <div className="text-[#e81123] dark:text-[#f3525a] text-sm mb-4">{error}</div>}
+                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
                             <form onSubmit={handleNext}>
                                 <div className="mb-6">
@@ -286,15 +280,15 @@ const RegisterPage = () => {
                                     <button
                                         type="button"
                                         onClick={() => { setUsePhone(!usePhone); setError(''); }}
-                                        className="text-[#0067b8] dark:text-[#4f9cdd] text-[13px] hover:underline hover:text-[#005da6] dark:hover:text-[#4f9cdd]"
+                                        className="text-[#0067b8] text-[13px] hover:underline hover:text-[#005da6]"
                                     >
                                         {usePhone ? "Use your email address" : "Use a phone number instead"}
                                     </button>
                                 </div>
 
                                 <div className="mb-8">
-                                    <span className="text-[13px] text-[#1b1b1b] dark:text-white">
-                                        Already have an account? <Link to="/login" className="text-[#0067b8] dark:text-[#4f9cdd] hover:underline">Sign in</Link>
+                                    <span className="text-[13px] text-[#1b1b1b]">
+                                        Already have an account? <Link to="/login" className="text-[#0067b8] hover:underline">Sign in</Link>
                                     </span>
                                 </div>
                                 <div className="flex justify-end w-full">
@@ -308,16 +302,16 @@ const RegisterPage = () => {
                     {step === 2 && (
                         <div className="animate-fade-in">
                             <div className="flex justify-center mb-6">
-                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] dark:text-white hover:bg-gray-100 dark:hover:bg-[#2b2b2b] p-1 px-3 rounded-full transition-colors">
-                                    <ArrowLeft size={20} className="text-[#646464] dark:text-gray-400" />
+                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
+                                    <ArrowLeft size={20} className="text-[#646464]" />
                                     <span className="text-sm">{usePhone ? phoneNumber : email}</span>
                                 </button>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] dark:text-white mb-2 leading-tight text-center">Create a password</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-white text-center">Enter the password you would like to use with your account.</p>
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Create a password</h2>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">Enter the password you would like to use with your account.</p>
 
-                            {error && <div className="text-[#e81123] dark:text-[#f3525a] text-sm mb-4">{error}</div>}
+                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
                             <form onSubmit={handleNext}>
                                 <div className="mb-8 relative">
@@ -332,7 +326,7 @@ const RegisterPage = () => {
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
                                         onMouseDown={(e) => e.preventDefault()}
-                                        className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 z-10 cursor-pointer"
+                                        className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700 z-10 cursor-pointer"
                                     >
                                         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                     </button>
@@ -349,7 +343,7 @@ const RegisterPage = () => {
                                         type="button"
                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                         onMouseDown={(e) => e.preventDefault()}
-                                        className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 z-10 cursor-pointer"
+                                        className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700 z-10 cursor-pointer"
                                     >
                                         {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                     </button>
@@ -365,16 +359,16 @@ const RegisterPage = () => {
                     {step === 3 && (
                         <div className="animate-fade-in">
                             <div className="flex justify-center mb-6">
-                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] dark:text-white hover:bg-gray-100 dark:hover:bg-[#2b2b2b] p-1 px-3 rounded-full transition-colors">
-                                    <ArrowLeft size={20} className="text-[#646464] dark:text-gray-400" />
+                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
+                                    <ArrowLeft size={20} className="text-[#646464]" />
                                     <span className="text-sm">{usePhone ? phoneNumber : email}</span>
                                 </button>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] dark:text-white mb-2 leading-tight text-center">What's your name?</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-white text-center">We need a little more info before we're done.</p>
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">What's your name?</h2>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">We need a little more info before we're done.</p>
 
-                            {error && <div className="text-[#e81123] dark:text-[#f3525a] text-sm mb-4">{error}</div>}
+                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
                             <form onSubmit={handleNext}>
                                 <div className="mb-6 space-y-4">
@@ -403,24 +397,24 @@ const RegisterPage = () => {
                     {step === 4 && (
                         <div className="animate-fade-in">
                             <div className="flex justify-center mb-6">
-                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] dark:text-white hover:bg-gray-100 dark:hover:bg-[#2b2b2b] p-1 px-3 rounded-full transition-colors">
-                                    <ArrowLeft size={20} className="text-[#646464] dark:text-gray-400" />
+                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
+                                    <ArrowLeft size={20} className="text-[#646464]" />
                                     <span className="text-sm">{usePhone ? phoneNumber : email}</span>
                                 </button>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] dark:text-white mb-2 leading-tight text-center">What's your birthdate?</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-white text-center">We need this to ensure the account is age-appropriate.</p>
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">What's your birthdate?</h2>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">We need this to ensure the account is age-appropriate.</p>
 
-                            {error && <div className="text-[#e81123] dark:text-[#f3525a] text-sm mb-4">{error}</div>}
+                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
                             <form onSubmit={handleNext}>
 
                                 <div className="mb-6">
-                                    <h3 className="block text-xs font-semibold text-[#1b1b1b] dark:text-white mb-1.5">Country/region</h3>
-                                    <div className="relative border border-[#868686] border-b border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-b-2 bg-white dark:bg-[#1b1b1b] h-[36px] transition-colors rounded-md">
+                                    <h3 className="block text-xs font-semibold text-[#1b1b1b] mb-1.5">Country/region</h3>
+                                    <div className="relative border border-[#868686] border-b border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-b-2 bg-white h-[36px] transition-colors rounded-md">
                                         <select
-                                            className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] dark:text-white appearance-none"
+                                            className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none"
                                             value={country}
                                             onChange={(e) => setCountry(e.target.value)}
                                         >
@@ -430,19 +424,19 @@ const RegisterPage = () => {
                                             <option value="Nepal">Nepal</option>
                                         </select>
                                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                            <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="mb-4">
-                                    <h3 className="block text-xs font-semibold text-[#1b1b1b] dark:text-white mb-1.5">Birthdate</h3>
+                                    <h3 className="block text-xs font-semibold text-[#1b1b1b] mb-1.5">Birthdate</h3>
                                     <div className="flex gap-2">
                                         {/* Month */}
                                         <div className="relative w-1/2">
-                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white dark:bg-[#1b1b1b] h-[36px] transition-colors rounded-md">
+                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
                                                 <select
-                                                    className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] dark:text-white appearance-none pt-2"
+                                                    className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
                                                     value={birthMonth}
                                                     onChange={(e) => setBirthMonth(e.target.value)}
                                                 >
@@ -451,18 +445,18 @@ const RegisterPage = () => {
                                                         <option key={m} value={m}>{m}</option>
                                                     ))}
                                                 </select>
-                                                <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] dark:text-[#a6a6a6] ${birthMonth ? 'top-0 text-xs text-[#0067b8] dark:text-[#4f9cdd] -translate-y-1/2 bg-white dark:bg-[#1b1b1b] px-1' : 'top-1.5 text-[15px]'}`}>Month</label>
+                                                <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] ${birthMonth ? 'top-0 text-xs text-[#0067b8] -translate-y-1/2 bg-white px-1' : 'top-1.5 text-[15px]'}`}>Month</label>
                                                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                                    <svg className="w-3 h-3 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                                    <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                                 </div>
                                             </div>
                                         </div>
 
                                         {/* Day */}
                                         <div className="relative w-1/4">
-                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white dark:bg-[#1b1b1b] h-[36px] transition-colors rounded-md">
+                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
                                                 <select
-                                                    className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] dark:text-white appearance-none pt-2"
+                                                    className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
                                                     value={birthDay}
                                                     onChange={(e) => setBirthDay(e.target.value)}
                                                 >
@@ -471,18 +465,18 @@ const RegisterPage = () => {
                                                         <option key={i + 1} value={i + 1}>{i + 1}</option>
                                                     ))}
                                                 </select>
-                                                <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] dark:text-[#a6a6a6] ${birthDay ? 'top-0 text-xs text-[#0067b8] dark:text-[#4f9cdd] -translate-y-1/2 bg-white dark:bg-[#1b1b1b] px-1' : 'top-1.5 text-[15px]'}`}>Day</label>
+                                                <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] ${birthDay ? 'top-0 text-xs text-[#0067b8] -translate-y-1/2 bg-white px-1' : 'top-1.5 text-[15px]'}`}>Day</label>
                                                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                                    <svg className="w-3 h-3 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                                    <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                                 </div>
                                             </div>
                                         </div>
 
                                         {/* Year */}
                                         <div className="relative w-1/3">
-                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white dark:bg-[#1b1b1b] h-[36px] transition-colors rounded-md">
+                                            <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-2 bg-white h-[36px] transition-colors rounded-md">
                                                 <select
-                                                    className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] dark:text-white appearance-none pt-2"
+                                                    className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] appearance-none pt-2"
                                                     value={birthYear}
                                                     onChange={(e) => setBirthYear(e.target.value)}
                                                 >
@@ -491,9 +485,9 @@ const RegisterPage = () => {
                                                         <option key={i} value={2024 - i}>{2024 - i}</option>
                                                     ))}
                                                 </select>
-                                                <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] dark:text-[#a6a6a6] ${birthYear ? 'top-0 text-xs text-[#0067b8] dark:text-[#4f9cdd] -translate-y-1/2 bg-white dark:bg-[#1b1b1b] px-1' : 'top-1.5 text-[15px]'}`}>Year</label>
+                                                <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] ${birthYear ? 'top-0 text-xs text-[#0067b8] -translate-y-1/2 bg-white px-1' : 'top-1.5 text-[15px]'}`}>Year</label>
                                                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                                    <svg className="w-3 h-3 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                                    <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                                 </div>
                                             </div>
                                         </div>
@@ -512,20 +506,20 @@ const RegisterPage = () => {
                     {step === 5 && (
                         <div className="animate-fade-in">
                             <div className="flex justify-center mb-6">
-                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] dark:text-white hover:bg-gray-100 dark:hover:bg-[#2b2b2b] p-1 px-3 rounded-full transition-colors">
-                                    <ArrowLeft size={20} className="text-[#646464] dark:text-gray-400" />
+                                <button onClick={handleBack} className="flex items-center gap-1 text-[#1b1b1b] hover:bg-gray-100 p-1 px-3 rounded-full transition-colors">
+                                    <ArrowLeft size={20} className="text-[#646464]" />
                                     <span className="text-sm">{usePhone ? phoneNumber : email}</span>
                                 </button>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] dark:text-white mb-2 leading-tight text-center">Verify {usePhone ? 'phone' : 'email'}</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-white text-center">
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Verify {usePhone ? 'phone' : 'email'}</h2>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">
                                 Enter the code we sent to <span className="font-semibold">{usePhone ? phoneNumber : email}</span>.
-                                <br />If you didn't receive the {usePhone ? 'code' : 'email'}, check your junk folder or <button className="text-[#0067b8] dark:text-[#4f9cdd] hover:underline">try again</button>.
+                                <br />If you didn't receive the {usePhone ? 'code' : 'email'}, check your junk folder or <button className="text-[#0067b8] hover:underline">try again</button>.
                             </p>
                             <div id="recaptcha-container"></div>
 
-                            {error && <div className="text-[#e81123] dark:text-[#f3525a] text-sm mb-4">{error}</div>}
+                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-6 space-y-4">
@@ -540,8 +534,8 @@ const RegisterPage = () => {
                                     />
                                 </div>
                                 <div className="mb-4 flex items-start gap-2">
-                                    <input type="checkbox" id="info" defaultChecked className="mt-1 w-4 h-4 border-gray-400 rounded-none bg-white dark:bg-[#1b1b1b]" />
-                                    <label htmlFor="info" className="text-[13px] text-[#1b1b1b] dark:text-white">I would like information, tips, and offers about Online Saathi products and services.</label>
+                                    <input type="checkbox" id="info" defaultChecked className="mt-1 w-4 h-4 border-gray-400 rounded-none" />
+                                    <label htmlFor="info" className="text-[13px] text-[#1b1b1b]">I would like information, tips, and offers about Online Saathi products and services.</label>
                                 </div>
 
                                 <div className="flex justify-end mt-8 w-full">
