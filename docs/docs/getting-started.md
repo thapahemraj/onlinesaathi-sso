@@ -16,7 +16,7 @@ Welcome to the **Online Saathi Identity Provider (IDP)** documentation. Online S
 ## Quick Start
 
 ### 1. Create an Account
-If you haven't already, [Sign Up](${CLIENT_URL}/register) for an Online Saathi account.
+If you haven't already, [Sign Up](https://accounts.i-sewa.in/register) for an Online Saathi account.
 
 ### 2. Register Your Application
 To integrate your app with Online Saathi, you need to obtain a **Client ID** and **Client Secret**.

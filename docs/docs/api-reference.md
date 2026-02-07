@@ -4,11 +4,11 @@ sidebar_position: 3
 
 # API Reference
 
-Online Saathi provides a comprehensive REST API. For interactive documentation, please visit our [Swagger UI](${API_URL.replace('/api', '')}/api-docs).
+Online Saathi provides a comprehensive REST API. For interactive documentation, please visit our [Swagger UI](https://api.i-sewa.in/api-docs).
 
 ## Base URL
 \`\`\`
-${API_URL}
+https://api.i-sewa.in/api
 \`\`\`
 
 ## Authentication Endpoints

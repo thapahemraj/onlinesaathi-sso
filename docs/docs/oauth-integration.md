@@ -19,7 +19,7 @@ This guide explains how to integrate your application with **Online Saathi SSO**
 Redirect the user's browser to the Online Saathi authorization endpoint:
 
 \`\`\`http
-GET ${API_URL}/oauth/authorize?
+GET https://api.i-sewa.in/api/oauth/authorize?
   response_type=code
   &client_id=YOUR_CLIENT_ID
   &redirect_uri=YOUR_REDIRECT_URI
@@ -43,7 +43,7 @@ GET https://your-app.com/callback?code=AUTHORIZATION_CODE
 Make a POST request to the token endpoint to exchange the authorization code for an ID Token and Access Token.
 
 \`\`\`http
-POST ${API_URL}/oauth/token
+POST https://api.i-sewa.in/api/oauth/token
 Content-Type: application/json
 
 {
@@ -59,7 +59,7 @@ Content-Type: application/json
 
 The response will contain an `id_token` (JWT) which contains user information. You should verify the signature of this token using our JWKS endpoint.
 
-**JWKS Endpoint**: `${API_URL}/oauth/jwks`
+**JWKS Endpoint**: `https://api.i-sewa.in/api/oauth/jwks`
 
 ## Example (Node.js)
 
@@ -67,7 +67,7 @@ The response will contain an `id_token` (JWT) which contains user information. Y
 const axios = require('axios');
 
 async function getUser(code) {
-  const tokenResponse = await axios.post('${API_URL}/oauth/token', {
+  const tokenResponse = await axios.post('https://api.i-sewa.in/api/oauth/token', {
     grant_type: 'authorization_code',
     client_id: process.env.CLIENT_ID,
     client_secret: process.env.CLIENT_SECRET,
