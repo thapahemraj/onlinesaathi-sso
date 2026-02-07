@@ -16,7 +16,12 @@ app.use(cors({
         'http://localhost:5173',
         'http://localhost:3000',
         'http://localhost:3001',
-        'https://onlinesaathi-sso.vercel.app' // Production Domain
+        'https://docs.i-sewa.in', // Production Domain
+        'https://accounts.i-sewa.in', // Production Domain
+        'https://api.i-sewa.in', // Production Domain
+        'https://www.i-sewa.in', // Production Domain
+        'https://i-sewa.in', // Production Domain
+        
     ],
     credentials: true
 }));

@@ -527,7 +527,7 @@ const RegisterPage = () => {
                             {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
                             <form onSubmit={handleSubmit}>
-                                <div className="mb-6">
+                                <div className="mb-6 space-y-4">
                                     <MsInput
                                         type="text"
                                         label="Code"
@@ -540,7 +540,7 @@ const RegisterPage = () => {
                                 </div>
                                 <div className="mb-4 flex items-start gap-2">
                                     <input type="checkbox" id="info" defaultChecked className="mt-1 w-4 h-4 border-gray-400 rounded-none" />
-                                    <label htmlFor="info" className="text-[13px] text-[#1b1b1b]">I would like information, tips, and offers about Microsoft products and services.</label>
+                                    <label htmlFor="info" className="text-[13px] text-[#1b1b1b]">I would like information, tips, and offers about Online Saathi products and services.</label>
                                 </div>
 
                                 <div className="flex justify-end mt-8 w-full">
