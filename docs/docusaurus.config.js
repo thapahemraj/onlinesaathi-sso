@@ -52,10 +52,7 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+          // Remove default editUrl
         },
         blog: {
           showReadingTime: true,
@@ -63,11 +60,7 @@ const config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-          // Useful options to enforce blogging best practices
+          // Remove default editUrl
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
@@ -100,9 +93,16 @@ const config = {
             label: 'Documentation',
           },
           {
-            href: 'https://github.com/thapahemraj/onlinesaathi-sso',
-            label: 'GitHub',
+            href: '/oauth-integration', // Will create this page
+            label: 'OAuth Guide',
+            position: 'left',
+          },
+          {
+            // User Profile Icon Link
+            to: `${process.env.CLIENT_URL || 'https://accounts.i-sewa.in'}/dashboard`,
             position: 'right',
+            className: 'header-user-link', // We'll add CSS for this
+            'aria-label': 'User Dashboard',
           },
         ],
       },
@@ -113,22 +113,30 @@ const config = {
             title: 'Docs',
             items: [
               {
-                label: 'Introduction',
-                to: '/docs/intro',
+                label: 'Getting Started',
+                to: '/docs/getting-started',
               },
               {
-                label: 'Register App',
-                to: '/docs/register-application',
+                label: 'OAuth Integration',
+                to: '/docs/oauth-integration',
+              },
+              {
+                label: 'API Reference',
+                to: '/docs/api-reference',
               },
             ],
           },
           {
-            title: 'Community',
+            title: 'Legal',
             items: [
               {
-                label: 'GitHub',
-                href: 'https://github.com/thapahemraj/onlinesaathi-sso',
+                label: 'Privacy Policy',
+                to: '#',
               },
+              {
+                label: 'Terms of Service',
+                to: '#',
+              }
             ],
           },
         ],

@@ -14,17 +14,19 @@ const generateToken = (id) => {
 const registerUser = async (req, res) => {
     const { username, email, password, phoneNumber, firebaseUid } = req.body;
 
-    // Check for existing user by email, username, or phone
-    const query = [
-        { email },
-        { username }
-    ];
-    if (phoneNumber) query.push({ phoneNumber });
-
-    const userExists = await User.findOne({ $or: query });
-
-    if (userExists) {
-        return res.status(400).json({ message: 'User already exists' });
+    // Check for existing user by email, username, or phone individually to give better error message
+    if (email) {
+        const emailExists = await User.findOne({ email });
+        if (emailExists) return res.status(400).json({ message: 'Email already exists' });
+    }
+    if (phoneNumber) {
+        const phoneExists = await User.findOne({ phoneNumber });
+        if (phoneExists) return res.status(400).json({ message: 'Phone number already exists' });
+    }
+    const usernameExists = await User.findOne({ username });
+    if (usernameExists) {
+        // If auto-generated username exists, we should ideally retry, but for now just error
+        return res.status(400).json({ message: 'Username taken, please try again' });
     }
 
     const user = await User.create({
@@ -274,14 +276,17 @@ const sendVerificationCode = async (req, res) => {
 // @route   POST /api/auth/verify-code
 // @access  Public
 const verifyVerificationCode = async (req, res) => {
+    console.log("verifyVerificationCode: Request body:", req.body);
     let { email, otp } = req.body;
 
     if (!email || !otp) {
+        console.log("verifyVerificationCode: Missing email or otp");
         return res.status(400).json({ success: false, message: "Email and OTP are required" });
     }
 
     email = email.trim();
     otp = otp.trim();
+    console.log(`verifyVerificationCode: Verifying for ${email} with otp ${otp}`);
 
     // Check if verification record exists
     const record = await Verification.findOne({ email, otp });

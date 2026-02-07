@@ -176,33 +176,13 @@ const RegisterPage = () => {
             }
 
             // Combine names for the simple backend 'username' field
+            // Append random 4 digits to ensure uniqueness
+            const uniqueSuffix = Math.floor(1000 + Math.random() * 9000).toString();
             const fullName = `${firstName} ${lastName}`;
-
-            // Register
-            // We need to pass phoneNumber if used
-            // If email was used, phoneNumber is empty. If phone used, email empty?
-            // Backend expects 'email' field as required currently... 
-            // We should use a dummy email or make email optional in backend? 
-            // Plan said "Add phoneNumber options: { unique:true, sparse: true }". 
-            // But 'email' is still required:true in User.js? 
-            // Wait, I didn't change 'email' required:false. 
-            // If user uses phone, email is missing. Backend will fail if email is required.
-            // I should update Register flow to ask for email even if phone is used? Or make email optional?
-            // User request: "email and phone number se vi user login... phone ke field"
-            // Usually Microsoft asks for email OR phone. 
-            // For now, I will send the phone number AS the email field if email is empty? No that's bad.
-            // I should have made email optional. 
-            // Let's assume for this step I will send a placeholder email if phone is used: [phone]@placeholder.com
-            // Or better, I'll update User.js to make email optional... but I already did the edit and missed it.
-            // I'll send a dummy email for now to unblock: `${phoneNumber}@phone.user`
+            const generatedUsername = `${firstName}${lastName}${uniqueSuffix}`.replace(/\s+/g, ''); // Remove spaces for username
 
             const payload = {
-                username: fullName, // This might duplicate if name same? Username should be unique? 
-                // Backend 'username' is unique... 
-                // Maybe use email/phone as username? 
-                // Logic in authController: User.create({ username, email, password, ... })
-                // If I send "John Doe" as username, 2nd "John Doe" will fail.
-                // I should probably generate a unique username.
+                username: generatedUsername,
                 password,
             };
 
@@ -217,8 +197,22 @@ const RegisterPage = () => {
             showAlert('Registration successful!', 'success');
             navigate('/dashboard');
         } catch (err) {
-            console.error(err);
-            const errorMessage = err.response?.data?.message || err.message || 'Verification or registration failed';
+            console.error("Registration/Verification Error:", err);
+            let errorMessage = 'Verification or registration failed';
+
+            if (err.response) {
+                console.log("Error Response Data:", err.response.data);
+                if (err.response.data && err.response.data.message) {
+                    errorMessage = err.response.data.message;
+                } else if (typeof err.response.data === 'string') {
+                    errorMessage = err.response.data;
+                } else {
+                    errorMessage = JSON.stringify(err.response.data);
+                }
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+
             showAlert(errorMessage, 'error');
         }
     };
