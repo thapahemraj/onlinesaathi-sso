@@ -82,45 +82,6 @@ const loginUser = async (req, res) => {
     if (user && (await user.matchPassword(password))) {
         const token = generateToken(user._id);
 
-        // --- Device Tracking ---
-        const UAParser = require('ua-parser-js');
-        const requestIp = require('request-ip');
-        const Device = require('../models/Device');
-
-        const parser = new UAParser(req.headers['user-agent']);
-        const result = parser.getResult();
-        const clientIp = requestIp.getClientIp(req);
-
-        // Simple heuristic for device name
-        const deviceName = `${result.os.name || 'Unknown OS'} - ${result.browser.name || 'Unknown Browser'}`;
-
-        // Check if this device already exists for user
-        // We use a simple fingerprint: user + ip + os + browser
-        // In a real app, you might use a client-side generated UUID stored in cookie
-        let device = await Device.findOne({
-            user: user._id,
-            userAgent: req.headers['user-agent'],
-        });
-
-        if (device) {
-            device.lastActive = Date.now();
-            device.ipAddress = clientIp;
-            await device.save();
-        } else {
-            // Create new device
-            await Device.create({
-                user: user._id,
-                deviceName,
-                deviceType: result.device.type || 'desktop',
-                platform: result.os.name,
-                browser: result.browser.name,
-                ipAddress: clientIp,
-                userAgent: req.headers['user-agent'],
-                trusted: true // Default trust for now
-            });
-        }
-        // -----------------------
-
         const isProduction = process.env.NODE_ENV !== 'development';
 
         res.cookie('token', token, {
