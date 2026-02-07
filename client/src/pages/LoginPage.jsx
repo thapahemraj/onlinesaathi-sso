@@ -198,19 +198,38 @@ const LoginPage = () => {
         setStep(1);
     }
 
+    // --- Dark Mode / System Theme Logic ---
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    useEffect(() => {
+        // 1. Check initial preference
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        setIsDarkMode(mediaQuery.matches);
+
+        // 2. Listen for changes
+        const handleChange = (e) => setIsDarkMode(e.matches);
+        mediaQuery.addEventListener('change', handleChange);
+
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
+
+    const backgroundImage = isDarkMode
+        ? (import.meta.env.VITE_BG_IMAGE_DARK_URL || import.meta.env.VITE_BG_IMAGE_URL)
+        : import.meta.env.VITE_BG_IMAGE_URL;
+
     return (
-        <div className="min-h-screen w-full relative flex items-center justify-center bg-white md:bg-[#f0f2f5]">
+        <div className="min-h-screen w-full relative flex items-center justify-center bg-white md:bg-[#f0f2f5] dark:bg-[#1b1b1b]">
             {/* Background Image */}
-            <div className="absolute inset-0 z-0 hidden md:block"
+            <div className="absolute inset-0 z-0 hidden md:block transition-all duration-500 ease-in-out"
                 style={{
-                    backgroundImage: `url('${import.meta.env.VITE_BG_IMAGE_URL}')`,
+                    backgroundImage: `url('${backgroundImage}')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }}>
             </div>
 
             {/* Login Card */}
-            <div className="z-10 w-full max-w-[440px] bg-white md:shadow-xl p-8 md:p-11 md:rounded-xl transition-all duration-300 relative">
+            <div className="z-10 w-full max-w-[440px] bg-white dark:bg-[#2c2c2c] md:shadow-xl p-8 md:p-11 md:rounded-xl transition-all duration-300 relative dark:text-white">
 
                 {/* Back Button (Absolute Top Left) */}
                 {step > 1 && (
@@ -235,7 +254,7 @@ const LoginPage = () => {
                             {rememberedUser ? (
                                 <>
                                     <h2 className="text-2xl font-bold text-[#1b1b1b] mb-4 leading-tight text-center">Pick an account</h2>
-                                    <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">Select an account to sign in.</p>
+                                    <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-gray-300 text-center">Select an account to sign in.</p>
 
                                     {/* Remembered User Card */}
                                     <div
@@ -286,8 +305,8 @@ const LoginPage = () => {
                                 </>
                             ) : (
                                 <>
-                                    <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Sign in</h2>
-                                    <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">to continue to Online Saathi</p>
+                                    <h2 className="text-2xl font-bold text-[#1b1b1b] dark:text-white mb-2 leading-tight text-center">Sign in</h2>
+                                    <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-gray-300 text-center">to continue to Online Saathi</p>
                                     {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
                                     <form onSubmit={handleNext}>
                                         <div className="mb-4">
@@ -340,8 +359,8 @@ const LoginPage = () => {
                                 </div>
                             )}
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Enter password</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">Please enter your password.</p>
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] dark:text-white mb-2 leading-tight text-center">Enter password</h2>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-gray-300 text-center">Please enter your password.</p>
 
                             {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
@@ -383,8 +402,8 @@ const LoginPage = () => {
                                 <span className="text-[#1b1b1b] font-semibold">{email}</span>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-[#1b1b1b] mb-2 leading-tight text-center">Verify your identity</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">We will send a verification code to your email.</p>
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] dark:text-white mb-2 leading-tight text-center">Verify your identity</h2>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-gray-300 text-center">We will send a verification code to your email.</p>
 
                             {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 
@@ -407,7 +426,7 @@ const LoginPage = () => {
                             </div>
 
                             <h2 className="text-2xl font-bold text-[#1b1b1b] mb-4 leading-tight text-center">Enter code</h2>
-                            <p className="text-[15px] mb-4 text-[#1b1b1b] text-center">We sent a code to <span className="font-semibold">{email}</span>. Please enter it below.</p>
+                            <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-gray-300 text-center">We sent a code to <span className="font-semibold">{email}</span>. Please enter it below.</p>
 
                             {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
 

@@ -20,8 +20,8 @@ const MsInput = ({ type = "text", label, value, onChange, error, autoFocus, clas
             <div
                 className={`
                     relative border rounded-md
-                    ${error ? 'border-[#e81123]' : isFocused ? 'border-[#0067b8] border-2' : 'border-[#868686] border'}
-                    bg-white h-[40px] transition-colors flex items-center
+                    ${error ? 'border-[#e81123]' : isFocused ? 'border-[#0067b8] border-2' : 'border-[#868686] dark:border-gray-600 border'}
+                    bg-white dark:bg-[#3b3b3b] h-[40px] transition-colors flex items-center
                 `}
             >
                 <input
@@ -33,7 +33,7 @@ const MsInput = ({ type = "text", label, value, onChange, error, autoFocus, clas
                     onBlur={handleBlur}
                     className={`
                         peer block w-full h-full px-3 pt-2 pb-0 bg-transparent
-                        text-[15px] text-[#1b1b1b] outline-none
+                        text-[15px] text-[#1b1b1b] dark:text-white outline-none
                         placeholder-transparent
                         ${className}
                     `}
@@ -42,10 +42,10 @@ const MsInput = ({ type = "text", label, value, onChange, error, autoFocus, clas
                 />
                 <label
                     className={`
-                        absolute left-3 transition-all duration-200 pointer-events-none px-1 bg-white
+                        absolute left-3 transition-all duration-200 pointer-events-none px-1 bg-white dark:bg-[#3b3b3b]
                         ${(isFocused || value)
-                            ? 'top-0 text-xs text-[#0067b8] transform -translate-y-[55%]'
-                            : 'top-1/2 text-[15px] text-[#666] transform -translate-y-1/2'
+                            ? 'top-0 text-xs text-[#0067b8] dark:text-[#4f93ce] transform -translate-y-[55%]'
+                            : 'top-1/2 text-[15px] text-[#666] dark:text-gray-400 transform -translate-y-1/2'
                         }
                         ${error ? 'text-[#e81123]' : ''}
                     `}
