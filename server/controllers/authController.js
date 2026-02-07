@@ -8,52 +8,57 @@ const generateToken = require('../utils/generateToken');
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
-    const { username, email, password, phoneNumber, firebaseUid } = req.body;
+    try {
+        const { username, email, password, phoneNumber, firebaseUid } = req.body;
 
-    // Check for existing user by email, username, or phone individually to give better error message
-    if (email) {
-        const emailExists = await User.findOne({ email });
-        if (emailExists) return res.status(400).json({ message: 'Email already exists' });
-    }
-    if (phoneNumber) {
-        const phoneExists = await User.findOne({ phoneNumber });
-        if (phoneExists) return res.status(400).json({ message: 'Phone number already exists' });
-    }
-    const usernameExists = await User.findOne({ username });
-    if (usernameExists) {
-        // If auto-generated username exists, we should ideally retry, but for now just error
-        return res.status(400).json({ message: 'Username taken, please try again' });
-    }
+        // Check for existing user by email, username, or phone individually to give better error message
+        if (email) {
+            const emailExists = await User.findOne({ email });
+            if (emailExists) return res.status(400).json({ message: 'Email already exists' });
+        }
+        if (phoneNumber) {
+            const phoneExists = await User.findOne({ phoneNumber });
+            if (phoneExists) return res.status(400).json({ message: 'Phone number already exists' });
+        }
+        const usernameExists = await User.findOne({ username });
+        if (usernameExists) {
+            // If auto-generated username exists, we should ideally retry, but for now just error
+            return res.status(400).json({ message: 'Username taken, please try again' });
+        }
 
-    const user = await User.create({
-        username,
-        email,
-        password,
-        phoneNumber,
-        firebaseUid
-    });
-
-    if (user) {
-        const token = generateToken(user._id);
-
-        // Determine cookie options based on environment
-        const isProduction = process.env.NODE_ENV !== 'development';
-
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: isProduction, // Secure in production
-            sameSite: isProduction ? 'lax' : 'strict', // Lax allows subdomains if domain is set
-            domain: isProduction ? '.i-sewa.in' : undefined, // Share across subdomains (.i-sewa.in)
-            maxAge: 30 * 24 * 60 * 60 * 1000,
+        const user = await User.create({
+            username,
+            email,
+            password,
+            phoneNumber,
+            firebaseUid
         });
-        res.status(201).json({
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-        });
-    } else {
-        res.status(400).json({ message: 'Invalid user data' });
+
+        if (user) {
+            const token = generateToken(user._id);
+
+            // Determine cookie options based on environment
+            const isProduction = process.env.NODE_ENV !== 'development';
+
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: isProduction, // Secure in production
+                sameSite: isProduction ? 'lax' : 'strict', // Lax allows subdomains if domain is set
+                domain: isProduction ? '.i-sewa.in' : undefined, // Share across subdomains (.i-sewa.in)
+                maxAge: 30 * 24 * 60 * 60 * 1000,
+            });
+            res.status(201).json({
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            });
+        } else {
+            res.status(400).json({ message: 'Invalid user data' });
+        }
+    } catch (error) {
+        console.error("Register Error:", error);
+        res.status(500).json({ message: 'Server error during registration', error: error.message });
     }
 };
 
@@ -204,7 +209,7 @@ const forgotPassword = async (req, res) => {
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
         await user.save();
-        return res.status(500).json({ message: 'Email could not be sent' });
+        return res.status(500).json({ message: 'Email could not be sent', error: err.message });
     }
 };
 

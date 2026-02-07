@@ -257,7 +257,7 @@ const RegisterPage = () => {
             </div>
 
             {/* Card */}
-            <div className="z-10 w-full max-w-[440px] bg-white dark:bg-[#2c2c2c] md:shadow-xl p-8 md:p-11 md:rounded-xl transition-all duration-300 dark:text-white">
+            <div className="z-10 w-full max-w-[440px] bg-white dark:bg-[#2c2c2c] md:shadow-xl p-6 sm:p-8 md:p-11 md:rounded-xl transition-all duration-300 dark:text-white">
                 <div className="w-full">
 
                     {/* Header Logo */}
