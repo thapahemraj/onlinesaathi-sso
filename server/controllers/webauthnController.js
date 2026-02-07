@@ -1,10 +1,32 @@
 const SimpleWebAuthnServer = require('@simplewebauthn/server');
+const { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } = require('@simplewebauthn/server');
 const User = require('../models/User');
 const Authenticator = require('../models/Authenticator');
 
 const rpName = 'Online Saathi SSO';
-const rpID = process.env.RP_ID || 'localhost';
-const origin = process.env.CLIENT_URL || 'http://localhost:5173';
+
+// Helper to get RP ID and Origin from Request
+const getRpConfig = (req) => {
+    // 1. Determine Origin (Client URL)
+    // In production, this might come from Origin header or Referer
+    const origin = req.get('Origin') || process.env.CLIENT_URL || 'https://accounts.i-sewa.in';
+
+    // 2. Determine RP ID (Domain without port)
+    // If we are on localhost, it's 'localhost'
+    // If we are on 'accounts.i-sewa.in', it should be 'i-sewa.in' or 'accounts.i-sewa.in'
+    // WebAuthn spec says RP ID must be effective domain.
+
+    let rpID = process.env.RP_ID || 'localhost';
+
+    try {
+        const url = new URL(origin);
+        rpID = url.hostname;
+    } catch (e) {
+        console.warn("Invalid origin URL, falling back to ENV or localhost");
+    }
+
+    return { rpID, origin };
+};
 
 // Helper to encode User ID safely
 const isoUint8Array = (str) => {
@@ -14,22 +36,21 @@ const isoUint8Array = (str) => {
 /**
  * Registration: Generate Options
  */
-const generateRegistrationOptions = async (req, res) => {
+const generateRegistrationOptionsHandler = async (req, res) => {
+    const { rpID } = getRpConfig(req);
     const user = await User.findById(req.user._id);
 
     if (!user) {
         return res.status(404).json({ error: 'User not found' });
     }
 
-    // Get user's existing authenticators to exclude them
     const userAuthenticators = await Authenticator.find({ user: user._id });
 
-    const options = await SimpleWebAuthnServer.generateRegistrationOptions({
+    const options = await generateRegistrationOptions({
         rpName,
         rpID,
         userID: isoUint8Array(user._id.toString()),
         userName: user.email || user.username,
-        // Don't prompt user for checking if they want to register a device they already have
         excludeCredentials: userAuthenticators.map(auth => ({
             id: auth.credentialID,
             type: 'public-key',
@@ -38,27 +59,10 @@ const generateRegistrationOptions = async (req, res) => {
         authenticatorSelection: {
             residentKey: 'preferred',
             userVerification: 'preferred',
-            authenticatorAttachment: 'platform', // Force platform (TouchID/FaceID) for "Biometrics" feel
+            authenticatorAttachment: 'platform',
         },
     });
 
-    // Save challenge to session or DB (Here we use session which requires express-session, 
-    // BUT since we are stateless JWT, we might need to sign the challenge and send it back 
-    // OR store it in a temporary "Challenge" collection. 
-    // For simplicity in a JWT setup without Redis/Sessions, we'll return it and expect the client to sign it? 
-    // NO, that's insecure. 
-    // Best Practice for stateless: Store challenge in a short-lived HTTP-only cookie or DB record linked to user.
-    // Let's assume we store it in the User model temporarily or a separate collection.
-    // For this implementation, let's use a temporary "currentChallenge" field on the User model.
-
-    // NOTE: This modifies the User model schema implicitly if not defined, but Mongoose supports it if strict: false or we add it. 
-    // Let's assume we create a DB record or use the User.
-
-    // We will verify against this user record later.
-    // Ideally use a separate cache (Redis), but we use User for simplicity.
-    req.user.currentChallenge = options.challenge;
-    // We need to save this to the DB because subsequent request comes from client
-    // However, req.user is usually from JWT middleware. We need to save to the actual DB doc.
     await User.findByIdAndUpdate(user._id, { currentChallenge: options.challenge });
 
     res.json(options);
@@ -67,7 +71,8 @@ const generateRegistrationOptions = async (req, res) => {
 /**
  * Registration: Verify Response
  */
-const verifyRegistrationResponse = async (req, res) => {
+const verifyRegistrationResponseHandler = async (req, res) => {
+    const { rpID, origin } = getRpConfig(req);
     const { body } = req;
     const user = await User.findById(req.user._id);
 
@@ -77,7 +82,7 @@ const verifyRegistrationResponse = async (req, res) => {
 
     let verification;
     try {
-        verification = await SimpleWebAuthnServer.verifyRegistrationResponse({
+        verification = await verifyRegistrationResponse({
             response: body,
             expectedChallenge: user.currentChallenge,
             expectedOrigin: origin,
@@ -102,8 +107,6 @@ const verifyRegistrationResponse = async (req, res) => {
         });
 
         await newAuthenticator.save();
-
-        // Clear challenge
         await User.findByIdAndUpdate(user._id, { currentChallenge: '' });
 
         res.json({ verified: true });
@@ -115,8 +118,8 @@ const verifyRegistrationResponse = async (req, res) => {
 /**
  * Login: Generate Options
  */
-const generateAuthenticationOptions = async (req, res) => {
-    // Determine user from email/username provided in body
+const generateAuthenticationOptionsHandler = async (req, res) => {
+    const { rpID } = getRpConfig(req);
     const { email } = req.body;
 
     if (!email) {
@@ -130,7 +133,7 @@ const generateAuthenticationOptions = async (req, res) => {
 
     const userAuthenticators = await Authenticator.find({ user: user._id });
 
-    const options = await SimpleWebAuthnServer.generateAuthenticationOptions({
+    const options = await generateAuthenticationOptions({
         rpID,
         allowCredentials: userAuthenticators.map(auth => ({
             id: auth.credentialID,
@@ -140,7 +143,6 @@ const generateAuthenticationOptions = async (req, res) => {
         userVerification: 'preferred',
     });
 
-    // Save challenge
     await User.findByIdAndUpdate(user._id, { currentChallenge: options.challenge });
 
     res.json(options);
@@ -149,8 +151,9 @@ const generateAuthenticationOptions = async (req, res) => {
 /**
  * Login: Verify Response
  */
-const verifyAuthenticationResponse = async (req, res) => {
-    const { body, email } = req.body; // email passed back or inferred? Client should send email + credential
+const verifyAuthenticationResponseHandler = async (req, res) => {
+    const { rpID, origin } = getRpConfig(req);
+    const { body, email } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -168,7 +171,7 @@ const verifyAuthenticationResponse = async (req, res) => {
 
     let verification;
     try {
-        verification = await SimpleWebAuthnServer.verifyAuthenticationResponse({
+        verification = await verifyAuthenticationResponse({
             response: body,
             expectedChallenge: user.currentChallenge,
             expectedOrigin: origin,
@@ -188,15 +191,11 @@ const verifyAuthenticationResponse = async (req, res) => {
     const { verified, authenticationInfo } = verification;
 
     if (verified) {
-        // Update counter
         authenticator.counter = authenticationInfo.newCounter;
         authenticator.lastUsed = new Date();
         await authenticator.save();
-
-        // Clear challenge
         await User.findByIdAndUpdate(user._id, { currentChallenge: '' });
 
-        // Generate JWT
         const generateToken = require('../utils/generateToken');
         const token = generateToken(user._id);
 
@@ -214,8 +213,8 @@ const verifyAuthenticationResponse = async (req, res) => {
 };
 
 module.exports = {
-    generateRegistrationOptions,
-    verifyRegistrationResponse,
-    generateAuthenticationOptions,
-    verifyAuthenticationResponse
+    generateRegistrationOptions: generateRegistrationOptionsHandler,
+    verifyRegistrationResponse: verifyRegistrationResponseHandler,
+    generateAuthenticationOptions: generateAuthenticationOptionsHandler,
+    verifyAuthenticationResponse: verifyAuthenticationResponseHandler
 };
