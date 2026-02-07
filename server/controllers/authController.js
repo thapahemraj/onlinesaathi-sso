@@ -268,7 +268,7 @@ const sendVerificationCode = async (req, res) => {
         res.json({ message: 'Verification code sent', mockOtp: process.env.NODE_ENV === 'development' ? otp : null });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ message: 'Email could not be sent' });
+        return res.status(500).json({ message: 'Email could not be sent', error: err.message });
     }
 };
 

@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff, MoreHorizontal, User as UserIcon } from 'lucide-react';
 import axios from 'axios';
 import MsInput from '../components/MsInput';
+import CustomAlert from '../components/CustomAlert';
 
 const LoginPage = () => {
     const [step, setStep] = useState(1);
@@ -120,7 +121,7 @@ const LoginPage = () => {
             try {
                 const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, { email });
                 console.log("Mock OTP:", res.data.mockOtp);
-                alert(`OTP sent successfully to ${email}`);
+                showAlert(`OTP sent successfully to ${email}`, 'success');
                 setStep(4);
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to send code. Check server logs.');
@@ -153,7 +154,8 @@ const LoginPage = () => {
                 });
                 setStep(2);
                 setPassword('');
-                setError('Password changed! Please sign in.');
+                showAlert('Password changed! Please sign in.', 'success');
+                setError(''); // Clear any previous errors
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to reset password');
             }
@@ -168,7 +170,7 @@ const LoginPage = () => {
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, { email });
             console.log("Resent OTP:", res.data.mockOtp);
-            alert(`Code sent to ${email}`);
+            showAlert(`Code sent to ${email}`, 'success');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to resend code');
         } finally {
@@ -198,6 +200,16 @@ const LoginPage = () => {
     // --- Dark Mode / System Theme Logic ---
     const [isDarkMode, setIsDarkMode] = useState(false);
 
+    // Custom Alert State
+    const [alertConfig, setAlertConfig] = useState({ show: false, message: '', type: 'success' });
+
+    const showAlert = (message, type = 'success') => {
+        setAlertConfig({ show: true, message, type });
+        if (type !== 'loading') {
+            setTimeout(() => setAlertConfig(prev => ({ ...prev, show: false })), 3000);
+        }
+    };
+
     useEffect(() => {
         // 1. Check initial preference
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -216,6 +228,14 @@ const LoginPage = () => {
 
     return (
         <div className="min-h-screen w-full relative flex items-center justify-center bg-white md:bg-[#f0f2f5] dark:bg-[#1b1b1b]">
+            {/* Custom Alert Component */}
+            <CustomAlert
+                isOpen={alertConfig.show}
+                message={alertConfig.message}
+                type={alertConfig.type}
+                onClose={() => setAlertConfig(prev => ({ ...prev, show: false }))}
+            />
+
             {/* Background Image */}
             <div className="absolute inset-0 z-0 hidden md:block transition-all duration-500 ease-in-out"
                 style={{
