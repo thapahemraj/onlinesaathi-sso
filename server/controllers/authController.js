@@ -188,38 +188,52 @@ const registerUser = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
-    await connectDB();
-    // Allow 'email' to serve as a generic identifier (email or phone)
-    const { email, password } = req.body;
+    try {
+        await connectDB();
+        // Allow 'email' to serve as a generic identifier (email or phone)
+        const { email, password } = req.body;
 
-    // Find user by email OR phoneNumber
-    const user = await User.findOne({
-        $or: [
-            { email: email },
-            { phoneNumber: email }
-        ]
-    });
-
-    if (user && (await user.matchPassword(password))) {
-        const token = generateToken(user._id);
-
-        const isProduction = process.env.NODE_ENV !== 'development';
-
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'lax' : 'strict',
-            domain: isProduction ? '.i-sewa.in' : undefined,
-            maxAge: 30 * 24 * 60 * 60 * 1000,
+        // Find user by email OR phoneNumber
+        const user = await User.findOne({
+            $or: [
+                { email: email },
+                { phoneNumber: email }
+            ]
         });
-        res.json({
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-        });
-    } else {
-        res.status(401).json({ message: 'Invalid email or password' });
+
+        if (user && (await user.matchPassword(password))) {
+            const token = generateToken(user._id);
+
+            const isProduction = process.env.NODE_ENV !== 'development';
+
+            // Set cookie
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: isProduction,
+                sameSite: isProduction ? 'lax' : 'strict',
+                domain: isProduction ? '.i-sewa.in' : undefined,
+                maxAge: 30 * 24 * 60 * 60 * 1000,
+            });
+
+            res.json({
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                profilePicture: user.profilePicture,
+                role: user.role,
+                dateOfBirth: user.dateOfBirth,
+                country: user.country,
+                language: user.language,
+                regionalFormat: user.regionalFormat,
+                token
+            });
+        } else {
+            res.status(401).json({ message: 'Invalid email or password' });
+        }
+    } catch (error) {
+        console.error("Login Error:", error);
+        res.status(500).json({ message: 'Server error during login', error: error.message });
     }
 };
 
@@ -227,34 +241,50 @@ const loginUser = async (req, res) => {
 // @route   POST /api/auth/logout
 // @access  Public
 const logoutUser = (req, res) => {
-    const isProduction = process.env.NODE_ENV !== 'development';
+    try {
+        const isProduction = process.env.NODE_ENV !== 'development';
 
-    res.cookie('token', '', {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'lax' : 'strict',
-        domain: isProduction ? '.i-sewa.in' : undefined,
-        expires: new Date(0),
-    });
-    res.status(200).json({ message: 'Logged out' });
+        res.cookie('token', '', {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'lax' : 'strict',
+            domain: isProduction ? '.i-sewa.in' : undefined,
+            expires: new Date(0),
+        });
+        res.status(200).json({ message: 'Logged out' });
+    } catch (error) {
+        console.error("Logout Error:", error);
+        res.status(500).json({ message: 'Server error during logout' });
+    }
 };
 
 // @desc    Get user profile
 // @route   GET /api/auth/profile
 // @access  Private
 const getUserProfile = async (req, res) => {
-    const user = await User.findById(req.user._id);
+    try {
+        await connectDB();
+        const user = await User.findById(req.user._id);
 
-    if (user) {
-        res.json({
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-            profilePicture: user.profilePicture
-        });
-    } else {
-        res.status(404).json({ message: 'User not found' });
+        if (user) {
+            res.json({
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                profilePicture: user.profilePicture,
+                phoneNumber: user.phoneNumber,
+                dateOfBirth: user.dateOfBirth,
+                country: user.country,
+                language: user.language,
+                regionalFormat: user.regionalFormat
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.error("Profile Error:", error);
+        res.status(500).json({ message: 'Server error fetching profile' });
     }
 };
 
