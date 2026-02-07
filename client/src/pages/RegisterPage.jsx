@@ -297,7 +297,7 @@ const RegisterPage = () => {
                                     <button
                                         type="button"
                                         onClick={() => { setUsePhone(!usePhone); setError(''); }}
-                                        className="text-[#0067b8] text-[13px] hover:underline hover:text-[#005da6]"
+                                        className="text-[#0067b8] dark:text-[#4f93ce] text-[13px] hover:underline hover:text-[#005da6] dark:hover:text-[#69afe5]"
                                     >
                                         {usePhone ? "Use your email address" : "Use a phone number instead"}
                                     </button>
@@ -435,10 +435,10 @@ const RegisterPage = () => {
                                             value={country}
                                             onChange={(e) => setCountry(e.target.value)}
                                         >
-                                            <option value="India" className="text-black">India</option>
-                                            <option value="United States" className="text-black">United States</option>
-                                            <option value="United Kingdom" className="text-black">United Kingdom</option>
-                                            <option value="Nepal" className="text-black">Nepal</option>
+                                            <option value="India" className="text-[#1b1b1b] dark:text-white dark:bg-[#3b3b3b]">India</option>
+                                            <option value="United States" className="text-[#1b1b1b] dark:text-white dark:bg-[#3b3b3b]">United States</option>
+                                            <option value="United Kingdom" className="text-[#1b1b1b] dark:text-white dark:bg-[#3b3b3b]">United Kingdom</option>
+                                            <option value="Nepal" className="text-[#1b1b1b] dark:text-white dark:bg-[#3b3b3b]">Nepal</option>
                                         </select>
                                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                                             <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -459,7 +459,7 @@ const RegisterPage = () => {
                                                 >
                                                     <option value="" disabled></option>
                                                     {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
-                                                        <option key={m} value={m} className="text-black">{m}</option>
+                                                        <option key={m} value={m} className="text-[#1b1b1b] dark:text-white dark:bg-[#3b3b3b]">{m}</option>
                                                     ))}
                                                 </select>
                                                 <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] dark:text-gray-400 ${birthMonth ? 'top-0 text-xs text-[#0067b8] dark:text-[#4f93ce] -translate-y-1/2 bg-white dark:bg-[#3b3b3b] px-1' : 'top-1.5 text-[15px]'}`}>Month</label>
@@ -479,7 +479,7 @@ const RegisterPage = () => {
                                                 >
                                                     <option value="" disabled></option>
                                                     {[...Array(31)].map((_, i) => (
-                                                        <option key={i + 1} value={i + 1} className="text-black">{i + 1}</option>
+                                                        <option key={i + 1} value={i + 1} className="text-[#1b1b1b] dark:text-white dark:bg-[#3b3b3b]">{i + 1}</option>
                                                     ))}
                                                 </select>
                                                 <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] dark:text-gray-400 ${birthDay ? 'top-0 text-xs text-[#0067b8] dark:text-[#4f93ce] -translate-y-1/2 bg-white dark:bg-[#3b3b3b] px-1' : 'top-1.5 text-[15px]'}`}>Day</label>
@@ -499,7 +499,7 @@ const RegisterPage = () => {
                                                 >
                                                     <option value="" disabled></option>
                                                     {[...Array(100)].map((_, i) => (
-                                                        <option key={i} value={2024 - i} className="text-black">{2024 - i}</option>
+                                                        <option key={i} value={2024 - i} className="text-[#1b1b1b] dark:text-white dark:bg-[#3b3b3b]">{2024 - i}</option>
                                                     ))}
                                                 </select>
                                                 <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] dark:text-gray-400 ${birthYear ? 'top-0 text-xs text-[#0067b8] dark:text-[#4f93ce] -translate-y-1/2 bg-white dark:bg-[#3b3b3b] px-1' : 'top-1.5 text-[15px]'}`}>Year</label>
