@@ -89,8 +89,8 @@ const LoginPage = () => {
                     navigate('/register', { state: { email } });
                 }
             } catch (err) {
-                console.error(err);
-                setError('Something went wrong. Please try again.');
+                console.error("Check Email Error:", err);
+                setError(err.response?.data?.message || err.message || 'Something went wrong. Please try again.');
                 setIsLoading(false);
             }
         }
