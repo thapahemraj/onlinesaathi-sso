@@ -9,7 +9,8 @@ const {
     verifyVerificationCode,
     checkEmail,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    getUserDevices
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -239,6 +240,20 @@ router.post('/verify-code', verifyVerificationCode);
  *         description: User profile data
  */
 router.get('/profile', protect, getUserProfile);
+
+/**
+ * @swagger
+ * /auth/devices:
+ *   get:
+ *     summary: Get user devices
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user devices
+ */
+router.get('/devices', protect, getUserDevices);
 
 /**
  * @swagger
