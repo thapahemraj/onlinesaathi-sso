@@ -99,9 +99,9 @@ const config = {
           },
           {
             // User Profile Icon Link
-            to: `${process.env.CLIENT_URL || 'https://accounts.i-sewa.in'}/dashboard`,
+            href: 'https://accounts.i-sewa.in/dashboard', // Hardcoded for production build stability
             position: 'right',
-            className: 'header-user-link', // We'll add CSS for this
+            className: 'header-user-link',
             'aria-label': 'User Dashboard',
           },
         ],
