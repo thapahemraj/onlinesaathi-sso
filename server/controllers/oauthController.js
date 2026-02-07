@@ -38,12 +38,9 @@ const authorize = async (req, res) => {
 
     if (!token) {
         // Redirect to login page with return URL
-        const returnUrl = encodeURIComponent(req.originalUrl);
-        // Assuming client runs on port 5173 or VITE_APP_URL
-        // We redirect to the Frontend Login Page, which will redirect back here after login
         const loginPage = process.env.NODE_ENV === 'development'
             ? 'http://localhost:5173/login'
-            : 'https://onlinesaathi-sso.vercel.app/login';
+            : 'https://accounts.i-sewa.in/login'; // Updated to new production domain
 
         return res.redirect(`${loginPage}?returnUrl=${returnUrl}`);
     }
@@ -55,7 +52,7 @@ const authorize = async (req, res) => {
         if (!user) {
             const loginPage = process.env.NODE_ENV === 'development'
                 ? 'http://localhost:5173/login'
-                : 'https://onlinesaathi-sso.vercel.app/login';
+                : 'https://accounts.i-sewa.in/login';
             return res.redirect(`${loginPage}?returnUrl=${encodeURIComponent(req.originalUrl)}`);
         }
 
@@ -81,7 +78,7 @@ const authorize = async (req, res) => {
         console.error("OAuth Authorize Error:", error);
         const loginPage = process.env.NODE_ENV === 'development'
             ? 'http://localhost:5173/login'
-            : 'https://onlinesaathi-sso.vercel.app/login';
+            : 'https://accounts.i-sewa.in/login';
         return res.redirect(`${loginPage}?returnUrl=${encodeURIComponent(req.originalUrl)}`);
     }
 };

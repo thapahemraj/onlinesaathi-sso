@@ -20,6 +20,8 @@ app.use(cors({
         'https://docs.i-sewa.in', // Production Docs
         'https://accounts.i-sewa.in', // Production Client
         'https://api.i-sewa.in', // Production API
+        'https://www.i-sewa.in',
+        'https://i-sewa.in'
 
     ],
     credentials: true

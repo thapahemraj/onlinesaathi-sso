@@ -273,15 +273,17 @@ router.get('/profile', protect, getUserProfile);
  */
 router.get('/.well-known/openid-configuration', (req, res) => {
     // Mock OIDC Discovery response
+    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api' : 'https://api.i-sewa.in/api';
+
     res.json({
-        issuer: process.env.VITE_API_URL || "https://onlinesaathi-sso.vercel.app",
-        authorization_endpoint: `${process.env.VITE_API_URL || "https://onlinesaathi-sso.vercel.app"}/oauth/authorize`,
-        token_endpoint: `${process.env.VITE_API_URL || "https://onlinesaathi-sso.vercel.app"}/oauth/token`,
-        userinfo_endpoint: `${process.env.VITE_API_URL || "https://onlinesaathi-sso.vercel.app"}/api/auth/profile`,
-        jwks_uri: `${process.env.VITE_API_URL || "https://onlinesaathi-sso.vercel.app"}/oauth/jwks`,
+        issuer: baseUrl,
+        authorization_endpoint: `${baseUrl}/oauth/authorize`,
+        token_endpoint: `${baseUrl}/oauth/token`,
+        userinfo_endpoint: `${baseUrl}/auth/profile`,
+        jwks_uri: `${baseUrl}/oauth/jwks`,
         response_types_supported: ["code", "token", "id_token"],
         subject_types_supported: ["public"],
-        id_token_signing_alg_values_supported: ["RS256"]
+        id_token_signing_alg_values_supported: ["HS256"] // We are using HS256 in authController
     });
 });
 

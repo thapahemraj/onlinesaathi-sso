@@ -44,7 +44,8 @@ const registerUser = async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: isProduction, // Secure in production
-            sameSite: isProduction ? 'none' : 'strict', // None for cross-site (different Vercel domains)
+            sameSite: isProduction ? 'lax' : 'strict', // Lax allows subdomains if domain is set
+            domain: isProduction ? '.i-sewa.in' : undefined, // Share across subdomains (.i-sewa.in)
             maxAge: 30 * 24 * 60 * 60 * 1000,
         });
         res.status(201).json({
@@ -81,7 +82,8 @@ const loginUser = async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: isProduction,
-            sameSite: isProduction ? 'none' : 'strict',
+            sameSite: isProduction ? 'lax' : 'strict',
+            domain: isProduction ? '.i-sewa.in' : undefined,
             maxAge: 30 * 24 * 60 * 60 * 1000,
         });
         res.json({
@@ -104,7 +106,8 @@ const logoutUser = (req, res) => {
     res.cookie('token', '', {
         httpOnly: true,
         secure: isProduction,
-        sameSite: isProduction ? 'none' : 'strict',
+        sameSite: isProduction ? 'lax' : 'strict',
+        domain: isProduction ? '.i-sewa.in' : undefined,
         expires: new Date(0),
     });
     res.status(200).json({ message: 'Logged out' });
