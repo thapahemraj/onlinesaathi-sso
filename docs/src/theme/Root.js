@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect } from '@docusaurus/router';
 import BrowserOnly from '@docusaurus/BrowserOnly';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 // This wrapper protects the documentation.
 // If the user doesn't have the cookie 'token', we redirect them to the main SSO login.
 // We pass ?returnUrl=... so they can come back here after login.
 
 function AuthGuard({ children }) {
+    const { siteConfig } = useDocusaurusContext();
     const [isAuthenticated, setIsAuthenticated] = useState(null); // null = loading
 
     useEffect(() => {
@@ -36,7 +38,8 @@ function AuthGuard({ children }) {
             try {
                 // We assume the API server (port 5000) allows credentials from port 3001
                 // We'll try to fetch the profile.
-                const res = await fetch('http://localhost:5000/api/auth/profile', {
+                const apiUrl = siteConfig.customFields.API_URL;
+                const res = await fetch(`${apiUrl}/auth/profile`, {
                     credentials: 'include' // Send cookies
                 });
 
@@ -64,8 +67,9 @@ function AuthGuard({ children }) {
     if (isAuthenticated === false) {
         // Redirect to Main App Login
         // Return URL is this documentation page
+        const clientUrl = siteConfig.customFields.CLIENT_URL;
         const returnUrl = window.location.href;
-        window.location.href = `http://localhost:5173/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+        window.location.href = `${clientUrl}/login?returnUrl=${encodeURIComponent(returnUrl)}`;
         return null;
     }
 

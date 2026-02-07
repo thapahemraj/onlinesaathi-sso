@@ -38,9 +38,8 @@ const authorize = async (req, res) => {
 
     if (!token) {
         // Redirect to login page with return URL
-        const loginPage = process.env.NODE_ENV === 'development'
-            ? 'http://localhost:5173/login'
-            : 'https://accounts.i-sewa.in/login'; // Updated to new production domain
+        const loginPage = `${process.env.CLIENT_URL}/login`;
+        const returnUrl = encodeURIComponent(req.originalUrl);
 
         return res.redirect(`${loginPage}?returnUrl=${returnUrl}`);
     }
@@ -50,9 +49,7 @@ const authorize = async (req, res) => {
         const user = await User.findById(decoded.id);
 
         if (!user) {
-            const loginPage = process.env.NODE_ENV === 'development'
-                ? 'http://localhost:5173/login'
-                : 'https://accounts.i-sewa.in/login';
+            const loginPage = `${process.env.CLIENT_URL}/login`;
             return res.redirect(`${loginPage}?returnUrl=${encodeURIComponent(req.originalUrl)}`);
         }
 
@@ -76,9 +73,7 @@ const authorize = async (req, res) => {
 
     } catch (error) {
         console.error("OAuth Authorize Error:", error);
-        const loginPage = process.env.NODE_ENV === 'development'
-            ? 'http://localhost:5173/login'
-            : 'https://accounts.i-sewa.in/login';
+        const loginPage = `${process.env.CLIENT_URL}/login`;
         return res.redirect(`${loginPage}?returnUrl=${encodeURIComponent(req.originalUrl)}`);
     }
 };
@@ -120,7 +115,7 @@ const token = async (req, res) => {
     // Generate Tokens
     // For ID Token, we strictly follow OIDC format
     const idTokenPayload = {
-        iss: process.env.VITE_API_URL || 'https://onlinesaathi-sso.vercel.app',
+        iss: process.env.API_URL || 'http://localhost:5000/api', // Use env var
         sub: user._id.toString(),
         aud: client_id,
         exp: Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour

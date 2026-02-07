@@ -25,6 +25,11 @@ const config = {
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
+  customFields: {
+    CLIENT_URL: process.env.CLIENT_URL || 'https://accounts.i-sewa.in',
+    API_URL: process.env.API_URL || 'https://api.i-sewa.in/api',
+  },
+
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'facebook', // Usually your GitHub org/user name.

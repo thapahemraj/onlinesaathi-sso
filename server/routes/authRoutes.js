@@ -273,7 +273,7 @@ router.get('/profile', protect, getUserProfile);
  */
 router.get('/.well-known/openid-configuration', (req, res) => {
     // Mock OIDC Discovery response
-    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api' : 'https://api.i-sewa.in/api';
+    const baseUrl = process.env.API_URL || 'http://localhost:5000/api';
 
     res.json({
         issuer: baseUrl,
