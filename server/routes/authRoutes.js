@@ -9,9 +9,14 @@ const {
     verifyVerificationCode,
     checkEmail,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    uploadProfilePicture,
+    updateUserProfile
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
+
+router.post('/profile-picture', protect, uploadProfilePicture);
+router.put('/profile', protect, updateUserProfile);
 
 /**
  * @swagger

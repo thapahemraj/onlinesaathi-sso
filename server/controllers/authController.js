@@ -1,6 +1,119 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const generateToken = require('../utils/generateToken');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const connectDB = require('../config/db');
+
+// Configure Multer for local storage
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = 'uploads/profile-pictures';
+        // Ensure directory exists
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, 'profile-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5000000 }, // 5MB limit
+    fileFilter: function (req, file, cb) {
+        const filetypes = /jpeg|jpg|png|gif|webp/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb('Error: Images Only!');
+        }
+    }
+}).single('profilePicture');
+
+// @desc    Upload Profile Picture
+// @route   POST /api/auth/profile-picture
+// @access  Private
+const uploadProfilePicture = (req, res) => {
+    upload(req, res, async function (err) {
+        if (err) {
+            return res.status(400).json({ message: err.message || err });
+        }
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        try {
+            await connectDB();
+            // Construct URL - In production this should be a CDN or static file serve path
+            // For this setup: http://localhost:5000/uploads/profile-pictures/filename
+            const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+            const host = req.get('host'); // e.g. localhost:5000
+            const fileUrl = `${protocol}://${host}/uploads/profile-pictures/${req.file.filename}`;
+
+            const user = await User.findByIdAndUpdate(
+                req.user._id,
+                { profilePicture: fileUrl },
+                { new: true }
+            );
+
+            res.json({
+                message: 'Profile picture updated',
+                profilePicture: user.profilePicture
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Server Error' });
+        }
+    });
+};
+
+// @desc    Update User Profile (Name, DOB, Country, etc.)
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateUserProfile = async (req, res) => {
+    try {
+        await connectDB();
+        const user = await User.findById(req.user._id);
+
+        if (user) {
+            user.username = req.body.username || user.username;
+            user.email = req.body.email || user.email;
+            user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+
+            // New fields
+            if (req.body.dateOfBirth) user.dateOfBirth = req.body.dateOfBirth;
+            if (req.body.country) user.country = req.body.country;
+            if (req.body.language) user.language = req.body.language;
+            if (req.body.regionalFormat) user.regionalFormat = req.body.regionalFormat;
+
+            const updatedUser = await user.save();
+
+            res.json({
+                _id: updatedUser._id,
+                username: updatedUser.username,
+                email: updatedUser.email,
+                phoneNumber: updatedUser.phoneNumber,
+                profilePicture: updatedUser.profilePicture,
+                role: updatedUser.role,
+                dateOfBirth: updatedUser.dateOfBirth,
+                country: updatedUser.country,
+                language: updatedUser.language,
+                regionalFormat: updatedUser.regionalFormat,
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
 
 // Generate JWT - Removed internal function
 
@@ -314,5 +427,7 @@ module.exports = {
     resetPassword,
     sendVerificationCode,
     verifyVerificationCode,
+    uploadProfilePicture,
+    updateUserProfile
 };
 
