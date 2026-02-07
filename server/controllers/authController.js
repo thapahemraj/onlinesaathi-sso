@@ -1,127 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const generateToken = require('../utils/generateToken');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const connectDB = require('../config/db');
-
-// Configure Multer for local storage
-// Configure Multer for local storage (Use /tmp for Vercel/Serverless)
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        // Vercel only allows writing to /tmp
-        const isProduction = process.env.NODE_ENV === 'production';
-        const uploadDir = isProduction ? '/tmp' : 'uploads/profile-pictures';
-
-        // Ensure directory exists (only for local dev)
-        if (!isProduction && !fs.existsSync(uploadDir)) {
-            try {
-                fs.mkdirSync(uploadDir, { recursive: true });
-            } catch (err) {
-                console.error("Multer mkdir error:", err);
-            }
-        }
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        cb(null, 'profile-' + Date.now() + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5000000 }, // 5MB limit
-    fileFilter: function (req, file, cb) {
-        const filetypes = /jpeg|jpg|png|gif|webp/;
-        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = filetypes.test(file.mimetype);
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb(new Error('Images Only!'));
-        }
-    }
-}).single('profilePicture');
-
-// @desc    Upload Profile Picture
-// @route   POST /api/auth/profile-picture
-// @access  Private
-const uploadProfilePicture = (req, res) => {
-    upload(req, res, async function (err) {
-        if (err) {
-            return res.status(400).json({ message: err.message || err });
-        }
-        if (!req.file) {
-            return res.status(400).json({ message: 'No file uploaded' });
-        }
-
-        try {
-            await connectDB();
-            // Construct URL - In production this should be a CDN or static file serve path
-            // For this setup: http://localhost:5000/uploads/profile-pictures/filename
-            const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-            const host = req.get('host'); // e.g. localhost:5000
-            const fileUrl = `${protocol}://${host}/uploads/profile-pictures/${req.file.filename}`;
-
-            const user = await User.findByIdAndUpdate(
-                req.user._id,
-                { profilePicture: fileUrl },
-                { new: true }
-            );
-
-            res.json({
-                message: 'Profile picture updated',
-                profilePicture: user.profilePicture
-            });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Server Error' });
-        }
-    });
-};
-
-// @desc    Update User Profile (Name, DOB, Country, etc.)
-// @route   PUT /api/auth/profile
-// @access  Private
-const updateUserProfile = async (req, res) => {
-    try {
-        await connectDB();
-        const user = await User.findById(req.user._id);
-
-        if (user) {
-            user.username = req.body.username || user.username;
-            user.email = req.body.email || user.email;
-            user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
-
-            // New fields
-            if (req.body.dateOfBirth) user.dateOfBirth = req.body.dateOfBirth;
-            if (req.body.country) user.country = req.body.country;
-            if (req.body.language) user.language = req.body.language;
-            if (req.body.regionalFormat) user.regionalFormat = req.body.regionalFormat;
-
-            const updatedUser = await user.save();
-
-            res.json({
-                _id: updatedUser._id,
-                username: updatedUser.username,
-                email: updatedUser.email,
-                phoneNumber: updatedUser.phoneNumber,
-                profilePicture: updatedUser.profilePicture,
-                role: updatedUser.role,
-                dateOfBirth: updatedUser.dateOfBirth,
-                country: updatedUser.country,
-                language: updatedUser.language,
-                regionalFormat: updatedUser.regionalFormat,
-            });
-        } else {
-            res.status(404).json({ message: 'User not found' });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server Error' });
-    }
-};
 
 // Generate JWT - Removed internal function
 
@@ -188,52 +67,38 @@ const registerUser = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
-    try {
-        await connectDB();
-        // Allow 'email' to serve as a generic identifier (email or phone)
-        const { email, password } = req.body;
+    await connectDB();
+    // Allow 'email' to serve as a generic identifier (email or phone)
+    const { email, password } = req.body;
 
-        // Find user by email OR phoneNumber
-        const user = await User.findOne({
-            $or: [
-                { email: email },
-                { phoneNumber: email }
-            ]
+    // Find user by email OR phoneNumber
+    const user = await User.findOne({
+        $or: [
+            { email: email },
+            { phoneNumber: email }
+        ]
+    });
+
+    if (user && (await user.matchPassword(password))) {
+        const token = generateToken(user._id);
+
+        const isProduction = process.env.NODE_ENV !== 'development';
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'lax' : 'strict',
+            domain: isProduction ? '.i-sewa.in' : undefined,
+            maxAge: 30 * 24 * 60 * 60 * 1000,
         });
-
-        if (user && (await user.matchPassword(password))) {
-            const token = generateToken(user._id);
-
-            const isProduction = process.env.NODE_ENV !== 'development';
-
-            // Set cookie
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: isProduction,
-                sameSite: isProduction ? 'lax' : 'strict',
-                domain: isProduction ? '.i-sewa.in' : undefined,
-                maxAge: 30 * 24 * 60 * 60 * 1000,
-            });
-
-            res.json({
-                _id: user._id,
-                username: user.username,
-                email: user.email,
-                phoneNumber: user.phoneNumber,
-                profilePicture: user.profilePicture,
-                role: user.role,
-                dateOfBirth: user.dateOfBirth,
-                country: user.country,
-                language: user.language,
-                regionalFormat: user.regionalFormat,
-                token
-            });
-        } else {
-            res.status(401).json({ message: 'Invalid email or password' });
-        }
-    } catch (error) {
-        console.error("Login Error:", error);
-        res.status(500).json({ message: 'Server error during login', error: error.message });
+        res.json({
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+        });
+    } else {
+        res.status(401).json({ message: 'Invalid email or password' });
     }
 };
 
@@ -241,50 +106,34 @@ const loginUser = async (req, res) => {
 // @route   POST /api/auth/logout
 // @access  Public
 const logoutUser = (req, res) => {
-    try {
-        const isProduction = process.env.NODE_ENV !== 'development';
+    const isProduction = process.env.NODE_ENV !== 'development';
 
-        res.cookie('token', '', {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'lax' : 'strict',
-            domain: isProduction ? '.i-sewa.in' : undefined,
-            expires: new Date(0),
-        });
-        res.status(200).json({ message: 'Logged out' });
-    } catch (error) {
-        console.error("Logout Error:", error);
-        res.status(500).json({ message: 'Server error during logout' });
-    }
+    res.cookie('token', '', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'lax' : 'strict',
+        domain: isProduction ? '.i-sewa.in' : undefined,
+        expires: new Date(0),
+    });
+    res.status(200).json({ message: 'Logged out' });
 };
 
 // @desc    Get user profile
 // @route   GET /api/auth/profile
 // @access  Private
 const getUserProfile = async (req, res) => {
-    try {
-        await connectDB();
-        const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id);
 
-        if (user) {
-            res.json({
-                _id: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-                profilePicture: user.profilePicture,
-                phoneNumber: user.phoneNumber,
-                dateOfBirth: user.dateOfBirth,
-                country: user.country,
-                language: user.language,
-                regionalFormat: user.regionalFormat
-            });
-        } else {
-            res.status(404).json({ message: 'User not found' });
-        }
-    } catch (error) {
-        console.error("Profile Error:", error);
-        res.status(500).json({ message: 'Server error fetching profile' });
+    if (user) {
+        res.json({
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            profilePicture: user.profilePicture
+        });
+    } else {
+        res.status(404).json({ message: 'User not found' });
     }
 };
 
@@ -465,7 +314,5 @@ module.exports = {
     resetPassword,
     sendVerificationCode,
     verifyVerificationCode,
-    uploadProfilePicture,
-    updateUserProfile
 };
 

@@ -38,21 +38,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    dateOfBirth: {
-        type: Date
-    },
-    country: {
-        type: String,
-        default: 'United States'
-    },
-    language: {
-        type: String,
-        default: 'English (United States)'
-    },
-    regionalFormat: {
-        type: String,
-        default: 'English (United States)'
-    },
     role: {
         type: String,
         enum: ['user', 'admin'],
