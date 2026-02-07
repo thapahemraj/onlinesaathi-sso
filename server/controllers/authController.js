@@ -7,12 +7,20 @@ const fs = require('fs');
 const connectDB = require('../config/db');
 
 // Configure Multer for local storage
+// Configure Multer for local storage (Use /tmp for Vercel/Serverless)
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadDir = 'uploads/profile-pictures';
-        // Ensure directory exists
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
+        // Vercel only allows writing to /tmp
+        const isProduction = process.env.NODE_ENV === 'production';
+        const uploadDir = isProduction ? '/tmp' : 'uploads/profile-pictures';
+
+        // Ensure directory exists (only for local dev)
+        if (!isProduction && !fs.existsSync(uploadDir)) {
+            try {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            } catch (err) {
+                console.error("Multer mkdir error:", err);
+            }
         }
         cb(null, uploadDir);
     },
@@ -31,7 +39,7 @@ const upload = multer({
         if (mimetype && extname) {
             return cb(null, true);
         } else {
-            cb('Error: Images Only!');
+            cb(new Error('Images Only!'));
         }
     }
 }).single('profilePicture');
