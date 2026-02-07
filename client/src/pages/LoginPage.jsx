@@ -1,11 +1,163 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-
 import { startAuthentication } from '@simplewebauthn/browser';
 import axios from 'axios';
+import { ArrowLeft, MoreHorizontal, Eye, EyeOff } from 'lucide-react';
+import MsInput from '../components/MsInput';
 
 const LoginPage = () => {
-    // ... (existing state)
+    const { login } = useAuth();
     const { theme } = useTheme();
+    const navigate = useNavigate();
+
+    const [step, setStep] = useState(1);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
+    // Forgot Password State
+    const [otpInput, setOtpInput] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+    // Remembered Account functionality
+    const [rememberedUser, setRememberedUser] = useState(null);
+    const [showMenu, setShowMenu] = useState(false);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('rememberedUser');
+        if (storedUser) {
+            setRememberedUser(JSON.parse(storedUser));
+            setEmail(JSON.parse(storedUser).email); // Pre-fill email
+        }
+    }, []);
+
+    const handleAccountClick = () => {
+        setStep(2); // Go straight to password
+        setError('');
+    };
+
+    const handleUseAnotherAccount = () => {
+        setRememberedUser(null);
+        setEmail('');
+        setStep(1);
+        setError('');
+    };
+
+    const handleForgetAccount = (e) => {
+        e.stopPropagation();
+        localStorage.removeItem('rememberedUser');
+        setRememberedUser(null);
+        setEmail('');
+        setStep(1);
+        setShowMenu(false);
+    };
+
+    const handleBack = () => {
+        if (step === 2 && rememberedUser) {
+            setStep(1); // Back to account picker
+        } else if (step > 1) {
+            setStep(step - 1);
+        }
+        setError('');
+    };
+
+    const handleResend = async () => {
+        // Resend OTP logic
+        setIsLoading(true);
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, { email });
+            // Show toast or slight message
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleNext = async (e) => {
+        e.preventDefault();
+        setError('');
+        setIsLoading(true);
+
+        try {
+            if (step === 1) {
+                // Check if user exists
+                try {
+                    const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/check-email`, { identifier: email });
+                    if (res.data.exists) {
+                        setStep(2);
+                    } else {
+                        setError('This username may be incorrect. Make sure you typed it correctly. Otherwise, contact your admin.');
+                    }
+                } catch (err) {
+                    setError('An error occurred. Please try again.');
+                }
+            } else if (step === 2) {
+                // Login
+                try {
+                    const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { email, password });
+                    login(res.data, null); // Assuming null token logic handled in context or updated context to take token?
+                    // Note: In authController, login returns token in cookie AND body?
+                    // Let's assume standard login flow
+                    // If backend sets cookie, we might not need token in login() if context reads cookie or /profile
+                    // BUT, current context likely expects user object.
+
+                    // IMPORTANT: Remember user if successful
+                    localStorage.setItem('rememberedUser', JSON.stringify({ username: res.data.username, email: res.data.email }));
+                    navigate('/dashboard');
+                } catch (err) {
+                    setError(err.response?.data?.message || 'Invalid password.');
+                }
+            } else if (step === 3) {
+                // Send OTP for Forgot Password
+                try {
+                    await axios.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, { email });
+                    setStep(4);
+                } catch (err) {
+                    setError(err.response?.data?.message || 'Failed to send code.');
+                }
+            } else if (step === 4) {
+                // Verify OTP isn't explicitly a separate step in backend usually, 
+                // but we often pass it to reset-password directly OR verify it first.
+                // let's assume we just move to step 5 and verify on submit?
+                // Or better: verify code first
+                // Backend route: /auth/reset-password takes otp.
+                // We can just move to step 5.
+                setStep(5);
+            } else if (step === 5) {
+                // Reset Password
+                if (newPassword !== confirmNewPassword) {
+                    setError("Passwords do not match.");
+                    setIsLoading(false);
+                    return;
+                }
+                try {
+                    await axios.post(`${import.meta.env.VITE_API_URL}/auth/reset-password`, {
+                        email,
+                        otp: otpInput,
+                        newPassword
+                    });
+                    // Success - go to login
+                    setStep(2);
+                    setPassword('');
+                    setRememberedUser(null); // Force re-login
+                    setError('Password reset details updated. Please sign in.');
+                } catch (err) {
+                    setError(err.response?.data?.message || 'Failed to reset password.');
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            setError('Something went wrong. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Passkey Login Handler
     const handlePasskeyLogin = async () => {
