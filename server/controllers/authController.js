@@ -9,6 +9,7 @@ const generateToken = require('../utils/generateToken');
 // @access  Public
 const registerUser = async (req, res) => {
     try {
+        await connectDB();
         const { username, email, password, phoneNumber, firebaseUid } = req.body;
 
         // Check for existing user by email, username, or phone individually to give better error message
@@ -66,6 +67,7 @@ const registerUser = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
+    await connectDB();
     // Allow 'email' to serve as a generic identifier (email or phone)
     const { email, password } = req.body;
 
@@ -135,12 +137,15 @@ const getUserProfile = async (req, res) => {
     }
 };
 
+const connectDB = require('../config/db');
+
 // @desc    Check if email or phone exists
 // @route   POST /api/auth/check-email
 // @access  Public
 const checkEmail = async (req, res) => {
     console.log("checkEmail: Request received");
     try {
+        await connectDB(); // Ensure DB is connected
         // Support 'email' key (legacy) or 'identifier' key
         const { email, identifier } = req.body;
         const queryValue = identifier || email;
