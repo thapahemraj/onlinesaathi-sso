@@ -9,7 +9,7 @@ const options = {
             description: 'API documentation for the Online Saathi Single Sign-On system',
             contact: {
                 name: 'API Support',
-                email: 'support@onlinesaathi.com',
+                email: 'support@onlinesaathi.org',
             },
         },
         servers: [
@@ -18,8 +18,8 @@ const options = {
                 description: 'Local Development Server',
             },
             {
-                url: 'https://onlinesaathi-sso.vercel.app/api',
-                description: 'Production Server',
+                url: 'https://api.i-sewa.in/api',
+                description: 'Production Server (i-sewa.in)',
             },
         ],
         components: {
@@ -37,7 +37,12 @@ const options = {
             },
         ],
     },
-    apis: [require('path').join(__dirname, '../routes/*.js')], // Use absolute path
+    // Vercel serverless environment path resolution
+    apis: [
+        require('path').join(__dirname, '../routes/*.js'), // Local/Standard
+        require('path').join(process.cwd(), 'routes/*.js'), // Vercel potentially
+        require('path').join(process.cwd(), 'server/routes/*.js') // Vercel monorepo structure
+    ],
 };
 
 const specs = swaggerJsdoc(options);
