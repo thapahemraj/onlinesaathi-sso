@@ -39,9 +39,9 @@ const DashboardLayout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#f2f2f2] font-segoe">
+        <div className="min-h-screen bg-[#f2f2f2] dark:bg-[#1b1b1b] font-segoe transition-colors duration-300">
             {/* Header */}
-            <header className="bg-[#0078D4] text-white h-12 flex items-center justify-between px-4 sticky top-0 z-50">
+            <header className="bg-[#0078D4] dark:bg-[#2b2b2b] text-white h-12 flex items-center justify-between px-4 sticky top-0 z-50 transition-colors">
                 <div className="flex items-center gap-4">
                     <button
                         className="md:hidden"
@@ -54,7 +54,7 @@ const DashboardLayout = () => {
 
                 <div className="flex items-center gap-4">
                     {/* User Profile Dropdown/Indicator */}
-                    <div className="flex items-center gap-3 cursor-pointer hover:bg-[#005a9e] px-2 py-1 rounded transition-colors" title={user?.email}>
+                    <div className="flex items-center gap-3 cursor-pointer hover:bg-[#005a9e] dark:hover:bg-[#3b3b3b] px-2 py-1 rounded transition-colors" title={user?.email}>
                         <div className="text-right hidden sm:block">
                             <div className="text-xs font-semibold">{user?.username}</div>
                             <div className="text-[10px] opacity-80">{user?.email}</div>
@@ -72,7 +72,7 @@ const DashboardLayout = () => {
 
             <div className="flex max-w-[1600px] mx-auto">
                 {/* Sidebar - Desktop */}
-                <aside className="hidden md:block w-64 bg-[#f2f2f2] min-h-[calc(100vh-48px)] pt-8 pl-4 pr-6">
+                <aside className="hidden md:block w-64 bg-[#f2f2f2] dark:bg-[#1b1b1b] min-h-[calc(100vh-48px)] pt-8 pl-4 pr-6 transition-colors">
                     <nav className="space-y-1">
                         {navItems.map((item) => (
                             <NavLink
@@ -81,8 +81,8 @@ const DashboardLayout = () => {
                                 end={item.end}
                                 className={({ isActive }) =>
                                     `flex items-center gap-3 px-4 py-3 text-[15px] rounded-md transition-colors ${isActive
-                                        ? 'bg-white shadow-sm font-semibold text-[#323130]'
-                                        : 'text-[#323130] hover:bg-gray-200'
+                                        ? 'bg-white dark:bg-[#2c2c2c] shadow-sm font-semibold text-[#323130] dark:text-white'
+                                        : 'text-[#323130] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#2c2c2c]'
                                     }`
                                 }
                             >
@@ -93,7 +93,7 @@ const DashboardLayout = () => {
 
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-[15px] text-[#323130] hover:bg-gray-200 rounded-md transition-colors mt-8 text-left"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-[15px] text-[#323130] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#2c2c2c] rounded-md transition-colors mt-8 text-left"
                         >
                             Sign out
                         </button>
@@ -102,9 +102,9 @@ const DashboardLayout = () => {
                             <NavLink
                                 to="/dashboard/admin"
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 px-4 py-3 text-[15px] rounded-md transition-colors mt-4 border-t border-gray-200 ${isActive
-                                        ? 'bg-white shadow-sm font-semibold text-[#0078D4]'
-                                        : 'text-[#0078D4] hover:bg-gray-200'
+                                    `flex items-center gap-3 px-4 py-3 text-[15px] rounded-md transition-colors mt-4 border-t border-gray-200 dark:border-gray-700 ${isActive
+                                        ? 'bg-white dark:bg-[#2c2c2c] shadow-sm font-semibold text-[#0078D4] dark:text-[#4f93ce]'
+                                        : 'text-[#0078D4] dark:text-[#4f93ce] hover:bg-gray-200 dark:hover:bg-[#2c2c2c]'
                                     }`
                                 }
                             >
@@ -119,7 +119,7 @@ const DashboardLayout = () => {
                 {isMobileMenuOpen && (
                     <div className="fixed inset-0 z-40 md:hidden">
                         <div className="absolute inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}></div>
-                        <div className="absolute left-0 top-12 bottom-0 w-64 bg-white shadow-xl py-4 overflow-y-auto">
+                        <div className="absolute left-0 top-12 bottom-0 w-64 bg-white dark:bg-[#2c2c2c] shadow-xl py-4 overflow-y-auto transition-colors">
                             <nav className="space-y-1 px-2">
                                 {navItems.map((item) => (
                                     <NavLink
@@ -129,8 +129,8 @@ const DashboardLayout = () => {
                                         end={item.end}
                                         className={({ isActive }) =>
                                             `flex items-center gap-3 px-4 py-3 text-[15px] rounded-md transition-colors ${isActive
-                                                ? 'bg-gray-100 font-semibold text-[#0078D4]'
-                                                : 'text-[#323130] hover:bg-gray-50'
+                                                ? 'bg-gray-100 dark:bg-[#3b3b3b] font-semibold text-[#0078D4] dark:text-[#4f93ce]'
+                                                : 'text-[#323130] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#3b3b3b]'
                                             }`
                                         }
                                     >
@@ -138,10 +138,10 @@ const DashboardLayout = () => {
                                         {item.label}
                                     </NavLink>
                                 ))}
-                                <div className="border-t my-4"></div>
+                                <div className="border-t dark:border-gray-700 my-4"></div>
                                 <button
                                     onClick={handleLogout}
-                                    className="w-full flex items-center gap-3 px-4 py-3 text-[15px] text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                    className="w-full flex items-center gap-3 px-4 py-3 text-[15px] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                                 >
                                     <LogOut size={20} />
                                     Sign out

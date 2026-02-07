@@ -20,22 +20,22 @@ const CustomAlert = ({ isOpen, message, type = 'success', onClose }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-10 px-4 bg-black/20 backdrop-blur-[1px] transition-opacity">
-            <div className={`bg-white rounded-lg shadow-xl p-5 w-full max-w-sm flex items-start gap-4 border-l-4 ${borderColor} animate-slide-down`}>
+            <div className={`bg-white dark:bg-[#2c2c2c] rounded-lg shadow-xl p-5 w-full max-w-sm flex items-start gap-4 border-l-4 ${borderColor} animate-slide-down transition-colors`}>
                 <div className={`${iconColor} mt-0.5`}>
                     <Icon size={24} className={type === 'loading' ? 'animate-spin' : ''} />
                 </div>
                 <div className="flex-1">
-                    <h3 className="text-[#1b1b1b] font-semibold text-[15px] mb-1">
+                    <h3 className="text-[#1b1b1b] dark:text-white font-semibold text-[15px] mb-1">
                         {type === 'loading' ? 'Please wait' : type === 'error' ? 'Attention' : 'Success'}
                     </h3>
-                    <p className="text-[#666] text-sm leading-relaxed">
+                    <p className="text-[#666] dark:text-gray-300 text-sm leading-relaxed">
                         {message}
                     </p>
                 </div>
                 {type !== 'loading' && (
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-[#1b1b1b] transition-colors"
+                        className="text-gray-400 dark:text-gray-500 hover:text-[#1b1b1b] dark:hover:text-white transition-colors"
                     >
                         <X size={18} />
                     </button>

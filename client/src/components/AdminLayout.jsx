@@ -35,18 +35,18 @@ const AdminLayout = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#f3f2f1] font-segoe flex">
+        <div className="min-h-screen bg-[#f3f2f1] dark:bg-[#1b1b1b] font-segoe flex transition-colors duration-300">
             {/* Sidebar */}
             <aside
-                className={`bg-white shadow-md fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0`}
+                className={`bg-white dark:bg-[#2c2c2c] shadow-md fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 border-r border-gray-100 dark:border-gray-800`}
             >
-                <div className="h-14 flex items-center px-6 border-b border-gray-100">
-                    <span className="font-bold text-lg text-[#0078D4] flex items-center gap-2">
+                <div className="h-14 flex items-center px-6 border-b border-gray-100 dark:border-gray-800">
+                    <span className="font-bold text-lg text-[#0078D4] dark:text-[#4f93ce] flex items-center gap-2">
                         <Shield size={20} />
                         Admin Center
                     </span>
                     <button
-                        className="ml-auto md:hidden text-gray-500"
+                        className="ml-auto md:hidden text-gray-500 dark:text-gray-400"
                         onClick={() => setIsSidebarOpen(false)}
                     >
                         <X size={20} />
@@ -61,8 +61,8 @@ const AdminLayout = () => {
                             end={item.end}
                             className={({ isActive }) =>
                                 `flex items-center gap-3 px-3 py-2.5 text-[14px] rounded-md transition-colors ${isActive
-                                    ? 'bg-[#eff6fc] text-[#0078D4] font-semibold'
-                                    : 'text-[#323130] hover:bg-[#f3f2f1]'
+                                    ? 'bg-[#eff6fc] dark:bg-[#3b3b3b] text-[#0078D4] dark:text-[#4f93ce] font-semibold'
+                                    : 'text-[#323130] dark:text-gray-300 hover:bg-[#f3f2f1] dark:hover:bg-[#3b3b3b]'
                                 }`
                             }
                         >
@@ -71,10 +71,10 @@ const AdminLayout = () => {
                         </NavLink>
                     ))}
 
-                    <div className="pt-4 mt-4 border-t border-gray-100">
+                    <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-800">
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 text-[14px] text-red-600 hover:bg-red-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-2.5 text-[14px] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors text-left"
                         >
                             <LogOut size={18} />
                             Sign out
@@ -86,24 +86,24 @@ const AdminLayout = () => {
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 {/* Header */}
-                <header className="bg-white h-14 border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10">
+                <header className="bg-white dark:bg-[#2c2c2c] h-14 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 shadow-sm z-10 transition-colors">
                     <div className="flex items-center gap-4">
                         <button
-                            className="md:hidden text-gray-500"
+                            className="md:hidden text-gray-500 dark:text-gray-400"
                             onClick={() => setIsSidebarOpen(true)}
                         >
                             <Menu size={20} />
                         </button>
-                        <h1 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                        <h1 className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                             Microsoft Entra ID
                         </h1>
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="text-right">
-                            <div className="text-sm font-semibold text-[#323130]">{user?.username}</div>
-                            <div className="text-xs text-gray-500 uppercase">{user?.role}</div>
+                            <div className="text-sm font-semibold text-[#323130] dark:text-white">{user?.username}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 uppercase">{user?.role}</div>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-[#0078D4] text-white flex items-center justify-center text-xs font-bold">
+                        <div className="w-8 h-8 rounded-full bg-[#0078D4] dark:bg-[#4f93ce] text-white flex items-center justify-center text-xs font-bold">
                             {user?.username?.charAt(0).toUpperCase()}
                         </div>
                     </div>
