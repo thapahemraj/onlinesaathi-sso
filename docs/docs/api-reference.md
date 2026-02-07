@@ -4,12 +4,12 @@ sidebar_position: 3
 
 # API Reference
 
-Online Saathi provides a comprehensive REST API. For interactive documentation, please visit our [Swagger UI](https://api.i-sewa.in/api-docs).
+Online Saathi provides a comprehensive REST API. For interactive documentation, please visit our [Swagger UI](${API_URL.replace('/api', '')}/api-docs).
 
 ## Base URL
-```
-https://api.i-sewa.in/api
-```
+\`\`\`
+${API_URL}
+\`\`\`
 
 ## Authentication Endpoints
 
@@ -19,14 +19,14 @@ Create a new user account.
 - **URL**: \`/auth/register\`
 - **Method**: \`POST\`
 - **Body**:
-    ```json
-    {
-      "username": "John Doe",
-      "email": "john@example.com",
-      "password": "securepassword",
-      "phoneNumber": "1234567890"
-    }
-    ```
+  \`\`\`json
+  {
+    "username": "John Doe",
+    "email": "john@example.com",
+    "password": "securepassword",
+    "phoneNumber": "1234567890" (optional)
+  }
+  \`\`\`
 
 ### Login User
 Authenticate a user and receive a session cookie/token.
@@ -34,12 +34,12 @@ Authenticate a user and receive a session cookie/token.
 - **URL**: \`/auth/login\`
 - **Method**: \`POST\`
 - **Body**:
-    ```json
-    {
-      "email": "john@example.com",
-      "password": "securepassword"
-    }
-    ```
+  \`\`\`json
+  {
+    "email": "john@example.com",
+    "password": "securepassword"
+  }
+  \`\`\`
 
 ### Get User Profile
 Retrieve the currently authenticated user's profile. Requires a valid session cookie.
@@ -47,14 +47,14 @@ Retrieve the currently authenticated user's profile. Requires a valid session co
 - **URL**: \`/auth/profile\`
 - **Method**: \`GET\`
 - **Response**:
-    ```json
-    {
-      "_id": "user_id_here",
-      "username": "John Doe",
-      "email": "john@example.com",
-      "role": "user"
-    }
-    ```
+  \`\`\`json
+  {
+    "_id": "user_id_here",
+    "username": "John Doe",
+    "email": "john@example.com",
+    "role": "user"
+  }
+  \`\`\`
 
 ## OAuth Endpoints
 
