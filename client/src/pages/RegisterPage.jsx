@@ -262,7 +262,7 @@ const RegisterPage = () => {
 
                     {/* Header Logo */}
                     <div className="mb-8 flex justify-center">
-                        <img src={import.meta.env.VITE_LOGO_URL} alt="Microsoft" className="h-10" />
+                        <img src={import.meta.env.VITE_LOGO_URL} alt="OnlineSaathi" className="h-10" />
                     </div>
 
                     {/* --- STEP 1: EMAIL --- */}

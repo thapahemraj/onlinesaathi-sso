@@ -83,11 +83,11 @@ const Overview = () => {
             {/* Recent Activity or Banner */}
             <div className="mt-8 bg-[#fdfdfd] dark:bg-[#2c2c2c] border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-6 transition-colors">
                 <div>
-                    <h3 className="text-lg font-semibold mb-2 text-[#323130] dark:text-white">Microsoft 365</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-[#323130] dark:text-white">OnlineSaathi Services</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300">Premium Office apps, extra cloud storage, advanced security, and more.</p>
                 </div>
                 <button className="bg-[#0067b8] dark:bg-[#0078D4] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#005da6] dark:hover:bg-[#0067b8] transition-colors whitespace-nowrap">
-                    Get Microsoft 365
+                    Get OnlineSaathi Services
                 </button>
             </div>
         </div>

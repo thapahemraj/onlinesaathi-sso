@@ -29,17 +29,17 @@ const Privacy = () => {
                 />
                 <PrivacyCard
                     title="Browsing history"
-                    description="See and clear your browsing history from Microsoft Edge."
+                    description="See and clear your browsing history from OnlineSaathi."
                     icon={Globe}
                 />
                 <PrivacyCard
                     title="Search history"
-                    description="View and clear the searches you've made on Bing."
+                    description="View and clear the searches you've made on OnlineSaathi."
                     icon={History}
                 />
                 <PrivacyCard
                     title="App and service activity"
-                    description="See data from apps and services you use related to your Microsoft account."
+                    description="See data from apps and services you use related to your OnlineSaathi account."
                     icon={Eye}
                 />
             </div>

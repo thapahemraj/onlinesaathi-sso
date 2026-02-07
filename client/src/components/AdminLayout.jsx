@@ -95,7 +95,7 @@ const AdminLayout = () => {
                             <Menu size={20} />
                         </button>
                         <h1 className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                            Microsoft Entra ID
+                            OnlineSaathi Email id
                         </h1>
                     </div>
                     <div className="flex items-center gap-3">

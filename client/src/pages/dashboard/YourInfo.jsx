@@ -37,7 +37,7 @@ const YourInfo = () => {
                 <div className="flex-1">
                     <h2 className="text-xl font-semibold mb-2">Profile photo</h2>
                     <p className="text-gray-600 text-sm mb-4 max-w-md">
-                        Add a photo to personalize your account. It will appear on apps and devices that use your Microsoft account.
+                        Add a photo to personalize your account. It will appear on apps and devices that use your OnlineSaathi account.
                     </p>
                     <button className="border border-gray-400 px-6 py-2 rounded-md text-[15px] font-semibold hover:bg-gray-50 transition-colors">
                         Change photo

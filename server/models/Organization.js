@@ -28,7 +28,7 @@ const organizationSchema = new mongoose.Schema({
         logoUrl: String,
         primaryColor: {
             type: String,
-            default: '#0078D4' // Microsoft Blue default
+            default: '#ffffffff' 
         }
     },
     settings: {

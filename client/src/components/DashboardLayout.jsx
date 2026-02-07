@@ -49,7 +49,7 @@ const DashboardLayout = () => {
                     >
                         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                     </button>
-                    <span className="font-semibold text-lg tracking-tight">Microsoft account</span>
+                    <span className="font-semibold text-lg tracking-tight">OnlineSaathi account</span>
                 </div>
 
                 <div className="flex items-center gap-4">
