@@ -9,8 +9,15 @@ const {
     verifyVerificationCode,
     checkEmail,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    getActivityLogs
 } = require('../controllers/authController');
+const {
+    generateRegistrationOptions,
+    verifyRegistration,
+    generateAuthenticationOptions,
+    verifyAuthentication
+} = require('../controllers/webauthnController');
 const { protect } = require('../middleware/authMiddleware');
 
 /**
@@ -242,6 +249,20 @@ router.get('/profile', protect, getUserProfile);
 
 /**
  * @swagger
+ * /auth/activity-logs:
+ *   get:
+ *     summary: Get user activity logs
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of activity logs
+ */
+router.get('/activity-logs', protect, getActivityLogs);
+
+/**
+ * @swagger
  * /auth/.well-known/openid-configuration:
  *   get:
  *     summary: OIDC Discovery Endpoint
@@ -289,3 +310,57 @@ router.get('/.well-known/openid-configuration', (req, res) => {
 
 
 module.exports = router;
+
+// WebAuthn / Passkeys Routes
+
+/**
+ * @swagger
+ * /auth/webauthn/register/options:
+ *   get:
+ *     summary: Generate WebAuthn registration options
+ *     tags: [WebAuthn]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Registration options
+ */
+router.get('/webauthn/register/options', protect, generateRegistrationOptions);
+
+/**
+ * @swagger
+ * /auth/webauthn/register/verify:
+ *   post:
+ *     summary: Verify WebAuthn registration
+ *     tags: [WebAuthn]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Registration verified
+ */
+router.post('/webauthn/register/verify', protect, verifyRegistration);
+
+/**
+ * @swagger
+ * /auth/webauthn/login/options:
+ *   get:
+ *     summary: Generate WebAuthn login options
+ *     tags: [WebAuthn]
+ *     responses:
+ *       200:
+ *         description: Login options
+ */
+router.get('/webauthn/login/options', generateAuthenticationOptions);
+
+/**
+ * @swagger
+ * /auth/webauthn/login/verify:
+ *   post:
+ *     summary: Verify WebAuthn login
+ *     tags: [WebAuthn]
+ *     responses:
+ *       200:
+ *         description: Login verified and token issued
+ */
+router.post('/webauthn/login/verify', verifyAuthentication);

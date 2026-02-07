@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const ActivityLog = require('../models/ActivityLog');
 const jwt = require('jsonwebtoken');
 
 // Generate JWT
@@ -56,6 +57,13 @@ const registerUser = async (req, res) => {
             email: user.email,
             role: user.role,
         });
+
+        // Log Activity
+        await ActivityLog.create({
+            actor: user._id,
+            action: 'REGISTER',
+            details: { ip: req.ip, userAgent: req.headers['user-agent'] }
+        });
     } else {
         res.status(400).json({ message: 'Invalid user data' });
     }
@@ -94,7 +102,24 @@ const loginUser = async (req, res) => {
             email: user.email,
             role: user.role,
         });
+
+        // Log Activity
+        await ActivityLog.create({
+            actor: user._id,
+            action: 'LOGIN',
+            details: { ip: req.ip, userAgent: req.headers['user-agent'] },
+            status: 'SUCCESS'
+        });
     } else {
+        // Log Failed Attempt (if user exists, or maybe generic)
+        if (user) {
+            await ActivityLog.create({
+                actor: user._id,
+                action: 'LOGIN',
+                details: { ip: req.ip, userAgent: req.headers['user-agent'], error: 'Invalid password' },
+                status: 'FAILURE'
+            });
+        }
         res.status(401).json({ message: 'Invalid email or password' });
     }
 };
@@ -237,6 +262,21 @@ const resetPassword = async (req, res) => {
     res.json({ message: 'Password updated successfully' });
 };
 
+// @desc    Get user activity logs
+// @route   GET /api/auth/activity-logs
+// @access  Private
+const getActivityLogs = async (req, res) => {
+    try {
+        const logs = await ActivityLog.find({ actor: req.user._id })
+            .sort({ timestamp: -1 })
+            .limit(50); // Limit to last 50 actions
+        res.json(logs);
+    } catch (error) {
+        console.error("Error fetching activity logs:", error);
+        res.status(500).json({ message: "Failed to fetch activity logs" });
+    }
+};
+
 // Exports moved to bottom
 
 const Verification = require('../models/Verification');
@@ -308,5 +348,6 @@ module.exports = {
     resetPassword,
     sendVerificationCode,
     verifyVerificationCode,
+    getActivityLogs
 };
 

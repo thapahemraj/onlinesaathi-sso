@@ -9,6 +9,7 @@ import Subscriptions from './dashboard/Subscriptions';
 import PaymentOptions from './dashboard/PaymentOptions';
 import OrderHistory from './dashboard/OrderHistory';
 import AddressBook from './dashboard/AddressBook';
+import ActivityLog from './dashboard/ActivityLog';
 
 const Dashboard = () => {
     return (
@@ -23,6 +24,7 @@ const Dashboard = () => {
                 <Route path="payment" element={<PaymentOptions />} />
                 <Route path="orders" element={<OrderHistory />} />
                 <Route path="addresses" element={<AddressBook />} />
+                <Route path="activity" element={<ActivityLog />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
         </DashboardLayout>

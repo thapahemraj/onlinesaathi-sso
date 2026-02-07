@@ -1,10 +1,52 @@
 import { useTheme } from '../context/ThemeContext';
 
+import { startAuthentication } from '@simplewebauthn/browser';
+import axios from 'axios';
+
 const LoginPage = () => {
     // ... (existing state)
     const { theme } = useTheme();
 
-    // ... (existing functions)
+    // Passkey Login Handler
+    const handlePasskeyLogin = async () => {
+        setIsLoading(true);
+        setError('');
+        try {
+            // 1. Get options from server
+            const resp = await axios.get(`${import.meta.env.VITE_API_URL}/auth/webauthn/login/options`);
+
+            // 2. Pass options to browser authenticator
+            let asseResp;
+            try {
+                asseResp = await startAuthentication(resp.data);
+            } catch (error) {
+                if (error.name === 'NotAllowedError') {
+                    throw new Error('User cancelled the request.');
+                }
+                throw error;
+            }
+
+            // 3. Send response to server
+            const verificationResp = await axios.post(
+                `${import.meta.env.VITE_API_URL}/auth/webauthn/login/verify`,
+                asseResp,
+                { withCredentials: true }
+            );
+
+            if (verificationResp.data.verified) {
+                const { token, user } = verificationResp.data;
+                login(user, token);
+                navigate('/dashboard');
+            } else {
+                setError('Verification failed. Please try again.');
+            }
+        } catch (error) {
+            console.error(error);
+            setError(error.response?.data?.message || 'Failed to sign in with passkey.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const bgImage = theme === 'dark'
         ? 'https://logincdn.msauth.net/shared/5/images/fluent_web_dark_2_bf5f23287bc9f60c9be2.svg'
@@ -117,7 +159,12 @@ const LoginPage = () => {
                                             </span>
                                         </div>
                                         <div className="mb-6">
-                                            <span className="text-[#0067b8] dark:text-[#4f9cdd] text-[13px] hover:underline cursor-pointer">Sign in with a security key</span>
+                                            <span
+                                                onClick={handlePasskeyLogin}
+                                                className="text-[#0067b8] dark:text-[#4f9cdd] text-[13px] hover:underline cursor-pointer"
+                                            >
+                                                Sign in with a security key
+                                            </span>
                                         </div>
                                         <div className="flex justify-end w-full">
                                             <button type="submit" className={buttonClasses} disabled={isLoading}>
