@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
     User,
@@ -16,7 +16,7 @@ import {
     MapPin
 } from 'lucide-react';
 
-const DashboardLayout = () => {
+const DashboardLayout = ({ children }) => {
     const { user, logout } = useAuth();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
@@ -153,7 +153,7 @@ const DashboardLayout = () => {
 
                 {/* Main Content */}
                 <main className="flex-1 p-4 md:p-8 md:pt-14 overflow-hidden">
-                    <Outlet />
+                    {children}
                 </main>
             </div>
         </div>
