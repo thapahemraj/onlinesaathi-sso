@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const generateToken = require('../utils/generateToken');
+const { trackDevice } = require('./deviceController');
 
 // Generate JWT - Removed internal function
 
@@ -91,6 +92,10 @@ const loginUser = async (req, res) => {
             domain: isProduction ? '.i-sewa.in' : undefined,
             maxAge: 30 * 24 * 60 * 60 * 1000,
         });
+
+        // Track device on login
+        trackDevice(user._id, req);
+
         res.json({
             _id: user._id,
             username: user.username,

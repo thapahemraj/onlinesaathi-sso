@@ -13,12 +13,10 @@ export const AuthProvider = ({ children }) => {
     axios.defaults.withCredentials = true;
     axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-    console.log("AuthContext: Using API URL:", axios.defaults.baseURL);
-
     useEffect(() => {
         const checkUser = async () => {
             try {
-                const { data } = await axios.get('/auth/profile');
+                const { data } = await axios.get('/profile');
                 setUser(data);
             } catch (error) {
                 console.log('Not logged in');
@@ -32,14 +30,18 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         const { data } = await axios.post('/auth/login', { email, password });
-        setUser(data);
-        return data;
+        // After login, fetch full profile
+        const { data: profile } = await axios.get('/profile');
+        setUser(profile);
+        return profile;
     };
 
     const register = async (username, email, password, phoneNumber, firebaseUid) => {
         const { data } = await axios.post('/auth/register', { username, email, password, phoneNumber, firebaseUid });
-        setUser(data);
-        return data;
+        // After register, fetch full profile
+        const { data: profile } = await axios.get('/profile');
+        setUser(profile);
+        return profile;
     };
 
     const logout = async () => {
@@ -47,8 +49,18 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    // Refresh user data after profile updates
+    const refreshUser = async () => {
+        try {
+            const { data } = await axios.get('/profile');
+            setUser(data);
+        } catch (error) {
+            console.error('Failed to refresh user data');
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+        <AuthContext.Provider value={{ user, setUser, login, register, logout, loading, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

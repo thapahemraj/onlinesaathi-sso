@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: false // Optional if using OAuth or Phone Auth
+        required: false
     },
     provider: {
         type: String,
@@ -42,6 +42,19 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['user', 'admin'],
         default: 'user'
+    },
+    // Profile fields
+    firstName: { type: String, default: '' },
+    lastName: { type: String, default: '' },
+    dateOfBirth: { type: Date, default: null },
+    country: { type: String, default: '' },
+    language: { type: String, default: 'English (United States)' },
+    // Privacy settings
+    privacySettings: {
+        locationActivity: { type: Boolean, default: true },
+        browsingHistory: { type: Boolean, default: true },
+        searchHistory: { type: Boolean, default: true },
+        appActivity: { type: Boolean, default: true }
     },
     lastLogin: {
         type: Date,

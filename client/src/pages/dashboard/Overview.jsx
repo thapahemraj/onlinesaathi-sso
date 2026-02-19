@@ -1,94 +1,60 @@
 import { useAuth } from '../../context/AuthContext';
-import { Laptop, Shield, Key, Eye } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Smartphone, Shield, Eye, User, CreditCard, MapPin, ShoppingBag, Package } from 'lucide-react';
+import axios from 'axios';
 
-const Card = ({ icon: Icon, colorClass, title, status, linkText, linkTo, description }) => (
-    <div className="bg-white dark:bg-[#2c2c2c] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
-        <div className="p-6">
-            <div className="flex items-start justify-between mb-4">
-                <div className={`p-2 rounded-md ${colorClass}`}>
-                    <Icon size={24} className="text-current" />
-                </div>
-                {/* Optional Status Indicator */}
-            </div>
-            <h3 className="text-lg font-semibold text-[#323130] dark:text-white mb-1">{title}</h3>
-            <div className="text-2xl font-bold text-[#323130] dark:text-white mb-2">{status}</div>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 min-h-[40px]">{description}</p>
-            <Link to={linkTo} className="text-[#0067b8] dark:text-[#4f93ce] text-[15px] font-semibold hover:underline flex items-center gap-1 group">
-                {linkText}
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
-            </Link>
+const QuickCard = ({ icon: Icon, title, subtitle, onClick, color }) => (
+    <div onClick={onClick} className="bg-white dark:bg-[#2c2c2c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md hover:border-[#0078D4] dark:hover:border-[#4f93ce] transition-all cursor-pointer group">
+        <div className={`p-3 rounded-lg mb-4 w-fit ${color}`}>
+            <Icon size={24} className="text-white" />
         </div>
+        <h3 className="font-semibold text-[#323130] dark:text-white mb-1 group-hover:text-[#0078D4] dark:group-hover:text-[#4f93ce] transition-colors">{title}</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
     </div>
 );
 
 const Overview = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
+    const [deviceCount, setDeviceCount] = useState(0);
+
+    useEffect(() => {
+        axios.get('/devices').then(res => setDeviceCount(res.data.length)).catch(() => { });
+    }, []);
+
+    const displayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'User';
 
     return (
         <div className="max-w-5xl">
             {/* Welcome Section */}
-            <div className="flex items-center gap-6 mb-10 bg-white dark:bg-[#2c2c2c] p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors">
-                <div className="relative">
+            <div className="bg-gradient-to-r from-[#0078D4] to-[#005da6] rounded-2xl p-8 mb-8 text-white">
+                <div className="flex items-center gap-5">
                     {user?.profilePicture ? (
-                        <img src={user.profilePicture} alt="Profile" className="w-24 h-24 rounded-full object-cover" />
+                        <img src={user.profilePicture.startsWith('/') ? `${import.meta.env.VITE_API_URL?.replace('/api', '')}${user.profilePicture}` : user.profilePicture} alt="Profile" className="w-20 h-20 rounded-full object-cover border-4 border-white/30" />
                     ) : (
-                        <div className="w-24 h-24 rounded-full bg-[#0078D4] text-white flex items-center justify-center text-3xl font-bold">
-                            {user?.username?.charAt(0).toUpperCase()}
+                        <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-3xl font-bold border-4 border-white/30">
+                            {displayName.charAt(0).toUpperCase()}
                         </div>
                     )}
-                </div>
-                <div>
-                    <h1 className="text-3xl font-bold text-[#323130] dark:text-white mb-2">{user?.username}</h1>
-                    <p className="text-[#605e5c] dark:text-gray-400 mb-4">{user?.email}</p>
-                    <div className="flex gap-4">
-                        <Link to="/dashboard/info" className="text-[#0067b8] dark:text-[#4f93ce] hover:underline text-[15px] font-semibold">Change password</Link>
-                        <span className="text-gray-300 dark:text-gray-600">|</span>
-                        <Link to="/dashboard/info" className="text-[#0067b8] dark:text-[#4f93ce] hover:underline text-[15px] font-semibold">Update info</Link>
+                    <div>
+                        <h1 className="text-3xl font-bold">Hi, {displayName}!</h1>
+                        <p className="text-white/80 mt-1">{user?.email}</p>
                     </div>
                 </div>
             </div>
 
-            {/* Grid Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card
-                    icon={Laptop}
-                    colorClass="text-[#0078D4] bg-blue-50 dark:bg-blue-900/20"
-                    title="Devices"
-                    status="4 devices"
-                    description="Find, lock, or erase a lost or stolen device."
-                    linkText="View all devices"
-                    linkTo="/dashboard/devices"
-                />
-                <Card
-                    icon={Shield}
-                    colorClass="text-green-600 bg-green-50 dark:bg-green-900/20"
-                    title="Security"
-                    status="Good"
-                    description="Your account is protected. Review recent activity."
-                    linkText="Update security info"
-                    linkTo="/dashboard/security"
-                />
-                <Card
-                    icon={Eye}
-                    colorClass="text-purple-600 bg-purple-50 dark:bg-purple-900/20"
-                    title="Privacy"
-                    status="On"
-                    description="Manage your privacy settings and data."
-                    linkText="Manage privacy"
-                    linkTo="/dashboard/privacy"
-                />
-            </div>
-
-            {/* Recent Activity or Banner */}
-            <div className="mt-8 bg-[#fdfdfd] dark:bg-[#2c2c2c] border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-6 transition-colors">
-                <div>
-                    <h3 className="text-lg font-semibold mb-2 text-[#323130] dark:text-white">OnlineSaathi Services</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Premium Office apps, extra cloud storage, advanced security, and more.</p>
-                </div>
-                <button className="bg-[#0067b8] dark:bg-[#0078D4] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#005da6] dark:hover:bg-[#0067b8] transition-colors whitespace-nowrap">
-                    Get OnlineSaathi Services
-                </button>
+            {/* Quick Links Grid */}
+            <h2 className="text-xl font-semibold text-[#323130] dark:text-white mb-4">Manage your account</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <QuickCard icon={User} title="Your info" subtitle="Profile details, photo" onClick={() => navigate('/dashboard/info')} color="bg-[#0078D4]" />
+                <QuickCard icon={Shield} title="Security" subtitle="Password, biometrics" onClick={() => navigate('/dashboard/security')} color="bg-emerald-500" />
+                <QuickCard icon={Eye} title="Privacy" subtitle="Activity controls" onClick={() => navigate('/dashboard/privacy')} color="bg-violet-500" />
+                <QuickCard icon={Smartphone} title="Devices" subtitle={`${deviceCount} device${deviceCount !== 1 ? 's' : ''} connected`} onClick={() => navigate('/dashboard/devices')} color="bg-amber-500" />
+                <QuickCard icon={CreditCard} title="Payment" subtitle="Payment methods" onClick={() => navigate('/dashboard/payment')} color="bg-rose-500" />
+                <QuickCard icon={MapPin} title="Addresses" subtitle="Billing & shipping" onClick={() => navigate('/dashboard/addresses')} color="bg-teal-500" />
+                <QuickCard icon={ShoppingBag} title="Orders" subtitle="Order history" onClick={() => navigate('/dashboard/orders')} color="bg-orange-500" />
+                <QuickCard icon={Package} title="Subscriptions" subtitle="Active plans" onClick={() => navigate('/dashboard/subscriptions')} color="bg-indigo-500" />
             </div>
         </div>
     );

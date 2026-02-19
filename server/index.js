@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 
 const app = express();
+const path = require('path');
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -41,6 +42,11 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/admin/applications', require('./routes/applicationRoutes'));
 app.use('/api/admin/orgs', require('./routes/organizationRoutes'));
 app.use('/api/admin/audit', require('./routes/auditRoutes'));
+app.use('/api/profile', require('./routes/profileRoutes'));
+app.use('/api/devices', require('./routes/deviceRoutes'));
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Swagger Documentation
 // Swagger Documentation
