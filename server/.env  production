@@ -1,0 +1,14 @@
+PORT=5000
+MONGO_URI=mongodb+srv://thapahemraj:HemrajThapa@ssoaouth.wmiihc9.mongodb.net/?appName=ssoaouth
+JWT_SECRET=thisisasecretkeythatshouldbechangedinproduction
+NODE_ENV=development
+
+# URL Configuration
+CLIENT_URL=http://localhost:5173
+API_URL=http://localhost:5000/api
+
+# SMTP Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_EMAIL=thapahemraj204@gmail.com
+SMTP_PASSWORD=aifk usid dwnz khvr
