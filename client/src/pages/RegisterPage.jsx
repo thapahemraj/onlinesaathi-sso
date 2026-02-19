@@ -32,6 +32,7 @@ const RegisterPage = () => {
     const [otp, setOtp] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [codeSent, setCodeSent] = useState(false);
 
     const [error, setError] = useState('');
     // Custom Alert State
@@ -100,6 +101,12 @@ const RegisterPage = () => {
                 return;
             }
 
+            // If code was already sent (e.g. user went back from Step 5), skip resending
+            if (codeSent) {
+                setStep(5);
+                return;
+            }
+
             // Trigger verification
             if (usePhone) {
                 showAlert('Sending verification code to phone...', 'loading');
@@ -113,18 +120,15 @@ const RegisterPage = () => {
                 }
 
                 const appVerifier = window.recaptchaVerifier;
-                // Ensure phone number has + code if missing? Assuming user enters full number or prefix
-                // Just passing as is for now, expecting e.g. +1... or simple number (might fail if no code)
-                // Ideally we prepend country code. Lets assume +91 or +1 for test or require user input
                 signInWithPhoneNumber(auth, phoneNumber, appVerifier)
                     .then((confirmResult) => {
                         setConfirmationResult(confirmResult);
+                        setCodeSent(true);
                         showAlert('OTP sent to your phone!', 'success');
                         setStep(5);
                     }).catch((error) => {
                         console.error(error);
                         showAlert('Failed to send SMS. Try again.', 'error');
-                        // Reset widget
                         window.recaptchaVerifier.render().then(widgetId => {
                             grecaptcha.reset(widgetId);
                         });
@@ -135,6 +139,7 @@ const RegisterPage = () => {
                 axios.post(`${import.meta.env.VITE_API_URL}/auth/send-verification`, { email })
                     .then(res => {
                         console.log("OTP sent:", res.data);
+                        setCodeSent(true);
                         showAlert('Verification code sent to your email!', 'success');
                         setStep(5);
                     })
@@ -149,6 +154,34 @@ const RegisterPage = () => {
     const handleBack = () => {
         if (step > 1) setStep(step - 1);
         setError('');
+    };
+
+    const resendCode = () => {
+        setCodeSent(false);
+        setOtp('');
+        if (usePhone) {
+            showAlert('Resending verification code to phone...', 'loading');
+            const appVerifier = window.recaptchaVerifier;
+            signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+                .then((confirmResult) => {
+                    setConfirmationResult(confirmResult);
+                    setCodeSent(true);
+                    showAlert('New OTP sent to your phone!', 'success');
+                }).catch((error) => {
+                    console.error(error);
+                    showAlert('Failed to resend SMS. Try again.', 'error');
+                });
+        } else {
+            axios.post(`${import.meta.env.VITE_API_URL}/auth/send-verification`, { email })
+                .then(res => {
+                    console.log("OTP resent:", res.data);
+                    setCodeSent(true);
+                    showAlert('New verification code sent to your email!', 'success');
+                })
+                .catch(err => {
+                    showAlert(err.response?.data?.message || 'Failed to resend verification code.', 'error');
+                });
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -532,7 +565,7 @@ const RegisterPage = () => {
                             <h2 className="text-2xl font-bold text-[#1b1b1b] dark:text-white mb-2 leading-tight text-center">Verify {usePhone ? 'phone' : 'email'}</h2>
                             <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-gray-300 text-center">
                                 Enter the code we sent to <span className="font-semibold">{usePhone ? phoneNumber : email}</span>.
-                                <br />If you didn't receive the {usePhone ? 'code' : 'email'}, check your junk folder or <button className="text-[#0067b8] dark:text-[#4f93ce] hover:underline">try again</button>.
+                                If you didn't receive the {usePhone ? 'code' : 'email'}, check your junk folder or <button type="button" onClick={resendCode} className="text-[#0067b8] dark:text-[#4f93ce] hover:underline">try again</button>.
                             </p>
                             <div id="recaptcha-container"></div>
 
