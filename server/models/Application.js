@@ -31,6 +31,24 @@ const applicationSchema = new mongoose.Schema({
     website: {
         type: String
     },
+    homepageUrl: {
+        type: String
+    },
+    logoUrl: {
+        type: String
+    },
+    isEnabled: {
+        type: Boolean,
+        default: true
+    },
+    allowedScopes: {
+        type: [String],
+        default: ['openid', 'profile', 'email']
+    },
+    grantTypes: {
+        type: [String],
+        default: ['authorization_code']
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -38,3 +56,4 @@ const applicationSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Application', applicationSchema);
+

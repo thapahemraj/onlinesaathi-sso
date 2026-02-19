@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, MapPin, History, Globe, Check, X } from 'lucide-react';
+import { Eye, MapPin, History, Globe, Check, X, Trash2, Loader2, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const PrivacyToggle = ({ title, description, icon: Icon, enabled, onToggle, loading }) => (
     <div className="bg-white dark:bg-[#2c2c2c] p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -29,6 +30,7 @@ const PrivacyToggle = ({ title, description, icon: Icon, enabled, onToggle, load
 
 const Privacy = () => {
     const { user, refreshUser } = useAuth();
+    const navigate = useNavigate();
     const [settings, setSettings] = useState({
         locationActivity: true,
         browsingHistory: true,
@@ -36,6 +38,12 @@ const Privacy = () => {
         appActivity: true
     });
     const [loading, setLoading] = useState('');
+
+    // Delete account state
+    const [showDelete, setShowDelete] = useState(false);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
 
     useEffect(() => {
         if (user?.privacySettings) {
@@ -54,6 +62,20 @@ const Privacy = () => {
             console.error('Failed to update privacy:', error);
         } finally {
             setLoading('');
+        }
+    };
+
+    const handleDeleteAccount = async (e) => {
+        e.preventDefault();
+        setDeleteLoading(true);
+        setDeleteError('');
+        try {
+            await axios.delete('/profile/delete-account', { data: { password: deletePassword } });
+            navigate('/login');
+        } catch (err) {
+            setDeleteError(err.response?.data?.message || 'Failed to delete account.');
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -104,8 +126,60 @@ const Privacy = () => {
                     <strong>Note:</strong> Changes to your privacy settings take effect immediately. Your data is handled in accordance with our privacy policy.
                 </p>
             </div>
+
+            {/* Danger Zone: Delete Account */}
+            <div className="mt-10 bg-white dark:bg-[#2c2c2c] rounded-xl shadow-sm border border-red-200 dark:border-red-800 p-6">
+                <div className="flex items-start gap-4 mb-4">
+                    <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <AlertTriangle size={24} className="text-red-500" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">Delete account</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Permanently delete your OnlineSaathi account and all associated data. This action cannot be undone.
+                        </p>
+                    </div>
+                </div>
+
+                {!showDelete ? (
+                    <button
+                        onClick={() => setShowDelete(true)}
+                        className="flex items-center gap-2 px-4 py-2 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-semibold"
+                    >
+                        <Trash2 size={16} />
+                        Close my account
+                    </button>
+                ) : (
+                    <form onSubmit={handleDeleteAccount} className="space-y-3 max-w-md">
+                        <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                            This will permanently delete your account, devices, sessions, addresses, and payment methods.
+                        </p>
+                        {deleteError && (
+                            <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded">{deleteError}</div>
+                        )}
+                        <input
+                            type="password"
+                            placeholder="Enter your password to confirm"
+                            value={deletePassword}
+                            onChange={(e) => setDeletePassword(e.target.value)}
+                            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1b1b1b] text-[#323130] dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                            autoFocus
+                        />
+                        <div className="flex gap-3">
+                            <button type="button" onClick={() => { setShowDelete(false); setDeletePassword(''); setDeleteError(''); }} className="flex-1 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#3b3b3b] transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" disabled={deleteLoading || !deletePassword} className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                                {deleteLoading ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                                Delete permanently
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </div>
         </div>
     );
 };
 
 export default Privacy;
+

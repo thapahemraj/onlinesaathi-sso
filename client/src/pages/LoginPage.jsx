@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff, MoreHorizontal, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, MoreHorizontal, Shield, User as UserIcon } from 'lucide-react';
 import axios from 'axios';
 import MsInput from '../components/MsInput';
 import CustomAlert from '../components/CustomAlert';
@@ -23,7 +23,11 @@ const LoginPage = () => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
-    const { login, user, loading } = useAuth();
+    // 2FA state
+    const [twoFACode, setTwoFACode] = useState('');
+    const [twoFAUserId, setTwoFAUserId] = useState(null);
+
+    const { login, verify2FA, user, loading } = useAuth();
     const navigate = useNavigate();
 
     const [showMenu, setShowMenu] = useState(false);
@@ -95,21 +99,29 @@ const LoginPage = () => {
         }
         else if (step === 2) {
             try {
-                const userData = await login(email, password);
-                // Save to localStorage for "Remembered Account" feature
+                const result = await login(email, password);
+
+                // Check if 2FA is required
+                if (result.requires2FA) {
+                    setTwoFAUserId(result.userId);
+                    setStep(6);
+                    setIsLoading(false);
+                    return;
+                }
+
+                // Normal login — save and navigate
                 localStorage.setItem('rememberedUser', JSON.stringify({
-                    username: userData.username,
-                    email: userData.email,
-                    profilePicture: userData.profilePicture
+                    username: result.username,
+                    email: result.email,
+                    profilePicture: result.profilePicture
                 }));
 
-                // Check for returnUrl/redirectUrl in query params
                 const params = new URLSearchParams(window.location.search);
                 const returnUrl = params.get('returnUrl') || params.get('redirect');
 
                 if (returnUrl) {
                     window.location.href = returnUrl;
-                } else if (userData.role === 'admin') {
+                } else if (result.role === 'admin') {
                     navigate('/dashboard/admin');
                 } else {
                     navigate('/dashboard');
@@ -159,6 +171,35 @@ const LoginPage = () => {
                 setError(''); // Clear any previous errors
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to reset password');
+            }
+        }
+        // Step 6: Verify 2FA code
+        else if (step === 6) {
+            if (!twoFACode || twoFACode.length < 6) {
+                setError('Please enter a valid 6-digit code or backup code.');
+                setIsLoading(false);
+                return;
+            }
+            try {
+                const userData = await verify2FA(twoFAUserId, twoFACode);
+                localStorage.setItem('rememberedUser', JSON.stringify({
+                    username: userData.username,
+                    email: userData.email,
+                    profilePicture: userData.profilePicture
+                }));
+
+                const params = new URLSearchParams(window.location.search);
+                const returnUrl = params.get('returnUrl') || params.get('redirect');
+
+                if (returnUrl) {
+                    window.location.href = returnUrl;
+                } else if (userData.role === 'admin') {
+                    navigate('/dashboard/admin');
+                } else {
+                    navigate('/dashboard');
+                }
+            } catch (err) {
+                setError(err.response?.data?.message || 'Invalid 2FA code');
             }
         }
 
@@ -513,6 +554,48 @@ const LoginPage = () => {
                                 </div>
                                 <div className="flex justify-end mt-8 w-full">
                                     <button type="submit" className={buttonClasses} disabled={isLoading}>Sign in</button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* --- STEP 6: TWO-FACTOR AUTHENTICATION --- */}
+                    {step === 6 && (
+                        <div className="animate-fade-in">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-white dark:bg-[#3b3b3b] border border-gray-200 dark:border-gray-500 rounded-full px-3 py-1 flex items-center gap-2 shadow-sm text-sm text-[#1b1b1b] dark:text-white">
+                                    {email}
+                                </div>
+                            </div>
+
+                            <div className="flex justify-center mb-4">
+                                <div className="p-3 bg-[#0078D4]/10 rounded-full">
+                                    <Shield size={32} className="text-[#0078D4]" />
+                                </div>
+                            </div>
+
+                            <h2 className="text-2xl font-bold text-[#1b1b1b] dark:text-white mb-2 leading-tight text-center">Two-factor authentication</h2>
+                            <p className="text-[15px] mb-6 text-[#1b1b1b] dark:text-gray-300 text-center">Enter the 6-digit code from your authenticator app or a backup code.</p>
+
+                            {error && <div className="text-[#e81123] text-sm mb-4">{error}</div>}
+
+                            <form onSubmit={handleNext}>
+                                <div className="mb-6">
+                                    <MsInput
+                                        type="text"
+                                        label="Verification code"
+                                        value={twoFACode}
+                                        onChange={(e) => setTwoFACode(e.target.value.replace(/[^a-zA-Z0-9]/g, ''))}
+                                        autoFocus
+                                    />
+                                </div>
+                                <div className="flex justify-between items-center w-full">
+                                    <button type="button" onClick={() => { setStep(2); setTwoFACode(''); setError(''); }} className="text-[#0067b8] dark:text-[#4f93ce] text-[13px] hover:underline">
+                                        Use another method
+                                    </button>
+                                    <button type="submit" className={buttonClasses} disabled={isLoading}>
+                                        {isLoading ? 'Verifying...' : 'Verify'}
+                                    </button>
                                 </div>
                             </form>
                         </div>

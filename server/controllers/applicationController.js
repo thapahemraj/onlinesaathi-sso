@@ -41,7 +41,7 @@ const getApplicationById = async (req, res) => {
 // @access  Private/Admin
 const createApplication = async (req, res) => {
     try {
-        const { name, redirectUris, homepageUrl, description } = req.body;
+        const { name, redirectUris, homepageUrl, description, allowedScopes, grantTypes } = req.body;
         const { clientId, clientSecret } = generateCredentials();
 
         const app = await Application.create({
@@ -51,7 +51,9 @@ const createApplication = async (req, res) => {
             redirectUris: redirectUris || [],
             homepageUrl,
             description,
-            createdBy: req.user._id
+            allowedScopes: allowedScopes || ['openid', 'profile', 'email'],
+            grantTypes: grantTypes || ['authorization_code'],
+            user: req.user._id
         });
 
         res.status(201).json(app);
@@ -74,6 +76,8 @@ const updateApplication = async (req, res) => {
             app.description = req.body.description || app.description;
             app.logoUrl = req.body.logoUrl || app.logoUrl;
             if (req.body.isEnabled !== undefined) app.isEnabled = req.body.isEnabled;
+            if (req.body.allowedScopes) app.allowedScopes = req.body.allowedScopes;
+            if (req.body.grantTypes) app.grantTypes = req.body.grantTypes;
 
             const updatedApp = await app.save();
             res.json(updatedApp);

@@ -12,6 +12,8 @@ const {
     resetPassword
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
+const { authLimiter, registerLimiter, otpLimiter } = require('../middleware/rateLimiter');
+const { loginRules, registerRules, forgotPasswordRules, resetPasswordRules, validate } = require('../middleware/validationRules');
 
 /**
  * @swagger
@@ -52,7 +54,7 @@ const { protect } = require('../middleware/authMiddleware');
  *       400:
  *         description: User already exists
  */
-router.post('/register', registerUser);
+router.post('/register', registerLimiter, registerRules, validate, registerUser);
 
 /**
  * @swagger
@@ -81,7 +83,7 @@ router.post('/register', registerUser);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', loginUser);
+router.post('/login', authLimiter, loginRules, validate, loginUser);
 
 /**
  * @swagger
@@ -134,7 +136,7 @@ router.post('/check-email', checkEmail);
  *       200:
  *         description: OTP sent
  */
-router.post('/forgot-password', forgotPassword);
+router.post('/forgot-password', otpLimiter, forgotPasswordRules, validate, forgotPassword);
 
 /**
  * @swagger
@@ -163,7 +165,7 @@ router.post('/forgot-password', forgotPassword);
  *       200:
  *         description: Password reset successfully
  */
-router.post('/reset-password', resetPassword);
+router.post('/reset-password', otpLimiter, resetPasswordRules, validate, resetPassword);
 
 /**
  * @swagger
@@ -198,7 +200,7 @@ router.post('/logout', logoutUser);
  *       200:
  *         description: Verification code sent
  */
-router.post('/send-verification', sendVerificationCode);
+router.post('/send-verification', otpLimiter, sendVerificationCode);
 
 /**
  * @swagger

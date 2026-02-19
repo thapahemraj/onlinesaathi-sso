@@ -1,7 +1,11 @@
 const User = require('../models/User');
+const Session = require('../models/Session');
+const Device = require('../models/Device');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 // Multer config for profile picture upload
 const storage = multer.diskStorage({
@@ -158,10 +162,176 @@ const updatePrivacySettings = async (req, res) => {
     }
 };
 
+// @desc    Request email change (sends OTP to new email)
+// @route   POST /api/profile/change-email
+// @access  Private
+const requestEmailChange = async (req, res) => {
+    try {
+        const { newEmail, password } = req.body;
+
+        if (!newEmail || !password) {
+            return res.status(400).json({ message: 'New email and password are required.' });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // Verify password
+        const isMatch = await user.matchPassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Incorrect password.' });
+        }
+
+        // Check if new email is already taken
+        const exists = await User.findOne({ email: newEmail.toLowerCase() });
+        if (exists) {
+            return res.status(400).json({ message: 'This email is already in use.' });
+        }
+
+        // Generate OTP
+        const otp = crypto.randomInt(100000, 999999).toString();
+        user.emailChangeOtp = otp;
+        user.emailChangeTo = newEmail.toLowerCase();
+        user.emailChangeExpires = Date.now() + 15 * 60 * 1000; // 15 min
+        await user.save();
+
+        // Send OTP email
+        try {
+            const transporter = nodemailer.createTransport({
+                service: process.env.EMAIL_SERVICE || 'gmail',
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS
+                }
+            });
+
+            await transporter.sendMail({
+                from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+                to: newEmail,
+                subject: 'Email Change Verification - SSO System',
+                html: `<h2>Verify your new email</h2><p>Your verification code is: <strong>${otp}</strong></p><p>This code expires in 15 minutes.</p>`
+            });
+        } catch (mailErr) {
+            console.error('Email send error:', mailErr.message);
+        }
+
+        res.json({ message: 'Verification code sent to your new email.', mockOtp: process.env.NODE_ENV === 'development' ? otp : undefined });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Confirm email change with OTP
+// @route   POST /api/profile/confirm-email-change
+// @access  Private
+const confirmEmailChange = async (req, res) => {
+    try {
+        const { otp } = req.body;
+
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (!user.emailChangeOtp || !user.emailChangeTo) {
+            return res.status(400).json({ message: 'No email change request found.' });
+        }
+
+        if (Date.now() > user.emailChangeExpires) {
+            user.emailChangeOtp = undefined;
+            user.emailChangeTo = undefined;
+            user.emailChangeExpires = undefined;
+            await user.save();
+            return res.status(400).json({ message: 'Code expired. Please request again.' });
+        }
+
+        if (user.emailChangeOtp !== otp) {
+            return res.status(400).json({ message: 'Invalid verification code.' });
+        }
+
+        // Update email
+        user.email = user.emailChangeTo;
+        user.emailChangeOtp = undefined;
+        user.emailChangeTo = undefined;
+        user.emailChangeExpires = undefined;
+        await user.save();
+
+        res.json({ message: 'Email changed successfully.', email: user.email });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Delete account permanently
+// @route   DELETE /api/profile/delete-account
+// @access  Private
+const deleteAccount = async (req, res) => {
+    try {
+        const { password } = req.body;
+
+        if (!password) {
+            return res.status(400).json({ message: 'Password is required to delete your account.' });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const isMatch = await user.matchPassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Incorrect password.' });
+        }
+
+        // Cascade delete related data
+        await Promise.all([
+            Session.deleteMany({ user: user._id }),
+            Device.deleteMany({ user: user._id }),
+        ]);
+
+        // Try to delete optional models if they exist
+        try { const Authenticator = require('../models/Authenticator'); await Authenticator.deleteMany({ user: user._id }); } catch (e) { }
+        try { const Address = require('../models/Address'); await Address.deleteMany({ userId: user._id }); } catch (e) { }
+        try { const Payment = require('../models/Payment'); await Payment.deleteMany({ userId: user._id }); } catch (e) { }
+
+        await User.findByIdAndDelete(user._id);
+
+        // Clear auth cookie
+        res.cookie('token', '', { httpOnly: true, expires: new Date(0) });
+        res.json({ message: 'Account deleted successfully.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Set recovery email
+// @route   PUT /api/profile/recovery-email
+// @access  Private
+const setRecoveryEmail = async (req, res) => {
+    try {
+        const { recoveryEmail } = req.body;
+
+        if (!recoveryEmail) {
+            return res.status(400).json({ message: 'Recovery email is required.' });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.recoveryEmail = recoveryEmail.toLowerCase();
+        await user.save();
+
+        res.json({ message: 'Recovery email set successfully.', recoveryEmail: user.recoveryEmail });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 module.exports = {
     getFullProfile,
     updateProfile,
     updateProfilePicture,
     changePassword,
-    updatePrivacySettings
+    updatePrivacySettings,
+    requestEmailChange,
+    confirmEmailChange,
+    deleteAccount,
+    setRecoveryEmail
 };
+

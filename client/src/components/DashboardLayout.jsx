@@ -13,7 +13,8 @@ import {
     Home,
     ShoppingBag,
     History,
-    MapPin
+    MapPin,
+    Monitor
 } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
@@ -28,6 +29,7 @@ const DashboardLayout = ({ children }) => {
         { path: '/dashboard/security', label: 'Security', icon: Shield },
         { path: '/dashboard/subscriptions', label: 'Subscriptions', icon: ShoppingBag },
         { path: '/dashboard/devices', label: 'Devices', icon: Smartphone },
+        { path: '/dashboard/sessions', label: 'Sessions', icon: Monitor },
         { path: '/dashboard/payment', label: 'Payment options', icon: CreditCard },
         { path: '/dashboard/orders', label: 'Order history', icon: History },
         { path: '/dashboard/addresses', label: 'Address book', icon: MapPin },

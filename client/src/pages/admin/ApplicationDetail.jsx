@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Copy, Eye, EyeOff, Save, Trash2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Copy, Eye, EyeOff, Save, Trash2, RefreshCw, Shield } from 'lucide-react';
+
+const AVAILABLE_SCOPES = [
+    { name: 'openid', label: 'OpenID', description: 'Basic identity verification (required)' },
+    { name: 'profile', label: 'Profile', description: 'Name, username, and profile picture' },
+    { name: 'email', label: 'Email', description: 'Email address' },
+    { name: 'phone', label: 'Phone', description: 'Phone number' },
+    { name: 'address', label: 'Address', description: 'Postal address' }
+];
 
 const ApplicationDetail = () => {
     const { id } = useParams();
@@ -13,7 +21,9 @@ const ApplicationDetail = () => {
         redirectUris: '', // Displayed as newline separated string
         homepageUrl: '',
         description: '',
-        isEnabled: true
+        isEnabled: true,
+        allowedScopes: ['openid', 'profile', 'email'],
+        grantTypes: ['authorization_code']
     });
 
     // Read-only fields (loaded from backend)
@@ -37,7 +47,9 @@ const ApplicationDetail = () => {
                 redirectUris: res.data.redirectUris.join('\n'),
                 homepageUrl: res.data.homepageUrl || '',
                 description: res.data.description || '',
-                isEnabled: res.data.isEnabled
+                isEnabled: res.data.isEnabled !== false,
+                allowedScopes: res.data.allowedScopes || ['openid', 'profile', 'email'],
+                grantTypes: res.data.grantTypes || ['authorization_code']
             });
         } catch (err) {
             alert('Failed to load application');
@@ -223,6 +235,39 @@ const ApplicationDetail = () => {
                             onChange={e => setFormData({ ...formData, redirectUris: e.target.value })}
                             placeholder={`https://myapp.com/callback\nhttp://localhost:3000/api/auth/callback`}
                         ></textarea>
+                    </div>
+                </div>
+
+                {/* Permissions & Scopes */}
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Shield size={20} className="text-blue-600" />
+                        <h3 className="text-lg font-semibold text-[#323130]">Permissions & Scopes</h3>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-4">Select the scopes this application is allowed to request when authenticating users.</p>
+                    <div className="space-y-3">
+                        {AVAILABLE_SCOPES.map(scope => (
+                            <label key={scope.name} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    className="w-4 h-4 mt-0.5 text-[#0067b8] border-gray-300 rounded focus:ring-[#0067b8]"
+                                    checked={formData.allowedScopes.includes(scope.name)}
+                                    disabled={scope.name === 'openid'}
+                                    onChange={(e) => {
+                                        if (scope.name === 'openid') return;
+                                        const updated = e.target.checked
+                                            ? [...formData.allowedScopes, scope.name]
+                                            : formData.allowedScopes.filter(s => s !== scope.name);
+                                        setFormData({ ...formData, allowedScopes: updated });
+                                    }}
+                                />
+                                <div>
+                                    <span className="text-sm font-medium text-[#323130]">{scope.label}</span>
+                                    <span className="ml-2 text-xs text-gray-400 font-mono">{scope.name}</span>
+                                    <p className="text-xs text-gray-500 mt-0.5">{scope.description}</p>
+                                </div>
+                            </label>
+                        ))}
                     </div>
                 </div>
 

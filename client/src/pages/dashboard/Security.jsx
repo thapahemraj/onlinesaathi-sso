@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Shield, Key, Activity, Fingerprint, X, Loader2 } from 'lucide-react';
+import { Shield, Key, Activity, Fingerprint, X, Loader2, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import BiometricSetup from '../../components/BiometricSetup';
+import TwoFactorSetup from '../../components/TwoFactorSetup';
 import axios from 'axios';
 
 const PasswordModal = ({ isOpen, onClose }) => {
@@ -80,16 +81,38 @@ const SecurityCard = ({ icon: Icon, title, description, actionText, onClick, sta
 );
 
 const Security = () => {
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const [showPwModal, setShowPwModal] = useState(false);
     const [showBio, setShowBio] = useState(false);
+
+    // Recovery email state
+    const [recoveryEmail, setRecoveryEmail] = useState(user?.recoveryEmail || '');
+    const [recoveryLoading, setRecoveryLoading] = useState(false);
+    const [recoveryMsg, setRecoveryMsg] = useState('');
+    const [showRecoveryEdit, setShowRecoveryEdit] = useState(false);
+
+    const handleSaveRecovery = async () => {
+        setRecoveryLoading(true);
+        setRecoveryMsg('');
+        try {
+            await axios.put('/profile/recovery-email', { recoveryEmail });
+            await refreshUser();
+            setRecoveryMsg('Recovery email saved!');
+            setShowRecoveryEdit(false);
+            setTimeout(() => setRecoveryMsg(''), 3000);
+        } catch (err) {
+            setRecoveryMsg(err.response?.data?.message || 'Failed to save.');
+        } finally {
+            setRecoveryLoading(false);
+        }
+    };
 
     return (
         <div className="max-w-4xl">
             <h1 className="text-3xl font-bold text-[#323130] dark:text-white mb-4">Security</h1>
             <p className="text-[#323130] dark:text-gray-300 mb-8">Settings and recommendations to help you keep your account secure.</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <SecurityCard
                     icon={Key}
                     title="Password"
@@ -97,14 +120,6 @@ const Security = () => {
                     actionText="Change password"
                     onClick={() => setShowPwModal(true)}
                     status="Active"
-                />
-                <SecurityCard
-                    icon={Shield}
-                    title="Two-step verification"
-                    description="Add an extra layer of security to your account by requiring a second form of verification."
-                    actionText="Manage"
-                    onClick={() => { }}
-                    status="Not set up"
                 />
                 <SecurityCard
                     icon={Fingerprint}
@@ -122,6 +137,9 @@ const Security = () => {
                 />
             </div>
 
+            {/* Two-Factor Authentication */}
+            <TwoFactorSetup />
+
             {showBio && (
                 <div className="mt-6 bg-white dark:bg-[#2c2c2c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <h2 className="text-lg font-semibold dark:text-white mb-4">Set up biometric login</h2>
@@ -129,9 +147,66 @@ const Security = () => {
                 </div>
             )}
 
+            {/* Recovery Email */}
+            <div className="mt-6 bg-white dark:bg-[#2c2c2c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-start gap-4">
+                    <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <Mail size={24} className="text-[#0078D4] dark:text-[#4f93ce]" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="font-semibold text-[#323130] dark:text-white mb-1">Recovery email</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                            Add a recovery email so you can recover your account if you lose access.
+                        </p>
+                        {recoveryMsg && (
+                            <div className={`text-sm mb-3 p-2 rounded ${recoveryMsg.includes('saved') ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' : 'text-red-600 bg-red-50 dark:bg-red-900/20'}`}>
+                                {recoveryMsg}
+                            </div>
+                        )}
+                        {!showRecoveryEdit ? (
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm text-[#323130] dark:text-gray-300">
+                                    {user?.recoveryEmail || 'Not set'}
+                                </span>
+                                <button
+                                    onClick={() => { setShowRecoveryEdit(true); setRecoveryEmail(user?.recoveryEmail || ''); }}
+                                    className="text-[#0067b8] dark:text-[#4f93ce] hover:underline text-sm font-semibold"
+                                >
+                                    {user?.recoveryEmail ? 'Edit' : 'Add recovery email'}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-3 max-w-md">
+                                <input
+                                    type="email"
+                                    value={recoveryEmail}
+                                    onChange={(e) => setRecoveryEmail(e.target.value)}
+                                    placeholder="recovery@example.com"
+                                    className="flex-1 h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#3b3b3b] text-[#323130] dark:text-white focus:border-[#0067b8] focus:outline-none text-sm"
+                                />
+                                <button
+                                    onClick={handleSaveRecovery}
+                                    disabled={recoveryLoading || !recoveryEmail}
+                                    className="px-4 h-10 bg-[#0067b8] text-white rounded-md font-semibold hover:bg-[#005da6] transition-colors text-sm disabled:opacity-50"
+                                >
+                                    {recoveryLoading ? 'Saving...' : 'Save'}
+                                </button>
+                                <button
+                                    onClick={() => setShowRecoveryEdit(false)}
+                                    className="px-3 h-10 border border-gray-300 dark:border-gray-600 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#3b3b3b] transition-colors text-sm"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             <PasswordModal isOpen={showPwModal} onClose={() => setShowPwModal(false)} />
         </div>
     );
 };
 
 export default Security;
+

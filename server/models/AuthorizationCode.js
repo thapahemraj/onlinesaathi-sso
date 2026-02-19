@@ -24,6 +24,18 @@ const authorizationCodeSchema = new mongoose.Schema({
         type: String,
         default: 'openid profile email'
     },
+    codeChallenge: {
+        type: String
+    },
+    codeChallengeMethod: {
+        type: String,
+        enum: ['S256', 'plain'],
+        default: 'S256'
+    },
+    consentGiven: {
+        type: Boolean,
+        default: false
+    },
     expiresAt: {
         type: Date,
         required: true,
@@ -35,3 +47,4 @@ const authorizationCodeSchema = new mongoose.Schema({
 authorizationCodeSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model('AuthorizationCode', authorizationCodeSchema);
+

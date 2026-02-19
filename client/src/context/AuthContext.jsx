@@ -30,7 +30,22 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         const { data } = await axios.post('/auth/login', { email, password });
-        // After login, fetch full profile
+
+        // If 2FA is required, return the response without setting user
+        if (data.requires2FA) {
+            return data; // { requires2FA: true, userId: '...' }
+        }
+
+        // Normal login — fetch full profile
+        const { data: profile } = await axios.get('/profile');
+        setUser(profile);
+        return profile;
+    };
+
+    // Complete login after 2FA verification
+    const verify2FA = async (userId, code) => {
+        const { data } = await axios.post('/2fa/login-verify', { userId, code });
+        // After 2FA, fetch full profile
         const { data: profile } = await axios.get('/profile');
         setUser(profile);
         return profile;
@@ -60,8 +75,9 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, setUser, login, register, logout, loading, refreshUser }}>
+        <AuthContext.Provider value={{ user, setUser, login, verify2FA, register, logout, loading, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );
 };
+

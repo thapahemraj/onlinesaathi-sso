@@ -7,9 +7,13 @@ const connectDB = require('./config/db');
 
 const app = express();
 const path = require('path');
+const helmet = require('helmet');
+const { generalLimiter } = require('./middleware/rateLimiter');
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(generalLimiter);
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
@@ -37,6 +41,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/auth/webauthn', require('./routes/webauthnRoutes')); // WebAuthn / Biometrics
+app.get('/.well-known/openid-configuration', require('./controllers/oauthController').discovery);
 app.use('/api/oauth', require('./routes/oauthRoutes')); // Mount OAuth
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/admin/applications', require('./routes/applicationRoutes'));
@@ -44,6 +49,8 @@ app.use('/api/admin/orgs', require('./routes/organizationRoutes'));
 app.use('/api/admin/audit', require('./routes/auditRoutes'));
 app.use('/api/profile', require('./routes/profileRoutes'));
 app.use('/api/devices', require('./routes/deviceRoutes'));
+app.use('/api/2fa', require('./routes/twoFactorRoutes'));
+app.use('/api/sessions', require('./routes/sessionRoutes'));
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

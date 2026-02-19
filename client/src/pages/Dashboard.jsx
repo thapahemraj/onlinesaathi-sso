@@ -3,6 +3,7 @@ import DashboardLayout from '../components/DashboardLayout';
 import Overview from './dashboard/Overview';
 import YourInfo from './dashboard/YourInfo';
 import Devices from './dashboard/Devices';
+import Sessions from './dashboard/Sessions';
 import Security from './dashboard/Security';
 import Privacy from './dashboard/Privacy';
 import Subscriptions from './dashboard/Subscriptions';
@@ -17,6 +18,7 @@ const Dashboard = () => {
                 <Route index element={<Overview />} />
                 <Route path="info" element={<YourInfo />} />
                 <Route path="devices" element={<Devices />} />
+                <Route path="sessions" element={<Sessions />} />
                 <Route path="security" element={<Security />} />
                 <Route path="privacy" element={<Privacy />} />
                 <Route path="subscriptions" element={<Subscriptions />} />
@@ -30,3 +32,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

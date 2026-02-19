@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Camera, X, Loader2 } from 'lucide-react';
+import { Camera, X, Loader2, Mail } from 'lucide-react';
 import axios from 'axios';
 
 const EditModal = ({ isOpen, onClose, title, children }) => {
@@ -38,6 +38,14 @@ const YourInfo = () => {
     const [editModal, setEditModal] = useState({ open: false, type: '' });
     const [formData, setFormData] = useState({});
     const [uploadLoading, setUploadLoading] = useState(false);
+
+    // Email change state
+    const [emailModal, setEmailModal] = useState(false);
+    const [emailStep, setEmailStep] = useState(1); // 1 = enter new email + password, 2 = enter OTP
+    const [emailData, setEmailData] = useState({ newEmail: '', password: '', otp: '' });
+    const [emailLoading, setEmailLoading] = useState(false);
+    const [emailError, setEmailError] = useState('');
+    const [emailSuccess, setEmailSuccess] = useState('');
 
     const openEdit = (type) => {
         // Pre-fill form data based on type
@@ -114,6 +122,51 @@ const YourInfo = () => {
         return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     };
 
+    // Email change handlers
+    const handleEmailRequest = async () => {
+        setEmailLoading(true);
+        setEmailError('');
+        try {
+            await axios.post('/profile/change-email', {
+                newEmail: emailData.newEmail,
+                password: emailData.password
+            });
+            setEmailStep(2);
+        } catch (err) {
+            setEmailError(err.response?.data?.message || 'Failed to request email change.');
+        } finally {
+            setEmailLoading(false);
+        }
+    };
+
+    const handleEmailConfirm = async () => {
+        setEmailLoading(true);
+        setEmailError('');
+        try {
+            await axios.post('/profile/confirm-email-change', { otp: emailData.otp });
+            setEmailSuccess('Email updated successfully!');
+            await refreshUser();
+            setTimeout(() => {
+                setEmailModal(false);
+                setEmailStep(1);
+                setEmailData({ newEmail: '', password: '', otp: '' });
+                setEmailSuccess('');
+            }, 1500);
+        } catch (err) {
+            setEmailError(err.response?.data?.message || 'Invalid verification code.');
+        } finally {
+            setEmailLoading(false);
+        }
+    };
+
+    const closeEmailModal = () => {
+        setEmailModal(false);
+        setEmailStep(1);
+        setEmailData({ newEmail: '', password: '', otp: '' });
+        setEmailError('');
+        setEmailSuccess('');
+    };
+
     const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Not set';
 
     const inputClass = "w-full h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#3b3b3b] text-[#323130] dark:text-white focus:border-[#0067b8] focus:outline-none text-sm";
@@ -161,7 +214,7 @@ const YourInfo = () => {
 
             <div className="bg-white dark:bg-[#2c2c2c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 mt-6">
                 <h2 className="text-xl font-semibold dark:text-white mb-2">Account info</h2>
-                <InfoRow label="Email address" value={user?.email || 'Not set'} onEdit={() => { }} actionText="Manage" />
+                <InfoRow label="Email address" value={user?.email || 'Not set'} onEdit={() => setEmailModal(true)} actionText="Change email" />
                 <InfoRow label="Phone number" value={user?.phoneNumber || 'None'} onEdit={() => openEdit('phone')} actionText={user?.phoneNumber ? 'Edit' : 'Add phone number'} />
             </div>
 
@@ -223,6 +276,32 @@ const YourInfo = () => {
                 <div className="space-y-4">
                     <input className={inputClass} type="tel" placeholder="Phone number" value={formData.phoneNumber || ''} onChange={e => setFormData({ ...formData, phoneNumber: e.target.value })} />
                     <button onClick={handleSave} disabled={loading} className={btnClass}>{loading ? 'Saving...' : 'Save'}</button>
+                </div>
+            </EditModal>
+
+            {/* Email Change Modal */}
+            <EditModal isOpen={emailModal} onClose={closeEmailModal} title={emailStep === 1 ? 'Change email address' : 'Verify new email'}>
+                <div className="space-y-4">
+                    {emailError && <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-2 rounded">{emailError}</div>}
+                    {emailSuccess && <div className="text-sm text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded">{emailSuccess}</div>}
+                    {emailStep === 1 ? (
+                        <>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Enter your new email and current password for verification.</p>
+                            <input className={inputClass} type="email" placeholder="New email address" value={emailData.newEmail} onChange={e => setEmailData({ ...emailData, newEmail: e.target.value })} />
+                            <input className={inputClass} type="password" placeholder="Current password" value={emailData.password} onChange={e => setEmailData({ ...emailData, password: e.target.value })} />
+                            <button onClick={handleEmailRequest} disabled={emailLoading || !emailData.newEmail || !emailData.password} className={btnClass}>
+                                {emailLoading ? 'Sending...' : 'Send verification code'}
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">A 6-digit code was sent to <strong className="dark:text-white">{emailData.newEmail}</strong>. Enter it below.</p>
+                            <input className={inputClass} type="text" placeholder="Enter 6-digit code" value={emailData.otp} onChange={e => setEmailData({ ...emailData, otp: e.target.value })} maxLength={6} />
+                            <button onClick={handleEmailConfirm} disabled={emailLoading || emailData.otp.length !== 6} className={btnClass}>
+                                {emailLoading ? 'Verifying...' : 'Confirm email change'}
+                            </button>
+                        </>
+                    )}
                 </div>
             </EditModal>
         </div>

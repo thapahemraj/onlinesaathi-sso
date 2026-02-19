@@ -2,6 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const generateToken = require('../utils/generateToken');
 const { trackDevice } = require('./deviceController');
+const { createSession } = require('./sessionController');
 
 // Generate JWT - Removed internal function
 
@@ -69,7 +70,6 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
     await connectDB();
-    // Allow 'email' to serve as a generic identifier (email or phone)
     const { email, password } = req.body;
 
     // Find user by email OR phoneNumber
@@ -80,31 +80,69 @@ const loginUser = async (req, res) => {
         ]
     });
 
-    if (user && (await user.matchPassword(password))) {
-        const token = generateToken(user._id);
-
-        const isProduction = process.env.NODE_ENV !== 'development';
-
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'lax' : 'strict',
-            domain: isProduction ? '.i-sewa.in' : undefined,
-            maxAge: 30 * 24 * 60 * 60 * 1000,
-        });
-
-        // Track device on login
-        trackDevice(user._id, req);
-
-        res.json({
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-        });
-    } else {
-        res.status(401).json({ message: 'Invalid email or password' });
+    if (!user) {
+        return res.status(401).json({ message: 'Invalid email or password' });
     }
+
+    // Check if account is locked
+    if (user.isLocked) {
+        const remainingMs = user.lockUntil - Date.now();
+        const remainingMin = Math.ceil(remainingMs / 60000);
+        return res.status(423).json({
+            message: `Account locked due to too many failed attempts. Try again in ${remainingMin} minute${remainingMin > 1 ? 's' : ''}.`,
+            lockedUntil: user.lockUntil
+        });
+    }
+
+    // Verify password
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch) {
+        // Increment failed login attempts
+        await user.incLoginAttempts();
+        const attemptsLeft = 5 - (user.loginAttempts + 1);
+        const msg = attemptsLeft > 0
+            ? `Invalid email or password. ${attemptsLeft} attempt${attemptsLeft > 1 ? 's' : ''} remaining.`
+            : 'Account locked due to too many failed attempts. Try again in 30 minutes.';
+        return res.status(401).json({ message: msg });
+    }
+
+    // Successful login — reset attempts
+    if (user.loginAttempts > 0) {
+        await user.resetLoginAttempts();
+    }
+
+    // Check if 2FA is enabled
+    if (user.twoFactorEnabled) {
+        return res.json({
+            requires2FA: true,
+            userId: user._id,
+            message: 'Please enter your 2FA code.'
+        });
+    }
+
+    const token = generateToken(user._id);
+
+    const isProduction = process.env.NODE_ENV !== 'development';
+
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'lax' : 'strict',
+        domain: isProduction ? '.i-sewa.in' : undefined,
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
+    // Track device and create session on login
+    trackDevice(user._id, req);
+    createSession(user._id, token, req);
+
+    res.json({
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+    });
 };
 
 // @desc    Logout user / clear cookie
