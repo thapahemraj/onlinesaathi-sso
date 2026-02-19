@@ -88,12 +88,10 @@ const createSession = async (userId, token, req) => {
         const device = ua.getDevice();
         const ip = requestIp.getClientIp(req) || req.ip || '';
 
+        // geoip-lite is too large for Vercel (153MB).
+        // Removed to prevent Function Invocation Failed errors.
+        // TODO: Use a lightweight API like ip-api.com if location is needed.
         let location = 'Unknown';
-        try {
-            const geoip = require('geoip-lite');
-            const geo = geoip.lookup(ip);
-            if (geo) location = `${geo.city || 'Unknown'}, ${geo.country || 'Unknown'}`;
-        } catch (e) { /* ignore */ }
 
         let deviceType = 'desktop';
         if (device.type === 'mobile') deviceType = 'mobile';
