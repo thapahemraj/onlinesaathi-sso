@@ -43,12 +43,17 @@ export const AuthProvider = ({ children }) => {
     };
 
     // Complete login after 2FA verification
-    const verify2FA = async (userId, code) => {
-        const { data } = await axios.post('/2fa/login-verify', { userId, code });
-        // After 2FA, fetch full profile
-        const { data: profile } = await axios.get('/profile');
-        setUser(profile);
-        return profile;
+    const verify2FA = async (userId, code, trustDevice = false) => {
+        setLoading(true);
+        try {
+            const res = await axios.post('/2fa/login-verify', { userId, code, trustDevice });
+            setUser(res.data);
+            return res.data;
+        } catch (error) {
+            throw error;
+        } finally {
+            setLoading(false);
+        }
     };
 
     const register = async (username, email, password, phoneNumber, firebaseUid) => {

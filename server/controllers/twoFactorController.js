@@ -2,6 +2,7 @@ const { authenticator } = require('otplib');
 const QRCode = require('qrcode');
 const User = require('../models/User');
 const crypto = require('crypto');
+const { logAction } = require('./auditController');
 
 // @desc    Setup 2FA — generate secret and QR code
 // @route   POST /api/2fa/setup
@@ -25,6 +26,9 @@ const setupTwoFactor = async (req, res) => {
         const appName = 'OnlineSaathi';
         const otpAuthUrl = authenticator.keyuri(user.email || user.username, appName, secret);
         const qrCodeDataUrl = await QRCode.toDataURL(otpAuthUrl);
+
+        // Audit Log: 2FA Setup Initiated
+        await logAction(req, '2FA Setup Initiated', 'User', user._id, {}, 'Success');
 
         res.json({
             secret,
@@ -69,6 +73,9 @@ const verifyAndEnable = async (req, res) => {
         user.backupCodes = backupCodes;
         await user.save();
 
+        // Audit Log: 2FA Enabled
+        await logAction(req, 'Enable 2FA', 'User', user._id, {}, 'Success');
+
         res.json({
             message: '2FA enabled successfully!',
             backupCodes: backupCodes.map(bc => bc.code)
@@ -102,6 +109,9 @@ const disableTwoFactor = async (req, res) => {
         user.backupCodes = [];
         await user.save();
 
+        // Audit Log: 2FA Disabled
+        await logAction(req, 'Disable 2FA', 'User', user._id, {}, 'Success');
+
         res.json({ message: '2FA disabled successfully.' });
     } catch (error) {
         console.error('2FA Disable Error:', error);
@@ -114,7 +124,7 @@ const disableTwoFactor = async (req, res) => {
 // @access  Public (with temp token)
 const verifyLoginCode = async (req, res) => {
     try {
-        const { userId, code } = req.body;
+        const { userId, code, trustDevice } = req.body;
 
         const user = await User.findById(userId);
         if (!user || !user.twoFactorEnabled) {
@@ -147,14 +157,25 @@ const verifyLoginCode = async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: isProduction,
-            sameSite: isProduction ? 'lax' : 'strict',
+            sameSite: 'lax',
             domain: isProduction ? '.i-sewa.in' : undefined,
             maxAge: 30 * 24 * 60 * 60 * 1000,
         });
 
         // Track device
         const { trackDevice } = require('./deviceController');
-        trackDevice(user._id, req);
+        const device = await trackDevice(user._id, req);
+
+        // Mark device as trusted if requested
+        if (trustDevice && device) {
+            const Device = require('../models/Device');
+            await Device.findByIdAndUpdate(device._id, {
+                isTrusted: true,
+                trustedAt: new Date()
+            });
+        }
+
+        await logAction(req, 'Login', 'User', user._id, { method: '2fa', trustedDevice: !!trustDevice }, 'Success');
 
         res.json({
             _id: user._id,

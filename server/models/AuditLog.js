@@ -26,6 +26,12 @@ const auditLogSchema = new mongoose.Schema({
     userAgent: {
         type: String
     },
+    deviceInfo: {
+        type: String // e.g. "Chrome on Windows 10"
+    },
+    location: {
+        type: String // e.g. "Kathmandu, Nepal"
+    },
     status: {
         type: String,
         enum: ['Success', 'Failure'],

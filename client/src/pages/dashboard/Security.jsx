@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import BiometricSetup from '../../components/BiometricSetup';
 import TwoFactorSetup from '../../components/TwoFactorSetup';
 import axios from 'axios';
+import { toast } from 'react-hot-toast'; // Assuming react-hot-toast is used for toasts
 
 const PasswordModal = ({ isOpen, onClose }) => {
     const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -84,12 +85,61 @@ const Security = () => {
     const { user, refreshUser } = useAuth();
     const [showPwModal, setShowPwModal] = useState(false);
     const [showBio, setShowBio] = useState(false);
+    const [show2FAModal, setShow2FAModal] = useState(false); // State for 2FA modal
+    const [twoFactorStatus, setTwoFactorStatus] = useState({ enabled: false, backupCodesRemaining: 0 });
+    const [loginNotifications, setLoginNotifications] = useState(true);
 
     // Recovery email state
     const [recoveryEmail, setRecoveryEmail] = useState(user?.recoveryEmail || '');
     const [recoveryLoading, setRecoveryLoading] = useState(false);
     const [recoveryMsg, setRecoveryMsg] = useState('');
     const [showRecoveryEdit, setShowRecoveryEdit] = useState(false);
+
+    useEffect(() => {
+        fetch2FAStatus();
+        fetchNotificationSettings();
+    }, []);
+
+    const fetchNotificationSettings = async () => {
+        try {
+            const { data } = await axios.get('/profile');
+            if (data.privacySettings && data.privacySettings.loginNotifications !== undefined) {
+                setLoginNotifications(data.privacySettings.loginNotifications);
+            }
+        } catch (error) {
+            console.error('Failed to fetch notification settings:', error);
+            toast.error('Failed to fetch notification settings');
+        }
+    };
+
+    const handleNotificationToggle = async () => {
+        try {
+            const newValue = !loginNotifications;
+            setLoginNotifications(newValue);
+            await axios.put('/profile/privacy', { loginNotifications: newValue });
+            toast.success('Notification settings updated');
+        } catch (error) {
+            setLoginNotifications(!loginNotifications); // Revert
+            console.error('Failed to update notification settings:', error);
+            toast.error('Failed to update settings');
+        }
+    };
+
+    const fetch2FAStatus = async () => {
+        try {
+            // Assuming /profile endpoint returns 2FA status
+            const { data } = await axios.get('/profile');
+            if (data.twoFactorEnabled !== undefined) {
+                setTwoFactorStatus({
+                    enabled: data.twoFactorEnabled,
+                    backupCodesRemaining: data.backupCodesRemaining || 0 // Assuming this field exists
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch 2FA status:', error);
+            toast.error('Failed to fetch 2FA status');
+        }
+    };
 
     const handleSaveRecovery = async () => {
         setRecoveryLoading(true);
@@ -138,7 +188,51 @@ const Security = () => {
             </div>
 
             {/* Two-Factor Authentication */}
-            <TwoFactorSetup />
+            <div className="mt-6 bg-white dark:bg-[#2c2c2c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-full text-blue-600 dark:text-blue-400">
+                            <Shield size={20} />
+                        </div>
+                        <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication (2FA)</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Add an extra layer of security to your account</p>
+                        </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={twoFactorStatus.enabled}
+                            onChange={() => setShow2FAModal(true)}
+                            disabled={twoFactorStatus.enabled} // Use modal to disable/enable
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                {/* Login Notifications */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mt-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded-full text-yellow-600 dark:text-yellow-400">
+                            <AlertTriangle size={20} />
+                        </div>
+                        <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Login Notifications</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Receive an email when a new device signs in</p>
+                        </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={loginNotifications}
+                            onChange={handleNotificationToggle}
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                    </label>
+                </div>
+            </div>
 
             {showBio && (
                 <div className="mt-6 bg-white dark:bg-[#2c2c2c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">

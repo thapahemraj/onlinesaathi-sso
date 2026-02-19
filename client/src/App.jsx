@@ -10,6 +10,7 @@ import Applications from './pages/admin/Applications';
 import ApplicationDetail from './pages/admin/ApplicationDetail';
 import Organizations from './pages/admin/Organizations';
 import SecuritySettings from './pages/admin/SecuritySettings';
+import AuditLogs from './pages/admin/AuditLogs';
 import AdminRoute from './components/AdminRoute';
 import { useAuth } from './context/AuthContext';
 
@@ -46,6 +47,7 @@ function App() {
           <Route path="apps/:id" element={<ApplicationDetail />} />
           <Route path="orgs" element={<Organizations />} />
           <Route path="security" element={<SecuritySettings />} />
+          <Route path="audit" element={<AuditLogs />} />
           {/* Add more admin routes here as needed */}
         </Route>
       </Routes>

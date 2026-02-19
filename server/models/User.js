@@ -54,7 +54,8 @@ const userSchema = new mongoose.Schema({
         locationActivity: { type: Boolean, default: true },
         browsingHistory: { type: Boolean, default: true },
         searchHistory: { type: Boolean, default: true },
-        appActivity: { type: Boolean, default: true }
+        appActivity: { type: Boolean, default: true },
+        loginNotifications: { type: Boolean, default: true }
     },
     lastLogin: {
         type: Date,

@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken');
 const generateToken = require('../utils/generateToken');
 const { trackDevice } = require('./deviceController');
 const { createSession } = require('./sessionController');
-
-// Generate JWT - Removed internal function
+const { logAction } = require('./auditController');
+const Session = require('../models/Session');
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -46,8 +46,8 @@ const registerUser = async (req, res) => {
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: isProduction, // Secure in production
-                sameSite: isProduction ? 'lax' : 'strict', // Lax allows subdomains if domain is set
-                domain: isProduction ? '.i-sewa.in' : undefined, // Share across subdomains (.i-sewa.in)
+                sameSite: 'lax', // Use Lax for both dev and prod to ensure reliable cookie delivery
+                domain: isProduction ? '.i-sewa.in' : undefined,
                 maxAge: 30 * 24 * 60 * 60 * 1000,
             });
             res.status(201).json({
@@ -81,6 +81,8 @@ const loginUser = async (req, res) => {
     });
 
     if (!user) {
+        // Audit Log: Login Failure (User not found)
+        await logAction(req, 'Login', 'User', null, { method: 'password', identifier: email, error: 'User not found' }, 'Failure');
         return res.status(401).json({ message: 'Invalid email or password' });
     }
 
@@ -88,6 +90,8 @@ const loginUser = async (req, res) => {
     if (user.isLocked) {
         const remainingMs = user.lockUntil - Date.now();
         const remainingMin = Math.ceil(remainingMs / 60000);
+        // Audit Log: Login Failure (Account Locked)
+        await logAction(req, 'Login', 'User', user._id, { method: 'password', error: 'Account locked' }, 'Failure');
         return res.status(423).json({
             message: `Account locked due to too many failed attempts. Try again in ${remainingMin} minute${remainingMin > 1 ? 's' : ''}.`,
             lockedUntil: user.lockUntil
@@ -104,6 +108,8 @@ const loginUser = async (req, res) => {
         const msg = attemptsLeft > 0
             ? `Invalid email or password. ${attemptsLeft} attempt${attemptsLeft > 1 ? 's' : ''} remaining.`
             : 'Account locked due to too many failed attempts. Try again in 30 minutes.';
+        // Audit Log: Login Failure (Invalid Password)
+        await logAction(req, 'Login', 'User', user._id, { method: 'password', error: 'Invalid password' }, 'Failure');
         return res.status(401).json({ message: msg });
     }
 
@@ -112,53 +118,64 @@ const loginUser = async (req, res) => {
         await user.resetLoginAttempts();
     }
 
+    // Track device and create session on login
+    // We track device BEFORE 2FA check to see if it's trusted
+    const CurrentDevice = await trackDevice(user._id, req);
+
     // Check if 2FA is enabled
     if (user.twoFactorEnabled) {
-        return res.json({
-            requires2FA: true,
-            userId: user._id,
-            message: 'Please enter your 2FA code.'
-        });
+        // If device is trusted, skip 2FA
+        if (CurrentDevice && CurrentDevice.isTrusted) {
+            await logAction(req, 'Login', 'User', user._id, { method: 'password', skip2FA: true, deviceId: CurrentDevice._id }, 'Success');
+        } else {
+            // Audit Log: Login Requires 2FA
+            await logAction(req, 'Login', 'User', user._id, { method: 'password', status: '2FA Required' }, 'Pending');
+            return res.json({
+                requires2FA: true,
+                userId: user._id,
+                email: user.email,
+                message: 'Please enter your 2FA code.'
+            });
+        }
     }
 
-    const token = generateToken(user._id);
+    const token = generateToken(user._id); // Fixed: generateToken(id)
 
-    const isProduction = process.env.NODE_ENV !== 'development';
+    await createSession(user._id, token, req);
+    // Device already tracked above
 
-    res.cookie('token', token, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'lax' : 'strict',
-        domain: isProduction ? '.i-sewa.in' : undefined,
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-
-    // Track device and create session on login
-    trackDevice(user._id, req);
-    createSession(user._id, token, req);
+    // Audit Log: Login Success
+    await logAction(req, 'Login', 'User', user._id, { method: 'password' }, 'Success');
 
     res.json({
         _id: user._id,
         username: user.username,
         email: user.email,
         role: user.role,
+        profilePicture: user.profilePicture,
+        isVerified: user.isVerified,
+        twoFactorEnabled: user.twoFactorEnabled
     });
 };
 
 // @desc    Logout user / clear cookie
 // @route   POST /api/auth/logout
 // @access  Public
-const logoutUser = (req, res) => {
+const logoutUser = async (req, res) => {
     const isProduction = process.env.NODE_ENV !== 'development';
 
     res.cookie('token', '', {
         httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'lax' : 'strict',
-        domain: isProduction ? '.i-sewa.in' : undefined,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
         expires: new Date(0),
     });
-    res.status(200).json({ message: 'Logged out' });
+
+    if (req.user) {
+        await logAction(req, 'Logout', 'User', req.user._id, {}, 'Success');
+    }
+
+    res.status(200).json({ message: 'Logged out successfully' });
 };
 
 // @desc    Get user profile
@@ -231,6 +248,8 @@ const forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
+        // Audit Log: Forgot Password Request Failure (User not found)
+        await logAction(req, 'Forgot Password Request', 'User', null, { identifier: email, error: 'User not found' }, 'Failure');
         return res.status(404).json({ message: 'User not found' });
     }
 
@@ -247,16 +266,21 @@ const forgotPassword = async (req, res) => {
     try {
         await sendEmail({
             email: user.email,
-            subject: 'Your Online Saathi account password reset code',
+            subject: 'Password Reset Request',
             message,
         });
 
-        res.json({ message: 'Email sent', mockOtp: process.env.NODE_ENV === 'development' ? resetToken : null });
+        // Audit Log: Forgot Password Request Success
+        await logAction(req, 'Forgot Password Request', 'User', user._id, {}, 'Success');
+
+        res.status(200).json({ message: 'Email sent', mockOtp: process.env.NODE_ENV === 'development' ? resetToken : null });
     } catch (err) {
         console.error(err);
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
         await user.save();
+        // Audit Log: Forgot Password Request Failure (Email Send Error)
+        await logAction(req, 'Forgot Password Request', 'User', user._id, { error: err.message }, 'Failure');
         return res.status(500).json({ message: 'Email could not be sent', error: err.message });
     }
 };
@@ -274,6 +298,8 @@ const resetPassword = async (req, res) => {
     });
 
     if (!user) {
+        // Audit Log: Password Reset Failure (Invalid/Expired Code)
+        await logAction(req, 'Password Reset', 'User', null, { identifier: email, error: 'Invalid or expired code' }, 'Failure');
         return res.status(400).json({ message: 'Invalid code or expired' });
     }
 
@@ -283,7 +309,10 @@ const resetPassword = async (req, res) => {
 
     await user.save();
 
-    res.json({ message: 'Password updated successfully' });
+    // Audit Log: Password Reset Success
+    await logAction(req, 'Password Reset', 'User', user._id, {}, 'Success');
+
+    res.status(200).json({ message: 'Password updated successfully' });
 };
 
 // Exports moved to bottom

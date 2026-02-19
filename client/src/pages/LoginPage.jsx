@@ -6,6 +6,7 @@ import axios from 'axios';
 import MsInput from '../components/MsInput';
 import CustomAlert from '../components/CustomAlert';
 import BiometricLogin from '../components/BiometricLogin';
+import { useTheme } from '../context/ThemeContext';
 
 const LoginPage = () => {
     const [step, setStep] = useState(1);
@@ -26,6 +27,7 @@ const LoginPage = () => {
     // 2FA state
     const [twoFACode, setTwoFACode] = useState('');
     const [twoFAUserId, setTwoFAUserId] = useState(null);
+    const [trustDevice, setTrustDevice] = useState(false);
 
     const { login, verify2FA, user, loading } = useAuth();
     const navigate = useNavigate();
@@ -181,7 +183,7 @@ const LoginPage = () => {
                 return;
             }
             try {
-                const userData = await verify2FA(twoFAUserId, twoFACode);
+                const userData = await verify2FA(twoFAUserId, twoFACode, trustDevice);
                 localStorage.setItem('rememberedUser', JSON.stringify({
                     username: userData.username,
                     email: userData.email,
@@ -240,7 +242,9 @@ const LoginPage = () => {
     }
 
     // --- Dark Mode / System Theme Logic ---
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    // Use global theme context
+    const { theme } = useTheme();
+    const isDarkMode = theme === 'dark';
 
     // Custom Alert State
     const [alertConfig, setAlertConfig] = useState({ show: false, message: '', type: 'success' });
@@ -251,18 +255,6 @@ const LoginPage = () => {
             setTimeout(() => setAlertConfig(prev => ({ ...prev, show: false })), 3000);
         }
     };
-
-    useEffect(() => {
-        // 1. Check initial preference
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        setIsDarkMode(mediaQuery.matches);
-
-        // 2. Listen for changes
-        const handleChange = (e) => setIsDarkMode(e.matches);
-        mediaQuery.addEventListener('change', handleChange);
-
-        return () => mediaQuery.removeEventListener('change', handleChange);
-    }, []);
 
     const backgroundImage = isDarkMode
         ? (import.meta.env.VITE_BG_IMAGE_DARK_URL || import.meta.env.VITE_BG_IMAGE_URL)
@@ -588,6 +580,18 @@ const LoginPage = () => {
                                         onChange={(e) => setTwoFACode(e.target.value.replace(/[^a-zA-Z0-9]/g, ''))}
                                         autoFocus
                                     />
+                                </div>
+                                <div className="mb-6 flex items-start gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id="trust"
+                                        checked={trustDevice}
+                                        onChange={(e) => setTrustDevice(e.target.checked)}
+                                        className="mt-1 w-4 h-4 border-gray-400 rounded-none cursor-pointer"
+                                    />
+                                    <label htmlFor="trust" className="text-[13px] text-[#1b1b1b] dark:text-gray-300 cursor-pointer">
+                                        Don't ask again on this device
+                                    </label>
                                 </div>
                                 <div className="flex justify-between items-center w-full">
                                     <button type="button" onClick={() => { setStep(2); setTwoFACode(''); setError(''); }} className="text-[#0067b8] dark:text-[#4f93ce] text-[13px] hover:underline">

@@ -1,138 +1,230 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Activity, Shield, User, Clock, AlertCircle, CheckCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { Search, Filter, RefreshCw, Download, Calendar } from 'lucide-react';
+import MsButton from '../../components/MsButton';
+import { toast } from 'react-hot-toast';
 
 const AuditLogs = () => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const { user } = useAuth();
+    const [filters, setFilters] = useState({
+        user: '',
+        action: '',
+        dateFrom: '',
+        dateTo: ''
+    });
 
-    useEffect(() => {
-        fetchLogs();
-    }, [page]);
-
-    const fetchLogs = async () => {
-        setLoading(true);
+    const fetchLogs = async (pageNum = 1) => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/audit?page=${page}&limit=20`, {
-                withCredentials: true
-            });
-            setLogs(res.data.logs);
-            setTotalPages(res.data.totalPages);
-        } catch (err) {
-            console.error(err);
+            setLoading(true);
+            const params = {
+                page: pageNum,
+                limit: 20,
+                ...filters
+            };
+            const { data } = await axios.get('/admin/audit', { params });
+            setLogs(data.logs);
+            setTotalPages(data.totalPages);
+            setPage(data.currentPage);
+        } catch (error) {
+            console.error('Failed to fetch audit logs', error);
+            toast.error('Failed to load logs');
         } finally {
             setLoading(false);
         }
     };
 
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleString();
+    useEffect(() => {
+        fetchLogs(1);
+    }, []);
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        fetchLogs(1);
+    };
+
+    const handleFilterChange = (e) => {
+        setFilters({ ...filters, [e.target.name]: e.target.value });
+    };
+
+    const clearFilters = () => {
+        setFilters({ user: '', action: '', dateFrom: '', dateTo: '' });
+        fetchLogs(1);
     };
 
     return (
-        <div className="h-full flex flex-col">
-            {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-[#323130] flex items-center gap-2">
-                    <Activity className="text-[#0078D4]" />
-                    Audit Logs
-                </h1>
-                <p className="text-gray-500 text-sm">Track user activities and security events.</p>
-            </div>
-
-            {/* List */}
-            <div className="bg-white rounded-md shadow-sm border border-gray-200 flex-1 overflow-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-[#f8f9fa] border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0">
-                        <tr>
-                            <th className="px-6 py-3">Status</th>
-                            <th className="px-6 py-3">Action</th>
-                            <th className="px-6 py-3">User</th>
-                            <th className="px-6 py-3">Resource</th>
-                            <th className="px-6 py-3">IP Address</th>
-                            <th className="px-6 py-3">Time</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {loading ? (
-                            <tr>
-                                <td colSpan="6" className="p-8 text-center text-gray-500">Loading logs...</td>
-                            </tr>
-                        ) : logs.length === 0 ? (
-                            <tr>
-                                <td colSpan="6" className="p-8 text-center text-gray-500">No activity recorded yet.</td>
-                            </tr>
-                        ) : (
-                            logs.map((log) => (
-                                <tr key={log._id} className="hover:bg-gray-50 transition-colors text-sm">
-                                    <td className="px-6 py-4">
-                                        {log.status === 'Success' ? (
-                                            <div className="flex items-center gap-1.5 text-green-700 bg-green-50 px-2.5 py-1 rounded-full w-fit text-xs font-medium">
-                                                <CheckCircle size={14} />
-                                                Success
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-1.5 text-red-700 bg-red-50 px-2.5 py-1 rounded-full w-fit text-xs font-medium">
-                                                <AlertCircle size={14} />
-                                                Failure
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 font-medium text-[#323130]">
-                                        {log.action}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs">
-                                                <User size={12} />
-                                            </div>
-                                            <span className="text-gray-700">{log.user?.username || 'Unknown'}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-gray-600">
-                                            {log.resource}
-                                            <span className="text-gray-400 text-xs ml-1">({log.resourceId?.substring(0, 6)}...)</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-500 font-mono text-xs">
-                                        {log.ipAddress}
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
-                                        <div className="flex items-center gap-1.5">
-                                            <Clock size={14} />
-                                            {formatDate(log.createdAt)}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="mt-4 flex justify-between items-center text-sm text-gray-600">
-                <div>Page {page} of {totalPages}</div>
+        <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Audit Logs</h1>
+                    <p className="text-gray-600 dark:text-gray-400">Track system activities and security events</p>
+                </div>
                 <div className="flex gap-2">
-                    <button
-                        disabled={page === 1}
-                        onClick={() => setPage(page - 1)}
-                        className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
-                    >
-                        Previous
-                    </button>
-                    <button
-                        disabled={page === totalPages}
-                        onClick={() => setPage(page + 1)}
-                        className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
-                    >
-                        Next
-                    </button>
+                    <MsButton variant="secondary" onClick={() => fetchLogs(page)} icon={RefreshCw}>
+                        Refresh
+                    </MsButton>
+                    <MsButton variant="outline" icon={Download}>
+                        Export
+                    </MsButton>
+                </div>
+            </div>
+
+            {/* Filters */}
+            <div className="bg-white dark:bg-[#2c2c2c] p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+                <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">User (Email/Username)</label>
+                        <div className="relative">
+                            <Search size={16} className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                name="user"
+                                value={filters.user}
+                                onChange={handleFilterChange}
+                                placeholder="Search user..."
+                                className="w-full pl-9 h-10 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#3b3b3b] text-sm focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Action Type</label>
+                        <select
+                            name="action"
+                            value={filters.action}
+                            onChange={handleFilterChange}
+                            className="w-full h-10 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#3b3b3b] text-sm px-3 focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="">All Actions</option>
+                            <option value="Login">Login</option>
+                            <option value="Logout">Logout</option>
+                            <option value="Update Profile">Profile Update</option>
+                            <option value="Password">Password Change</option>
+                            <option value="2FA">2FA Actions</option>
+                            <option value="Admin">Admin Actions</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Range</label>
+                        <div className="flex gap-2">
+                            <input
+                                type="date"
+                                name="dateFrom"
+                                value={filters.dateFrom}
+                                onChange={handleFilterChange}
+                                className="w-full h-10 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#3b3b3b] text-sm px-3"
+                            />
+                            <input
+                                type="date"
+                                name="dateTo"
+                                value={filters.dateTo}
+                                onChange={handleFilterChange}
+                                className="w-full h-10 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#3b3b3b] text-sm px-3"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <MsButton type="submit" className="flex-1">Search</MsButton>
+                        <MsButton type="button" variant="secondary" onClick={clearFilters}>Clear</MsButton>
+                    </div>
+                </form>
+            </div>
+
+            {/* Logs Table */}
+            <div className="bg-white dark:bg-[#2c2c2c] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th className="px-6 py-3">Timestamp</th>
+                                <th className="px-6 py-3">Action</th>
+                                <th className="px-6 py-3">User</th>
+                                <th className="px-6 py-3">IP / Device</th>
+                                <th className="px-6 py-3">Status</th>
+                                <th className="px-6 py-3">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-8 text-gray-500">Loading records...</td>
+                                </tr>
+                            ) : logs.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-8 text-gray-500">No records found matching filters.</td>
+                                </tr>
+                            ) : (
+                                logs.map((log) => (
+                                    <tr key={log._id} className="bg-white dark:bg-[#2c2c2c] border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#333]">
+                                        <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                                            {new Date(log.createdAt).toLocaleString()}
+                                        </td>
+                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                            {log.action}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {log.user ? (
+                                                <div>
+                                                    <div className="font-medium text-gray-900 dark:text-white">{log.user.username}</div>
+                                                    <div className="text-xs text-gray-500">{log.user.email}</div>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400 italic">Unknown/System</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-500">
+                                            <div className="text-xs">{log.ipAddress}</div>
+                                            <div className="text-xs text-gray-400 truncate max-w-[150px]" title={log.deviceInfo}>
+                                                {log.deviceInfo || 'Unknown Device'}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2 py-1 rounded-full text-xs ${log.status === 'Success'
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                                }`}>
+                                                {log.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <details className="cursor-pointer text-xs text-blue-600 dark:text-blue-400">
+                                                <summary>View</summary>
+                                                <pre className="mt-1 p-2 bg-gray-50 dark:bg-black/20 rounded max-w-xs overflow-auto text-gray-600 dark:text-gray-300">
+                                                    {JSON.stringify(log.details || {}, null, 2)}
+                                                </pre>
+                                            </details>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="flex justify-between items-center p-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                        Page {page} of {totalPages}
+                    </div>
+                    <div className="flex gap-2">
+                        <MsButton
+                            variant="secondary"
+                            disabled={page === 1}
+                            onClick={() => fetchLogs(page - 1)}
+                            size="sm"
+                        >
+                            Previous
+                        </MsButton>
+                        <MsButton
+                            variant="secondary"
+                            disabled={page === totalPages}
+                            onClick={() => fetchLogs(page + 1)}
+                            size="sm"
+                        >
+                            Next
+                        </MsButton>
+                    </div>
                 </div>
             </div>
         </div>

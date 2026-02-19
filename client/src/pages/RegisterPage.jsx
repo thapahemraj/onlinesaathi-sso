@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import PasswordStrength from '../components/PasswordStrength';
 import { auth } from '../firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import axios from 'axios';
 import CustomAlert from '../components/CustomAlert';
 import MsInput from '../components/MsInput';
+import { useTheme } from '../context/ThemeContext';
 
 const RegisterPage = () => {
     // Steps: 1=Email, 2=Password, 3=Name, 4=Details(Country/DOB), 5=Verify(OTP)
@@ -255,17 +257,9 @@ const RegisterPage = () => {
     const buttonClasses = "w-full bg-[#0067b8] text-white py-2 hover:bg-[#005da6] shadow-sm rounded-md text-[15px] font-semibold transition-colors mt-4";
 
     // --- Dark Mode / System Theme Logic ---
-    const [isDarkMode, setIsDarkMode] = useState(false);
-
-    useEffect(() => {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        setIsDarkMode(mediaQuery.matches);
-
-        const handleChange = (e) => setIsDarkMode(e.matches);
-        mediaQuery.addEventListener('change', handleChange);
-
-        return () => mediaQuery.removeEventListener('change', handleChange);
-    }, []);
+    // Use global theme context
+    const { theme } = useTheme();
+    const isDarkMode = theme === 'dark';
 
     const backgroundImage = isDarkMode
         ? (import.meta.env.VITE_BG_IMAGE_DARK_URL || import.meta.env.VITE_BG_IMAGE_URL)
@@ -380,6 +374,8 @@ const RegisterPage = () => {
                                     >
                                         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                     </button>
+                                    {/* PasswordStrength component added here */}
+                                    <PasswordStrength password={password} />
                                 </div>
 
                                 <div className="mb-8 relative">

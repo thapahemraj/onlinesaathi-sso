@@ -2,6 +2,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Smartphone, Shield, Eye, User, CreditCard, MapPin, ShoppingBag, Package } from 'lucide-react';
+import ProfileCompletion from '../../components/ProfileCompletion';
 import axios from 'axios';
 
 const QuickCard = ({ icon: Icon, title, subtitle, onClick, color }) => (
@@ -45,8 +46,12 @@ const Overview = () => {
             </div>
 
             {/* Quick Links Grid */}
-            <h2 className="text-xl font-semibold text-[#323130] dark:text-white mb-4">Manage your account</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <h1 className="text-3xl font-bold text-[#323130] dark:text-white mb-2">Welcome, {user?.firstName || user?.username}!</h1>
+            <p className="text-[#323130] dark:text-gray-300 mb-8">Manage your info, privacy, and security to make Microsoft work better for you.</p>
+
+            <ProfileCompletion user={user} />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <QuickCard icon={User} title="Your info" subtitle="Profile details, photo" onClick={() => navigate('/dashboard/info')} color="bg-[#0078D4]" />
                 <QuickCard icon={Shield} title="Security" subtitle="Password, biometrics" onClick={() => navigate('/dashboard/security')} color="bg-emerald-500" />
                 <QuickCard icon={Eye} title="Privacy" subtitle="Activity controls" onClick={() => navigate('/dashboard/privacy')} color="bg-violet-500" />

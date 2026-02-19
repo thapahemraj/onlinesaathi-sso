@@ -35,6 +35,13 @@ const deviceSchema = new mongoose.Schema({
         type: String,
         default: '' // Unique hash from UA + IP for duplicate detection
     },
+    isTrusted: {
+        type: Boolean,
+        default: false
+    },
+    trustedAt: {
+        type: Date
+    },
     lastActive: {
         type: Date,
         default: Date.now

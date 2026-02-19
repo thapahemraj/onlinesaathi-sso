@@ -14,11 +14,15 @@ import {
     ShoppingBag,
     History,
     MapPin,
-    Monitor
+    Monitor,
+    Moon,
+    Sun
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const DashboardLayout = ({ children }) => {
     const { user, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -55,6 +59,15 @@ const DashboardLayout = ({ children }) => {
                 </div>
 
                 <div className="flex items-center gap-4">
+                    {/* Theme Toggle */}
+                    <button
+                        onClick={toggleTheme}
+                        className="p-2 rounded-full hover:bg-white/10 transition-colors"
+                        title="Toggle theme"
+                    >
+                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+
                     {/* User Profile Dropdown/Indicator */}
                     <div className="flex items-center gap-3 cursor-pointer hover:bg-[#005a9e] dark:hover:bg-[#3b3b3b] px-2 py-1 rounded transition-colors" title={user?.email}>
                         <div className="text-right hidden sm:block">

@@ -48,16 +48,21 @@ app.use('/api/oauth', require('./routes/oauthRoutes')); // Mount OAuth
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/admin/applications', require('./routes/applicationRoutes'));
 app.use('/api/admin/orgs', require('./routes/organizationRoutes'));
-app.use('/api/admin/audit', require('./routes/auditRoutes'));
 app.use('/api/profile', require('./routes/profileRoutes'));
 app.use('/api/devices', require('./routes/deviceRoutes'));
-app.use('/api/2fa', require('./routes/twoFactorRoutes'));
-app.use('/api/sessions', require('./routes/sessionRoutes'));
+
+// Defined routes with require
+const twoFactorRoutes = require('./routes/twoFactorRoutes');
+const sessionRoutes = require('./routes/sessionRoutes');
+const auditRoutes = require('./routes/auditRoutes');
+
+app.use('/api/2fa', twoFactorRoutes);
+app.use('/api/sessions', sessionRoutes);
+app.use('/api/audit', auditRoutes);
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Swagger Documentation
 // Swagger Documentation
 try {
     const swaggerUi = require('swagger-ui-express');
