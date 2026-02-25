@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import PasswordStrength from '../components/PasswordStrength';
 import { auth } from '../firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";

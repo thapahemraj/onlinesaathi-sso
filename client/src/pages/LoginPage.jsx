@@ -29,8 +29,22 @@ const LoginPage = () => {
     const [twoFAUserId, setTwoFAUserId] = useState(null);
     const [trustDevice, setTrustDevice] = useState(false);
 
-    const { login, verify2FA, user, loading } = useAuth();
+    const { login, loginWithGoogle, verify2FA, user, loading } = useAuth();
     const navigate = useNavigate();
+
+    const handleGoogleLogin = async () => {
+        setError('');
+        setIsLoading(true);
+        try {
+            await loginWithGoogle();
+            // Success! The AuthContext will handle setUser and redirecting via useEffect
+        } catch (err) {
+            console.error("Google Login Error:", err);
+            setError(err.response?.data?.message || 'Google Sign-In failed');
+            setIsLoading(false);
+        }
+    };
+
 
     const [showMenu, setShowMenu] = useState(false);
 
@@ -280,7 +294,8 @@ const LoginPage = () => {
             </div>
 
             {/* Login Card */}
-            <div className="z-10 w-full max-w-[440px] bg-white dark:bg-[#2c2c2c] md:shadow-xl p-6 sm:p-8 md:p-11 md:rounded-xl transition-all duration-300 relative dark:text-white">
+            <div className="z-10 w-full max-w-[440px] bg-white dark:bg-[#2c2c2c] md:shadow-xl p-5 sm:p-8 md:p-11 md:rounded-xl transition-all duration-300 relative dark:text-white mx-4 sm:mx-0">
+
 
                 {/* Back Button (Absolute Top Left) */}
                 {step > 1 && (
@@ -390,12 +405,22 @@ const LoginPage = () => {
                                         <div className="mb-6">
                                             <span className="text-[#0067b8] dark:text-[#4f93ce] text-[13px] hover:underline cursor-pointer">Sign in with a security key</span>
                                         </div>
-                                        <div className="flex justify-end w-full">
+                                        <div className="flex justify-end w-full gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={handleGoogleLogin}
+                                                className="flex items-center justify-center gap-2 bg-white dark:bg-[#3b3b3b] text-[#1b1b1b] dark:text-white px-4 py-1.5 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md text-[15px] font-semibold transition-colors shadow-sm"
+                                                disabled={isLoading}
+                                            >
+                                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
+                                                Google
+                                            </button>
                                             <button type="submit" className={buttonClasses} disabled={isLoading}>
                                                 {isLoading ? 'Checking...' : 'Next'}
                                             </button>
                                         </div>
                                     </form>
+
                                 </>
                             )}
                         </div>

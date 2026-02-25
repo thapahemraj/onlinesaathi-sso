@@ -135,14 +135,14 @@ const AuditLogs = () => {
             <div className="bg-white dark:bg-[#2c2c2c] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead className="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800">
+                        <thead className="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-black/10">
                             <tr>
-                                <th className="px-6 py-3">Timestamp</th>
-                                <th className="px-6 py-3">Action</th>
-                                <th className="px-6 py-3">User</th>
-                                <th className="px-6 py-3">IP / Device</th>
-                                <th className="px-6 py-3">Status</th>
-                                <th className="px-6 py-3">Details</th>
+                                <th className="px-6 py-3 border-b border-gray-200 dark:border-gray-800">Timestamp</th>
+                                <th className="px-6 py-3 border-b border-gray-200 dark:border-gray-800">Action</th>
+                                <th className="px-6 py-3 border-b border-gray-200 dark:border-gray-800">User</th>
+                                <th className="px-6 py-3 border-b border-gray-200 dark:border-gray-800">IP / Device</th>
+                                <th className="px-6 py-3 border-b border-gray-200 dark:border-gray-800">Status</th>
+                                <th className="px-6 py-3 border-b border-gray-200 dark:border-gray-800">Details</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -156,8 +156,8 @@ const AuditLogs = () => {
                                 </tr>
                             ) : (
                                 logs.map((log) => (
-                                    <tr key={log._id} className="bg-white dark:bg-[#2c2c2c] border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#333]">
-                                        <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                                    <tr key={log._id} className="bg-white dark:bg-[#2c2c2c] border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-black/10 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
                                             {new Date(log.createdAt).toLocaleString()}
                                         </td>
                                         <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
@@ -173,16 +173,16 @@ const AuditLogs = () => {
                                                 <span className="text-gray-400 italic">Unknown/System</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 text-gray-500">
-                                            <div className="text-xs">{log.ipAddress}</div>
-                                            <div className="text-xs text-gray-400 truncate max-w-[150px]" title={log.deviceInfo}>
+                                        <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+                                            <div className="text-xs font-mono">{log.ipAddress}</div>
+                                            <div className="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[150px]" title={log.deviceInfo}>
                                                 {log.deviceInfo || 'Unknown Device'}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 rounded-full text-xs ${log.status === 'Success'
-                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                                 }`}>
                                                 {log.status}
                                             </span>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Shield, Key, Activity, Fingerprint, X, Loader2, Mail } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Shield, Key, Activity, Fingerprint, X, Loader2, Mail, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import BiometricSetup from '../../components/BiometricSetup';
 import TwoFactorSetup from '../../components/TwoFactorSetup';

@@ -24,12 +24,12 @@ const AdminDashboard = () => {
     }, []);
 
     const StatCard = ({ title, value, icon: Icon, color }) => (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex items-start justify-between">
+        <div className="bg-white dark:bg-[#2c2c2c] p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 flex items-start justify-between transition-colors">
             <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
-                <h3 className="text-3xl font-bold text-[#323130]">{value}</h3>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{title}</p>
+                <h3 className="text-3xl font-bold text-[#323130] dark:text-white">{value}</h3>
             </div>
-            <div className={`p-3 rounded-md ${color} bg-opacity-10`}>
+            <div className={`p-3 rounded-md ${color} bg-opacity-10 dark:bg-opacity-20`}>
                 <Icon size={24} className={color.replace('bg-', 'text-')} />
             </div>
         </div>
@@ -39,7 +39,7 @@ const AdminDashboard = () => {
 
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-[#323130]">Overview</h2>
+            <h2 className="text-2xl font-bold text-[#323130] dark:text-white">Overview</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
@@ -69,15 +69,15 @@ const AdminDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-semibold mb-4 text-[#323130]">Recent Activity</h3>
+                <div className="bg-white dark:bg-[#2c2c2c] p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
+                    <h3 className="text-lg font-semibold mb-4 text-[#323130] dark:text-white">Recent Activity</h3>
                     <div className="space-y-4">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="flex items-center gap-4 text-sm border-b border-gray-50 last:border-0 pb-3 last:pb-0">
+                            <div key={i} className="flex items-center gap-4 text-sm border-b border-gray-50 dark:border-gray-800 last:border-0 pb-3 last:pb-0">
                                 <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                                 <div className="flex-1">
-                                    <span className="font-medium text-[#323130]">User Login</span>
-                                    <span className="text-gray-500"> - admin@example.com logged in successfully.</span>
+                                    <span className="font-medium text-[#323130] dark:text-gray-200">User Login</span>
+                                    <span className="text-gray-500 dark:text-gray-400"> - admin@example.com logged in successfully.</span>
                                 </div>
                                 <span className="text-gray-400 text-xs">2m ago</span>
                             </div>
@@ -85,20 +85,20 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-semibold mb-4 text-[#323130]">System Health</h3>
+                <div className="bg-white dark:bg-[#2c2c2c] p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
+                    <h3 className="text-lg font-semibold mb-4 text-[#323130] dark:text-white">System Health</h3>
                     <div className="space-y-4">
                         <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-600">API Status</span>
-                            <span className="text-green-600 font-medium px-2 py-1 bg-green-50 rounded">Operational</span>
+                            <span className="text-gray-600 dark:text-gray-400">API Status</span>
+                            <span className="text-green-600 dark:text-green-400 font-medium px-2 py-1 bg-green-50 dark:bg-green-900/20 rounded">Operational</span>
                         </div>
                         <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-600">Database</span>
-                            <span className="text-green-600 font-medium px-2 py-1 bg-green-50 rounded">Connected</span>
+                            <span className="text-gray-600 dark:text-gray-400">Database</span>
+                            <span className="text-green-600 dark:text-green-400 font-medium px-2 py-1 bg-green-50 dark:bg-green-900/20 rounded">Connected</span>
                         </div>
                         <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-600">Auth Services</span>
-                            <span className="text-green-600 font-medium px-2 py-1 bg-green-50 rounded">Running</span>
+                            <span className="text-gray-600 dark:text-gray-400">Auth Services</span>
+                            <span className="text-green-600 dark:text-green-400 font-medium px-2 py-1 bg-green-50 dark:bg-green-900/20 rounded">Running</span>
                         </div>
                     </div>
                 </div>

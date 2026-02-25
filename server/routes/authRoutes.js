@@ -9,8 +9,10 @@ const {
     verifyVerificationCode,
     checkEmail,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    googleLogin
 } = require('../controllers/authController');
+
 const { protect } = require('../middleware/authMiddleware');
 const { authLimiter, registerLimiter, otpLimiter } = require('../middleware/rateLimiter');
 const { loginRules, registerRules, forgotPasswordRules, resetPasswordRules, validate } = require('../middleware/validationRules');
@@ -227,6 +229,34 @@ router.post('/send-verification', otpLimiter, sendVerificationCode);
  *         description: Email verified
  */
 router.post('/verify-code', verifyVerificationCode);
+
+/**
+ * @swagger
+ * /auth/google-login:
+ *   post:
+ *     summary: Login with Google
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               uid:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               displayName:
+ *                 type: string
+ *               photoURL:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ */
+router.post('/google-login', googleLogin);
+
 
 /**
  * @swagger

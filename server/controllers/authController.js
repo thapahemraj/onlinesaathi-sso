@@ -1,4 +1,6 @@
+const crypto = require('crypto');
 const User = require('../models/User');
+
 const jwt = require('jsonwebtoken');
 const generateToken = require('../utils/generateToken');
 const { trackDevice } = require('./deviceController');
@@ -140,6 +142,17 @@ const loginUser = async (req, res) => {
     }
 
     const token = generateToken(user._id); // Fixed: generateToken(id)
+
+    // Determine cookie options based on environment
+    const isProduction = process.env.NODE_ENV !== 'development';
+
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: isProduction, // Secure in production
+        sameSite: 'lax', // Use Lax for both dev and prod
+        domain: isProduction ? '.i-sewa.in' : undefined,
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
 
     await createSession(user._id, token, req);
     // Device already tracked above
@@ -376,6 +389,77 @@ const verifyVerificationCode = async (req, res) => {
     }
 };
 
+const googleLogin = async (req, res) => {
+    try {
+        await connectDB();
+        const { uid, email, displayName, photoURL } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required from Google' });
+        }
+
+        // 1. Check if user exists by email
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            // 2. Create new user if they don't exist
+            // For Google login, we don't have a password, so we set a random one or keep it empty if allowed
+            // Our model likely requires a password, so we'll generate a random string
+            const randomPassword = crypto.randomBytes(16).toString('hex');
+
+
+            user = await User.create({
+                username: displayName || email.split('@')[0],
+                email,
+                password: randomPassword,
+                isVerified: true, // Google emails are already verified
+                profilePicture: photoURL,
+                firebaseUid: uid,
+                provider: 'google'
+            });
+            // Audit Log: Account Created via Google
+            await logAction(req, 'Register', 'User', user._id, { method: 'google' }, 'Success');
+        } else {
+            // Update firebaseUid if not set
+            if (!user.firebaseUid) {
+                user.firebaseUid = uid;
+                await user.save();
+            }
+        }
+
+        // Check if account is locked
+        if (user.isLocked) {
+            return res.status(423).json({ message: 'Account locked' });
+        }
+
+        const token = generateToken(user._id);
+        const isProduction = process.env.NODE_ENV !== 'development';
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'lax',
+            domain: isProduction ? '.i-sewa.in' : undefined,
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+        });
+
+        await createSession(user._id, token, req);
+        await logAction(req, 'Login', 'User', user._id, { method: 'google' }, 'Success');
+
+        res.json({
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            profilePicture: user.profilePicture,
+            isVerified: user.isVerified
+        });
+    } catch (error) {
+        console.error("Google Login Error:", error);
+        res.status(500).json({ message: 'Server error during Google login', error: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
@@ -386,5 +470,7 @@ module.exports = {
     resetPassword,
     sendVerificationCode,
     verifyVerificationCode,
+    googleLogin,
 };
+
 

@@ -59,6 +59,9 @@ const auditRoutes = require('./routes/auditRoutes');
 app.use('/api/2fa', twoFactorRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/wallet', require('./routes/walletRoutes'));
+app.use('/api/features', require('./routes/featureRoutes'));
+app.use('/api/apps/voice-ai', require('./routes/appRoutes'));
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

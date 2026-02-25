@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-    darkMode: 'media',
+    darkMode: 'class',
     content: [
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,12 +8,10 @@ export default {
     theme: {
         extend: {
             screens: {
-                'sm': '350px',
-                'md': '450px',
-                'lg': '1024px',
-                'xl': '1280px',
-                '2xl': '1536px',
+                'xs': '375px',
+                // Keep standard sm (640), md (768), lg (1024)
             },
+
             colors: {
                 ms: {
                     blue: '#0078D4',

@@ -67,8 +67,8 @@ const Organizations = () => {
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-2xl font-semibold text-[#323130]">Organizations</h1>
-                    <p className="text-gray-500 text-sm">Manage tenants and branding</p>
+                    <h1 className="text-2xl font-semibold text-[#323130] dark:text-white">Organizations</h1>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">Manage tenants and branding</p>
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
@@ -85,14 +85,14 @@ const Organizations = () => {
                 <input
                     type="text"
                     placeholder="Search organizations..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#0078D4]"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#2c2c2c] text-[#1b1b1b] dark:text-white focus:outline-none focus:border-[#0078D4]"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
 
             {/* List */}
-            <div className="bg-white rounded-md shadow-sm border border-gray-200 flex-1 overflow-auto">
+            <div className="bg-white dark:bg-[#2c2c2c] rounded-md shadow-sm border border-gray-200 dark:border-gray-800 flex-1 overflow-auto transition-colors">
                 {loading ? (
                     <div className="p-8 text-center text-gray-500">Loading...</div>
                 ) : filteredOrgs.length === 0 ? (
@@ -102,7 +102,7 @@ const Organizations = () => {
                     </div>
                 ) : (
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-[#f8f9fa] border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <thead className="bg-[#f8f9fa] dark:bg-black/10 border-b border-gray-200 dark:border-gray-800 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                             <tr>
                                 <th className="px-6 py-3">Name</th>
                                 <th className="px-6 py-3">Domain</th>
@@ -110,9 +110,9 @@ const Organizations = () => {
                                 <th className="px-6 py-3 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                             {filteredOrgs.map((org) => (
-                                <tr key={org._id} className="hover:bg-gray-50 transition-colors">
+                                <tr key={org._id} className="hover:bg-gray-50 dark:hover:bg-black/10 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div
@@ -122,14 +122,14 @@ const Organizations = () => {
                                                 {org.name.charAt(0).toUpperCase()}
                                             </div>
                                             <div>
-                                                <div className="font-medium text-[#323130]">{org.name}</div>
-                                                <div className="text-gray-500 text-xs">/{org.slug}</div>
+                                                <div className="font-medium text-[#323130] dark:text-white">{org.name}</div>
+                                                <div className="text-gray-500 dark:text-gray-400 text-xs">/{org.slug}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         {org.domain ? (
-                                            <div className="flex items-center gap-1.5 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded w-fit">
+                                            <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-black/20 px-2 py-1 rounded w-fit">
                                                 <Globe size={12} />
                                                 {org.domain}
                                             </div>
@@ -137,11 +137,11 @@ const Organizations = () => {
                                             <span className="text-gray-400 text-xs">-</span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">
+                                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                                         {org.owner?.email || 'Unknown'}
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <button className="p-2 hover:bg-gray-200 rounded-full text-gray-500">
+                                        <button className="p-2 hover:bg-gray-200 dark:hover:bg-black/20 rounded-full text-gray-500">
                                             <MoreHorizontal size={18} />
                                         </button>
                                     </td>
@@ -155,37 +155,37 @@ const Organizations = () => {
             {/* Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-                        <h2 className="text-xl font-bold mb-4 text-[#323130]">Create Organization</h2>
-                        {error && <div className="mb-4 bg-red-50 text-red-600 p-3 rounded text-sm">{error}</div>}
+                    <div className="bg-white dark:bg-[#2c2c2c] rounded-lg shadow-xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-700">
+                        <h2 className="text-xl font-bold mb-4 text-[#323130] dark:text-white">Create Organization</h2>
+                        {error && <div className="mb-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded text-sm">{error}</div>}
                         <form onSubmit={handleCreate}>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
                                     <input
                                         type="text"
                                         required
-                                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-[#0078D4] focus:outline-none"
+                                        className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm bg-white dark:bg-[#3b3b3b] text-[#323130] dark:text-white focus:border-[#0078D4] focus:outline-none"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL)</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Slug (URL)</label>
                                     <input
                                         type="text"
                                         required
-                                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-[#0078D4] focus:outline-none"
+                                        className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm bg-white dark:bg-[#3b3b3b] text-[#323130] dark:text-white focus:border-[#0078D4] focus:outline-none"
                                         placeholder="e.g. acme-corp"
                                         value={formData.slug}
                                         onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Domain (Optional)</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Domain (Optional)</label>
                                     <input
                                         type="text"
-                                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-[#0078D4] focus:outline-none"
+                                        className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm bg-white dark:bg-[#3b3b3b] text-[#323130] dark:text-white focus:border-[#0078D4] focus:outline-none"
                                         placeholder="e.g. acme.com"
                                         value={formData.domain}
                                         onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
@@ -196,7 +196,7 @@ const Organizations = () => {
                                 <button
                                     type="button"
                                     onClick={() => setShowModal(false)}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded"
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black/20 rounded transition-colors"
                                 >
                                     Cancel
                                 </button>

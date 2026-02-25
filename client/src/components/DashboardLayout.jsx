@@ -167,9 +167,10 @@ const DashboardLayout = ({ children }) => {
                 )}
 
                 {/* Main Content */}
-                <main className="flex-1 p-4 md:p-8 md:pt-14 overflow-hidden">
+                <main className="flex-1 p-4 sm:p-6 md:p-8 md:pt-14 overflow-hidden min-w-0">
                     {children}
                 </main>
+
             </div>
         </div>
     );

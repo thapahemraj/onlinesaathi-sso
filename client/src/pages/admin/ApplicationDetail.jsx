@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Copy, Eye, EyeOff, Save, Trash2, RefreshCw, Shield } from 'lucide-react';
+import { ArrowLeft, Copy, Eye, EyeOff, Save, Trash2, RefreshCw, Shield, ShieldAlert } from 'lucide-react';
 
 const AVAILABLE_SCOPES = [
     { name: 'openid', label: 'OpenID', description: 'Basic identity verification (required)' },
@@ -111,18 +111,18 @@ const ApplicationDetail = () => {
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate('/dashboard/admin/apps')} className="p-2 hover:bg-white rounded-full transition-colors text-gray-600">
+                    <button onClick={() => navigate('/dashboard/admin/apps')} className="p-2 hover:bg-gray-100 dark:hover:bg-[#3b3b3b] rounded-full transition-colors text-gray-600 dark:text-gray-300">
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <h2 className="text-2xl font-bold text-[#323130]">{isNew ? 'Register an application' : formData.name}</h2>
-                        <p className="text-gray-500 text-sm">
+                        <h2 className="text-2xl font-bold text-[#323130] dark:text-white">{isNew ? 'Register an application' : formData.name}</h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
                             {isNew ? 'Register a new app to integrate with your Identity Provider.' : `Application ID: ${appData?.clientId}`}
                         </p>
                     </div>
                 </div>
                 {!isNew && (
-                    <button onClick={handleDelete} className="text-red-600 hover:bg-red-50 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-2 transition-colors">
+                    <button onClick={handleDelete} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-2 transition-colors">
                         <Trash2 size={16} />
                         Delete
                     </button>
@@ -133,35 +133,35 @@ const ApplicationDetail = () => {
 
                 {/* Credentials Card (Only for existing apps) */}
                 {!isNew && appData && (
-                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                        <h3 className="text-lg font-semibold text-[#323130] mb-4">Credentials</h3>
+                    <div className="bg-white dark:bg-[#2c2c2c] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
+                        <h3 className="text-lg font-semibold text-[#323130] dark:text-white mb-4">Credentials</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Application (Client) ID</label>
-                                <div className="flex bg-gray-50 border border-gray-200 rounded-md overflow-hidden">
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Application (Client) ID</label>
+                                <div className="flex bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
                                     <input
                                         readOnly
-                                        className="bg-transparent px-3 py-2 text-sm w-full font-mono text-gray-700 outline-none"
+                                        className="bg-transparent px-3 py-2 text-sm w-full font-mono text-gray-700 dark:text-gray-300 outline-none"
                                         value={appData.clientId}
                                     />
-                                    <button type="button" onClick={() => handleCopy(appData.clientId)} className="px-3 hover:bg-gray-100 border-l border-gray-200 text-gray-500">
+                                    <button type="button" onClick={() => handleCopy(appData.clientId)} className="px-3 hover:bg-gray-100 dark:hover:bg-[#3b3b3b] border-l border-gray-200 dark:border-gray-700 text-gray-500">
                                         <Copy size={16} />
                                     </button>
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Client Secret</label>
-                                <div className="flex bg-gray-50 border border-gray-200 rounded-md overflow-hidden">
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Client Secret</label>
+                                <div className="flex bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
                                     <input
                                         readOnly
                                         type={showSecret ? "text" : "password"}
-                                        className="bg-transparent px-3 py-2 text-sm w-full font-mono text-gray-700 outline-none"
+                                        className="bg-transparent px-3 py-2 text-sm w-full font-mono text-gray-700 dark:text-gray-300 outline-none"
                                         value={appData.clientSecret}
                                     />
-                                    <button type="button" onClick={() => setShowSecret(!showSecret)} className="px-3 hover:bg-gray-100 border-l border-gray-200 text-gray-500">
+                                    <button type="button" onClick={() => setShowSecret(!showSecret)} className="px-3 hover:bg-gray-100 dark:hover:bg-[#3b3b3b] border-l border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
                                         {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}
                                     </button>
-                                    <button type="button" onClick={() => handleCopy(appData.clientSecret)} className="px-3 hover:bg-gray-100 border-l border-gray-200 text-gray-500">
+                                    <button type="button" onClick={() => handleCopy(appData.clientSecret)} className="px-3 hover:bg-gray-100 dark:hover:bg-[#3b3b3b] border-l border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
                                         <Copy size={16} />
                                     </button>
                                 </div>
@@ -174,35 +174,35 @@ const ApplicationDetail = () => {
                 )}
 
                 {/* Main Settings */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h3 className="text-lg font-semibold text-[#323130] mb-4">Branding & Details</h3>
+                <div className="bg-white dark:bg-[#2c2c2c] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
+                    <h3 className="text-lg font-semibold text-[#323130] dark:text-white mb-4">Branding & Details</h3>
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-semibold text-[#323130] mb-1">Display Name</label>
+                            <label className="block text-sm font-semibold text-[#323130] dark:text-gray-200 mb-1">Display Name</label>
                             <input
                                 type="text"
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[#0067b8] focus:ring-1 focus:ring-[#0067b8]"
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-[#3b3b3b] text-[#1b1b1b] dark:text-white focus:outline-none focus:border-[#0067b8] focus:ring-1 focus:ring-[#0067b8]"
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
                                 placeholder="My App"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-[#323130] mb-1">Description (Optional)</label>
+                            <label className="block text-sm font-semibold text-[#323130] dark:text-gray-200 mb-1">Description (Optional)</label>
                             <input
                                 type="text"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[#0067b8] focus:ring-1 focus:ring-[#0067b8]"
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-[#3b3b3b] text-[#1b1b1b] dark:text-white focus:outline-none focus:border-[#0067b8] focus:ring-1 focus:ring-[#0067b8]"
                                 value={formData.description}
                                 onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 placeholder="App for internal HR system"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-[#323130] mb-1">Homepage URL (Optional)</label>
+                            <label className="block text-sm font-semibold text-[#323130] dark:text-gray-200 mb-1">Homepage URL (Optional)</label>
                             <input
                                 type="url"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[#0067b8] focus:ring-1 focus:ring-[#0067b8]"
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-[#3b3b3b] text-[#1b1b1b] dark:text-white focus:outline-none focus:border-[#0067b8] focus:ring-1 focus:ring-[#0067b8]"
                                 value={formData.homepageUrl}
                                 onChange={e => setFormData({ ...formData, homepageUrl: e.target.value })}
                                 placeholder="https://myapp.com"
@@ -217,20 +217,20 @@ const ApplicationDetail = () => {
                                     checked={formData.isEnabled}
                                     onChange={e => setFormData({ ...formData, isEnabled: e.target.checked })}
                                 />
-                                <label htmlFor="isEnabled" className="text-sm text-[#323130]">Enable this application for users to sign in?</label>
+                                <label htmlFor="isEnabled" className="text-sm text-[#323130] dark:text-gray-200">Enable this application for users to sign in?</label>
                             </div>
                         )}
                     </div>
                 </div>
 
                 {/* Authentication Settings */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h3 className="text-lg font-semibold text-[#323130] mb-4">Authentication</h3>
+                <div className="bg-white dark:bg-[#2c2c2c] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
+                    <h3 className="text-lg font-semibold text-[#323130] dark:text-white mb-4">Authentication</h3>
                     <div>
-                        <label className="block text-sm font-semibold text-[#323130] mb-1">Redirect URIs</label>
-                        <p className="text-xs text-gray-500 mb-2">The URLs where we will send tokens after authentication. One per line.</p>
+                        <label className="block text-sm font-semibold text-[#323130] dark:text-gray-200 mb-1">Redirect URIs</label>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">The URLs where we will send tokens after authentication. One per line.</p>
                         <textarea
-                            className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono focus:outline-none focus:border-[#0067b8] focus:ring-1 focus:ring-[#0067b8]"
+                            className="w-full h-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-mono bg-white dark:bg-[#3b3b3b] text-[#1b1b1b] dark:text-white focus:outline-none focus:border-[#0067b8] focus:ring-1 focus:ring-[#0067b8]"
                             value={formData.redirectUris}
                             onChange={e => setFormData({ ...formData, redirectUris: e.target.value })}
                             placeholder={`https://myapp.com/callback\nhttp://localhost:3000/api/auth/callback`}
@@ -239,15 +239,15 @@ const ApplicationDetail = () => {
                 </div>
 
                 {/* Permissions & Scopes */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div className="bg-white dark:bg-[#2c2c2c] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
                     <div className="flex items-center gap-2 mb-4">
-                        <Shield size={20} className="text-blue-600" />
-                        <h3 className="text-lg font-semibold text-[#323130]">Permissions & Scopes</h3>
+                        <Shield size={20} className="text-blue-600 dark:text-blue-400" />
+                        <h3 className="text-lg font-semibold text-[#323130] dark:text-white">Permissions & Scopes</h3>
                     </div>
-                    <p className="text-xs text-gray-500 mb-4">Select the scopes this application is allowed to request when authenticating users.</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Select the scopes this application is allowed to request when authenticating users.</p>
                     <div className="space-y-3">
                         {AVAILABLE_SCOPES.map(scope => (
-                            <label key={scope.name} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                            <label key={scope.name} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-black/10 rounded-lg hover:bg-gray-100 dark:hover:bg-black/20 transition-colors cursor-pointer">
                                 <input
                                     type="checkbox"
                                     className="w-4 h-4 mt-0.5 text-[#0067b8] border-gray-300 rounded focus:ring-[#0067b8]"
@@ -262,9 +262,9 @@ const ApplicationDetail = () => {
                                     }}
                                 />
                                 <div>
-                                    <span className="text-sm font-medium text-[#323130]">{scope.label}</span>
-                                    <span className="ml-2 text-xs text-gray-400 font-mono">{scope.name}</span>
-                                    <p className="text-xs text-gray-500 mt-0.5">{scope.description}</p>
+                                    <span className="text-sm font-medium text-[#323130] dark:text-white">{scope.label}</span>
+                                    <span className="ml-2 text-xs text-gray-400 dark:text-gray-500 font-mono">{scope.name}</span>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{scope.description}</p>
                                 </div>
                             </label>
                         ))}

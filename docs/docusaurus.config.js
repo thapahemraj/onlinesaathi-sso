@@ -10,8 +10,8 @@ import { themes as prismThemes } from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Online Saathi Docs',
-  tagline: 'Identity Provider & SSO Documentation',
+  title: 'Online Saathi IDP',
+  tagline: 'Modern, secure, and fast Identity Solutions for your applications.',
   favicon: 'img/favicon.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -20,20 +20,20 @@ const config = {
   },
 
   // Set the production url of your site here
-  url: 'https://your-docusaurus-site.example.com',
+  url: 'https://online-saathi.in',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
   customFields: {
-    CLIENT_URL: process.env.CLIENT_URL || 'https://accounts.i-sewa.in',
-    API_URL: process.env.API_URL || 'https://api.i-sewa.in/api',
+    CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
+    API_URL: process.env.API_URL || 'http://localhost:5000/api',
   },
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'facebook', // Usually your GitHub org/user name.
-  projectName: 'docusaurus', // Usually your repo name.
+  organizationName: 'onlinesaathi', // Usually your GitHub org/user name.
+  projectName: 'sso-docs', // Usually your repo name.
 
   onBrokenLinks: 'throw',
 
@@ -56,10 +56,11 @@ const config = {
         },
         blog: {
           showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
+          blogTitle: 'Online Saathi Blog',
+          blogDescription: 'Latest updates on security and SSO integration.',
+          postsPerPage: 'ALL',
+          blogSidebarTitle: 'All posts',
+          blogSidebarCount: 'ALL',
           // Remove default editUrl
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -75,12 +76,15 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      // Replace with your project's social card
       image: 'img/docusaurus-social-card.jpg',
       colorMode: {
+        defaultMode: 'light',
+        disableSwitch: false,
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'Online Saathi IDP',
+        title: 'Online Saathi',
         logo: {
           alt: 'Online Saathi Logo',
           src: 'img/logo.svg',
@@ -90,19 +94,22 @@ const config = {
             type: 'docSidebar',
             sidebarId: 'tutorialSidebar',
             position: 'left',
-            label: 'Documentation',
+            label: 'User Guide',
+            docsPluginId: 'default',
+            sidebarPath: 'userGuideSidebar', // custom sidebar id if needed
           },
           {
-            href: '/oauth-integration', // Will create this page
-            label: 'OAuth Guide',
+            type: 'docSidebar',
+            sidebarId: 'tutorialSidebar',
             position: 'left',
+            label: 'Developer Guide',
           },
+          { to: '/blog', label: 'Blog', position: 'left' },
           {
-            // User Profile Icon Link
-            to: `${process.env.CLIENT_URL || 'https://accounts.i-sewa.in'}/dashboard`,
+            href: 'http://localhost:5173/login',
+            label: 'Sign In',
             position: 'right',
-            className: 'header-user-link', // We'll add CSS for this
-            'aria-label': 'User Dashboard',
+            className: 'button button--primary navbar-btn',
           },
         ],
       },
@@ -110,33 +117,42 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
+            title: 'Guides',
             items: [
               {
-                label: 'Getting Started',
-                to: '/docs/getting-started',
+                label: 'User Guide',
+                to: '/docs/user-guide',
               },
               {
-                label: 'OAuth Integration',
-                to: '/docs/oauth-integration',
-              },
-              {
-                label: 'API Reference',
-                to: '/docs/api-reference',
+                label: 'Developer Guide',
+                to: '/docs/developer-guide',
               },
             ],
           },
           {
-            title: 'Legal',
+            title: 'Community',
             items: [
               {
-                label: 'Privacy Policy',
-                to: '#',
+                label: 'Blog',
+                to: '/blog',
               },
               {
-                label: 'Terms of Service',
-                to: '#',
-              }
+                label: 'GitHub',
+                href: 'https://github.com/thapahemraj/onlinesaathi-sso',
+              },
+            ],
+          },
+          {
+            title: 'Portal',
+            items: [
+              {
+                label: 'Accounts Dashboard',
+                href: 'http://localhost:5173',
+              },
+              {
+                label: 'Admin Panel',
+                href: 'http://localhost:5173/dashboard/admin',
+              },
             ],
           },
         ],

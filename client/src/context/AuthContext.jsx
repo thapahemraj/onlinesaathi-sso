@@ -79,8 +79,28 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const loginWithGoogle = async () => {
+        const { signInWithPopup } = await import('firebase/auth');
+        const { auth, googleProvider } = await import('../firebase');
+        const result = await signInWithPopup(auth, googleProvider);
+
+        const { user: firebaseUser } = result;
+
+        const { data } = await axios.post('/auth/google-login', {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL
+        });
+
+        const { data: profile } = await axios.get('/profile');
+        setUser(profile);
+        return profile;
+    };
+
     return (
-        <AuthContext.Provider value={{ user, setUser, login, verify2FA, register, logout, loading, refreshUser }}>
+        <AuthContext.Provider value={{ user, setUser, login, loginWithGoogle, verify2FA, register, logout, loading, refreshUser }}>
+
             {children}
         </AuthContext.Provider>
     );

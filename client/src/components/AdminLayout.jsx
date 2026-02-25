@@ -11,12 +11,18 @@ import {
     X,
     Building,
     AppWindow, // Replaced Grid with AppWindow for applications
-    Activity
+    Activity,
+    Sun,
+    Moon
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+
 
 const AdminLayout = () => {
     const { user, logout } = useAuth(); // Assuming 'user' has 'role'
+    const { theme, toggleTheme } = useTheme();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -41,11 +47,9 @@ const AdminLayout = () => {
                 className={`bg-white dark:bg-[#2c2c2c] shadow-md fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 border-r border-gray-100 dark:border-gray-800`}
             >
                 <div className="h-14 flex items-center px-6 border-b border-gray-100 dark:border-gray-800">
-                    <span className="font-bold text-lg text-[#0078D4] dark:text-[#4f93ce] flex items-center gap-2">
-                        <Shield size={20} />
-                        Admin Center
-                    </span>
+                    <img src={import.meta.env.VITE_LOGO_URL} alt="Online Saathi" className="h-8" />
                     <button
+
                         className="ml-auto md:hidden text-gray-500 dark:text-gray-400"
                         onClick={() => setIsSidebarOpen(false)}
                     >
@@ -94,12 +98,21 @@ const AdminLayout = () => {
                         >
                             <Menu size={20} />
                         </button>
-                        <h1 className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                        <h1 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                             OnlineSaathi Email id
                         </h1>
+
                     </div>
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={toggleTheme}
+                            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#3b3b3b] text-gray-600 dark:text-gray-300 transition-colors"
+                            title="Toggle theme"
+                        >
+                            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                        </button>
                         <div className="text-right">
+
                             <div className="text-sm font-semibold text-[#323130] dark:text-white">{user?.username}</div>
                             <div className="text-xs text-gray-500 dark:text-gray-400 uppercase">{user?.role}</div>
                         </div>
@@ -110,9 +123,10 @@ const AdminLayout = () => {
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-auto p-6 md:p-8">
+                <main className="flex-1 overflow-auto p-4 sm:p-6 md:p-8">
                     <Outlet />
                 </main>
+
             </div>
         </div>
     );
