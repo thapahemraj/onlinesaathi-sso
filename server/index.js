@@ -12,6 +12,7 @@ const { generalLimiter } = require('./middleware/rateLimiter');
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+app.set('trust proxy', 1); // Trust the first proxy (Vercel) so rate limiting works accurately
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(generalLimiter);
 app.use(express.json());
@@ -75,9 +76,12 @@ try {
     console.error("Swagger setup failed:", err);
 }
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Only listen if not running in production (Vercel uses module.exports under the hood)
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
 // Global Error Handler
 app.use((err, req, res, next) => {
