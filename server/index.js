@@ -76,8 +76,8 @@ try {
     console.error("Swagger setup failed:", err);
 }
 
-// Only listen if not running in production (Vercel uses module.exports under the hood)
-if (process.env.NODE_ENV !== 'production') {
+// Only listen if run directly (Vercel imports this file so require.main !== module)
+if (require.main === module) {
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
