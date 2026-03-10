@@ -40,5 +40,9 @@
   },
   "overrides": {
     "@scure/base": "1.1.8"
+  },
+  "resolutions": {
+    "**/@scure/base": "1.1.8",
+    "@scure/base": "1.1.8"
   }
 }
