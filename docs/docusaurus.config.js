@@ -20,14 +20,14 @@ const config = {
   },
 
   // Set the production url of your site here
-  url: 'https://online-saathi.in',
+  url: 'https://i-sewa.in',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
   customFields: {
-    CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
-    API_URL: process.env.API_URL || 'http://localhost:5000/api',
+    CLIENT_URL: process.env.CLIENT_URL || 'https://accounts.i-sewa.in',
+    API_URL: process.env.API_URL || 'https://api.i-sewa.in/api',
   },
 
   // GitHub pages deployment config.
@@ -106,7 +106,7 @@ const config = {
           },
           { to: '/blog', label: 'Blog', position: 'left' },
           {
-            href: 'http://localhost:5173/login',
+            href: 'https://accounts.i-sewa.in/login',
             label: 'Sign In',
             position: 'right',
             className: 'button button--primary navbar-btn',
@@ -147,11 +147,11 @@ const config = {
             items: [
               {
                 label: 'Accounts Dashboard',
-                href: 'http://localhost:5173',
+                href: 'https://accounts.i-sewa.in',
               },
               {
                 label: 'Admin Panel',
-                href: 'http://localhost:5173/dashboard/admin',
+                href: 'https://accounts.i-sewa.in/dashboard/admin',
               },
             ],
           },
