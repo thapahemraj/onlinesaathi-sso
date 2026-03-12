@@ -9,7 +9,7 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const ROLES = ['user', 'member', 'saathi', 'agent', 'supportTeam', 'subAdmin', 'superAdmin'];
 
 const ROLE_COLORS = {
-    user: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+    user: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-301',
     member: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
     saathi: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
     agent: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
