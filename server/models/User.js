@@ -40,9 +40,20 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'admin'],
+        // Hierarchy (low → high): user → member → saathi → agent → supportTeam → subAdmin → superAdmin
+        // 'admin' kept as legacy alias for superAdmin
+        enum: ['user', 'member', 'saathi', 'agent', 'supportTeam', 'subAdmin', 'superAdmin', 'admin'],
         default: 'user'
     },
+    // KYC Verification Status
+    kycStatus: {
+        type: String,
+        enum: ['not_submitted', 'pending', 'under_review', 'approved', 'rejected'],
+        default: 'not_submitted'
+    },
+    kycVerifiedAt: { type: Date, default: null },
+    kycRejectionReason: { type: String, default: null },
+    kycReviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     // Profile fields
     firstName: { type: String, default: '' },
     lastName: { type: String, default: '' },

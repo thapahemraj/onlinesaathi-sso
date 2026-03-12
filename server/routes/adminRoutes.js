@@ -1,22 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
-const { admin } = require('../middleware/adminMiddleware');
+const { protect, isSupportPlus, isSubAdmin, isSuperAdmin, requireMinRole } = require('../middleware/authMiddleware');
 const {
     getDashboardStats,
     getAllUsers,
     deleteUser,
-    updateUser
+    updateUser,
+    assignRole,
+    getUsersByRole,
+    lookupUser
 } = require('../controllers/adminController');
 
-// All routes are protected and admin-only
+// All routes require authentication + at least supportTeam level
 router.use(protect);
-router.use(admin);
+router.use(isSupportPlus);
 
 router.get('/stats', getDashboardStats);
+
+// User management
 router.get('/users', getAllUsers);
+router.get('/users/lookup', lookupUser);             // Support team can use this
+router.get('/users/by-role', isSubAdmin, getUsersByRole);
 router.route('/users/:id')
-    .delete(deleteUser)
-    .put(updateUser);
+    .delete(isSubAdmin, deleteUser)
+    .put(isSubAdmin, updateUser);
+router.put('/users/:id/role', isSubAdmin, assignRole); // subAdmin and above
 
 module.exports = router;

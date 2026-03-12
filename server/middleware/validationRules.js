@@ -29,6 +29,21 @@ const registerRules = [
         .matches(/[a-z]/).withMessage('Password must contain at least one lowercase letter')
         .matches(/[0-9]/).withMessage('Password must contain at least one number')
         .matches(/[@$!%*?&#]/).withMessage('Password must contain at least one special character (@$!%*?&#)'),
+    body('firstName')
+        .optional()
+        .trim()
+        .isLength({ max: 50 }).withMessage('First name is too long'),
+    body('lastName')
+        .optional()
+        .trim()
+        .isLength({ max: 50 }).withMessage('Last name is too long'),
+    body('country')
+        .optional()
+        .trim()
+        .isLength({ max: 100 }).withMessage('Country name is too long'),
+    body('dateOfBirth')
+        .optional()
+        .isISO8601().withMessage('Date of birth must be a valid date'),
 ];
 
 const loginRules = [

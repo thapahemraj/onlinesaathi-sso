@@ -14,7 +14,17 @@ const Session = require('../models/Session');
 const registerUser = async (req, res) => {
     try {
         await connectDB();
-        const { username, email, password, phoneNumber, firebaseUid } = req.body;
+        const {
+            username,
+            email,
+            password,
+            phoneNumber,
+            firebaseUid,
+            firstName,
+            lastName,
+            dateOfBirth,
+            country
+        } = req.body;
 
         // Check for existing user by email, username, or phone individually to give better error message
         if (email) {
@@ -36,7 +46,11 @@ const registerUser = async (req, res) => {
             email,
             password,
             phoneNumber,
-            firebaseUid
+            firebaseUid,
+            firstName,
+            lastName,
+            dateOfBirth,
+            country
         });
 
         if (user) {

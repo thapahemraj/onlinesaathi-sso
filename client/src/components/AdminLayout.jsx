@@ -18,7 +18,7 @@ import {
 import { useTheme } from '../context/ThemeContext';
 
 
-const AdminLayout = () => {
+const AdminLayout = ({ children }) => {
     const { user, logout } = useAuth(); // Assuming 'user' has 'role'
     const { theme, toggleTheme } = useTheme();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -124,7 +124,7 @@ const AdminLayout = () => {
 
                 {/* Page Content */}
                 <main className="flex-1 overflow-auto p-4 sm:p-6 md:p-8">
-                    <Outlet />
+                    {children ?? <Outlet />}
                 </main>
 
             </div>

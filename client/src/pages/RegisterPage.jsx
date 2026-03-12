@@ -50,6 +50,45 @@ const RegisterPage = () => {
         }
     };
 
+    const buildDateOfBirth = () => {
+        const day = Number(birthDay);
+        const monthNames = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December'
+        ];
+        const normalizedMonth = /^\d+$/.test(String(birthMonth))
+            ? Number(birthMonth)
+            : monthNames.findIndex((monthName) => monthName === birthMonth) + 1;
+        const year = Number(birthYear);
+
+        if (!day || !normalizedMonth || !year) {
+            return null;
+        }
+
+        const date = new Date(Date.UTC(year, normalizedMonth - 1, day, 12, 0, 0));
+
+        if (
+            Number.isNaN(date.getTime()) ||
+            date.getUTCFullYear() !== year ||
+            date.getUTCMonth() !== normalizedMonth - 1 ||
+            date.getUTCDate() !== day
+        ) {
+            return null;
+        }
+
+        return date.toISOString();
+    };
+
     const handleNext = (e) => {
         e.preventDefault();
         setError('');
@@ -100,6 +139,11 @@ const RegisterPage = () => {
         else if (step === 4) {
             if (!birthDay || !birthMonth || !birthYear) {
                 setError('Please enter your birthdate.');
+                return;
+            }
+
+            if (!buildDateOfBirth()) {
+                setError('Please enter a valid birthdate.');
                 return;
             }
 
@@ -197,6 +241,9 @@ const RegisterPage = () => {
             // Verify OTP
             showAlert('Verifying code...', 'loading');
             let firebaseUid = null;
+            const normalizedFirstName = firstName.trim();
+            const normalizedLastName = lastName.trim();
+            const dateOfBirth = buildDateOfBirth();
 
             if (usePhone) {
                 if (!confirmationResult) {
@@ -213,12 +260,16 @@ const RegisterPage = () => {
             // Combine names for the simple backend 'username' field
             // Append random 4 digits to ensure uniqueness
             const uniqueSuffix = Math.floor(1000 + Math.random() * 9000).toString();
-            const fullName = `${firstName} ${lastName}`;
-            const generatedUsername = `${firstName}${lastName}${uniqueSuffix}`.replace(/\s+/g, ''); // Remove spaces for username
+            const usernameBase = `${normalizedFirstName}${normalizedLastName}`.replace(/[^a-zA-Z0-9_]/g, '');
+            const generatedUsername = `${usernameBase || 'user'}${uniqueSuffix}`;
 
             const payload = {
                 username: generatedUsername,
                 password,
+                firstName: normalizedFirstName,
+                lastName: normalizedLastName,
+                country: country.trim(),
+                dateOfBirth,
             };
 
             if (usePhone) {
@@ -228,7 +279,7 @@ const RegisterPage = () => {
                 payload.email = email;
             }
 
-            await register(payload.username, payload.email, payload.password, payload.phoneNumber, payload.firebaseUid);
+            await register(payload);
             showAlert('Registration successful!', 'success');
             navigate('/dashboard');
         } catch (err) {
@@ -458,7 +509,7 @@ const RegisterPage = () => {
 
                                 <div className="mb-6">
                                     <h3 className="block text-xs font-semibold text-[#1b1b1b] dark:text-gray-300 mb-1.5">Country/region</h3>
-                                    <div className="relative border border-[#868686] border-b border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-b-2 bg-white dark:bg-[#3b3b3b] dark:border-gray-600 h-[36px] transition-colors rounded-md">
+                                    <div className="relative border border-[#868686] hover:border-[#323130] focus-within:border-[#0067b8] focus-within:border-b-2 bg-white dark:bg-[#3b3b3b] dark:border-gray-600 h-[36px] transition-colors rounded-md">
                                         <select
                                             className="w-full h-full px-2 bg-transparent outline-none text-[15px] text-[#1b1b1b] dark:text-white appearance-none"
                                             value={country}
@@ -487,8 +538,8 @@ const RegisterPage = () => {
                                                     onChange={(e) => setBirthMonth(e.target.value)}
                                                 >
                                                     <option value="" disabled></option>
-                                                    {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
-                                                        <option key={m} value={m} className="text-[#1b1b1b] dark:text-white dark:bg-[#3b3b3b]">{m}</option>
+                                                    {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((monthName, index) => (
+                                                        <option key={monthName} value={index + 1} className="text-[#1b1b1b] dark:text-white dark:bg-[#3b3b3b]">{monthName}</option>
                                                     ))}
                                                 </select>
                                                 <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] dark:text-gray-400 ${birthMonth ? 'top-0 text-xs text-[#0067b8] dark:text-[#4f93ce] -translate-y-1/2 bg-white dark:bg-[#3b3b3b] px-1' : 'top-1.5 text-[15px]'}`}>Month</label>
@@ -527,9 +578,11 @@ const RegisterPage = () => {
                                                     onChange={(e) => setBirthYear(e.target.value)}
                                                 >
                                                     <option value="" disabled></option>
-                                                    {[...Array(100)].map((_, i) => (
-                                                        <option key={i} value={2024 - i} className="text-[#1b1b1b] dark:text-white dark:bg-[#3b3b3b]">{2024 - i}</option>
-                                                    ))}
+                                                    {[...Array(100)].map((_, i) => {
+                                                        const currentYear = new Date().getFullYear();
+                                                        const yearOption = currentYear - i;
+                                                        return <option key={yearOption} value={yearOption} className="text-[#1b1b1b] dark:text-white dark:bg-[#3b3b3b]">{yearOption}</option>;
+                                                    })}
                                                 </select>
                                                 <label className={`absolute left-2 transition-all duration-200 pointer-events-none text-[#666] dark:text-gray-400 ${birthYear ? 'top-0 text-xs text-[#0067b8] dark:text-[#4f93ce] -translate-y-1/2 bg-white dark:bg-[#3b3b3b] px-1' : 'top-1.5 text-[15px]'}`}>Year</label>
                                                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">

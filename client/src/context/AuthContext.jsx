@@ -9,6 +9,23 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const apiOrigin = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+
+    const normalizeUser = (userData) => {
+        if (!userData) {
+            return userData;
+        }
+
+        const profilePicture = typeof userData.profilePicture === 'string' && userData.profilePicture.startsWith('/')
+            ? `${apiOrigin}${userData.profilePicture}`
+            : userData.profilePicture || '';
+
+        return {
+            ...userData,
+            profilePicture
+        };
+    };
+
     // Configure axios defaults
     axios.defaults.withCredentials = true;
     axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -17,7 +34,7 @@ export const AuthProvider = ({ children }) => {
         const checkUser = async () => {
             try {
                 const { data } = await axios.get('/profile');
-                setUser(data);
+                setUser(normalizeUser(data));
             } catch (error) {
                 console.log('Not logged in');
                 setUser(null);
@@ -38,17 +55,20 @@ export const AuthProvider = ({ children }) => {
 
         // Normal login — fetch full profile
         const { data: profile } = await axios.get('/profile');
-        setUser(profile);
-        return profile;
+        const normalizedProfile = normalizeUser(profile);
+        setUser(normalizedProfile);
+        return normalizedProfile;
     };
 
     // Complete login after 2FA verification
     const verify2FA = async (userId, code, trustDevice = false) => {
         setLoading(true);
         try {
-            const res = await axios.post('/2fa/login-verify', { userId, code, trustDevice });
-            setUser(res.data);
-            return res.data;
+            await axios.post('/2fa/login-verify', { userId, code, trustDevice });
+            const { data: profile } = await axios.get('/profile');
+            const normalizedProfile = normalizeUser(profile);
+            setUser(normalizedProfile);
+            return normalizedProfile;
         } catch (error) {
             throw error;
         } finally {
@@ -56,12 +76,13 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (username, email, password, phoneNumber, firebaseUid) => {
-        const { data } = await axios.post('/auth/register', { username, email, password, phoneNumber, firebaseUid });
+    const register = async (registrationData) => {
+        await axios.post('/auth/register', registrationData);
         // After register, fetch full profile
         const { data: profile } = await axios.get('/profile');
-        setUser(profile);
-        return profile;
+        const normalizedProfile = normalizeUser(profile);
+        setUser(normalizedProfile);
+        return normalizedProfile;
     };
 
     const logout = async () => {
@@ -73,7 +94,7 @@ export const AuthProvider = ({ children }) => {
     const refreshUser = async () => {
         try {
             const { data } = await axios.get('/profile');
-            setUser(data);
+            setUser(normalizeUser(data));
         } catch (error) {
             console.error('Failed to refresh user data');
         }
@@ -94,8 +115,9 @@ export const AuthProvider = ({ children }) => {
         });
 
         const { data: profile } = await axios.get('/profile');
-        setUser(profile);
-        return profile;
+        const normalizedProfile = normalizeUser(profile);
+        setUser(normalizedProfile);
+        return normalizedProfile;
     };
 
     return (

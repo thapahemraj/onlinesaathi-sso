@@ -10,7 +10,11 @@ import Subscriptions from './dashboard/Subscriptions';
 import PaymentOptions from './dashboard/PaymentOptions';
 import OrderHistory from './dashboard/OrderHistory';
 import AddressBook from './dashboard/AddressBook';
-import ActivityLog from './dashboard/ActivityLog'; // Added ActivityLog import
+import ActivityLog from './dashboard/ActivityLog';
+import Documents from './dashboard/Documents';
+import Schemes from './dashboard/Schemes';
+import Jobs from './dashboard/Jobs';
+import KYCStatus from './dashboard/KYCStatus';
 
 const Dashboard = () => {
     return (
@@ -26,7 +30,11 @@ const Dashboard = () => {
                 <Route path="payment" element={<PaymentOptions />} />
                 <Route path="orders" element={<OrderHistory />} />
                 <Route path="addresses" element={<AddressBook />} />
-                <Route path="activity" element={<ActivityLog />} /> {/* Added ActivityLog route */}
+                <Route path="activity" element={<ActivityLog />} />
+                <Route path="documents" element={<Documents />} />
+                <Route path="schemes" element={<Schemes />} />
+                <Route path="jobs" element={<Jobs />} />
+                <Route path="kyc-status" element={<KYCStatus />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
         </DashboardLayout>

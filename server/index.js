@@ -64,6 +64,12 @@ app.use('/api/wallet', require('./routes/walletRoutes'));
 app.use('/api/features', require('./routes/featureRoutes'));
 app.use('/api/apps/voice-ai', require('./routes/appRoutes'));
 
+// RBAC feature routes
+app.use('/api/kyc', require('./routes/kycRoutes'));
+app.use('/api/documents', require('./routes/documentRoutes'));
+app.use('/api/schemes', require('./routes/schemeRoutes'));
+app.use('/api/jobs', require('./routes/jobRoutes'));
+
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

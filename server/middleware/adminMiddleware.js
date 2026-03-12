@@ -1,19 +1,13 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { ROLE_LEVELS } = require('./authMiddleware');
 
 const admin = async (req, res, next) => {
     try {
-        // Auth middleware should have already run and attached req.user (id)
-        // Let's fetch the full user to check role
         if (!req.user) {
             return res.status(401).json({ message: 'Not authorized' });
         }
-
-        // Check if req.user is just an ID (depending on auth middleware) or full object
-        // Usually auth middleware does: req.user = await User.findById(decoded.id).select('-password');
-        // Let's verify what auth middleware does by looking at it, but for now assuming standard 'protect' middleware
-
-        if (req.user.role === 'admin') {
+        // Accept any admin-level role (supportTeam and above)
+        const level = ROLE_LEVELS[req.user.role] || 0;
+        if (level >= ROLE_LEVELS['supportTeam']) {
             next();
         } else {
             res.status(403).json({ message: 'Not authorized as admin' });
