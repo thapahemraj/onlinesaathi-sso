@@ -15,6 +15,7 @@ import Documents from './dashboard/Documents';
 import Schemes from './dashboard/Schemes';
 import Jobs from './dashboard/Jobs';
 import KYCStatus from './dashboard/KYCStatus';
+import WalletPage from './dashboard/Wallet';
 
 const Dashboard = () => {
     return (
@@ -35,6 +36,7 @@ const Dashboard = () => {
                 <Route path="schemes" element={<Schemes />} />
                 <Route path="jobs" element={<Jobs />} />
                 <Route path="kyc-status" element={<KYCStatus />} />
+                <Route path="wallet" element={<WalletPage />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
         </DashboardLayout>

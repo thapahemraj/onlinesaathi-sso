@@ -1,7 +1,7 @@
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Smartphone, Shield, Eye, User, CreditCard, MapPin, ShoppingBag, Package } from 'lucide-react';
+import { Smartphone, Shield, Eye, User, CreditCard, MapPin, ShoppingBag, Package, Wallet } from 'lucide-react';
 import ProfileCompletion from '../../components/ProfileCompletion';
 import axios from 'axios';
 
@@ -60,6 +60,7 @@ const Overview = () => {
                 <QuickCard icon={MapPin} title="Addresses" subtitle="Billing & shipping" onClick={() => navigate('/dashboard/addresses')} color="bg-teal-500" />
                 <QuickCard icon={ShoppingBag} title="Orders" subtitle="Order history" onClick={() => navigate('/dashboard/orders')} color="bg-orange-500" />
                 <QuickCard icon={Package} title="Subscriptions" subtitle="Active plans" onClick={() => navigate('/dashboard/subscriptions')} color="bg-indigo-500" />
+                <QuickCard icon={Wallet} title="My Wallet" subtitle="Balance & top-up" onClick={() => navigate('/dashboard/wallet')} color="bg-green-600" />
             </div>
         </div>
     );
