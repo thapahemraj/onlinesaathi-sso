@@ -21,6 +21,13 @@ const sidebars = {
         'api-reference',
       ],
     },
+    {
+      type: 'category',
+      label: 'Wallet & Payments',
+      items: [
+        'add-money',
+      ],
+    },
   ],
 };
 
