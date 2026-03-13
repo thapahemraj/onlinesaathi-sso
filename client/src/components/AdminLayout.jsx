@@ -13,7 +13,8 @@ import {
     AppWindow, // Replaced Grid with AppWindow for applications
     Activity,
     Sun,
-    Moon
+    Moon,
+    Wallet
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -36,6 +37,7 @@ const AdminLayout = ({ children }) => {
         { path: '/dashboard/admin/orgs', label: 'Organizations', icon: Building },
         { path: '/dashboard/admin/apps', label: 'Applications (OAuth)', icon: AppWindow },
         { path: '/dashboard/admin/security', label: 'Security & Auth', icon: Shield },
+        { path: '/dashboard/admin/transactions', label: 'Wallet Approvals', icon: Wallet },
         { path: '/dashboard/admin/audit', label: 'Audit Logs', icon: Activity },
         { path: '/dashboard/admin/settings', label: 'Settings', icon: Settings },
     ];

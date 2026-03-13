@@ -13,13 +13,23 @@ const getWallet = async (req, res) => {
         if (!org) return res.status(404).json({ message: 'Organization not found' });
 
         let wallet = await Wallet.findOne({ organization: org._id });
-
-        // Auto-create wallet if missing (fail-safe)
         if (!wallet) {
             wallet = await Wallet.create({ organization: org._id });
         }
 
-        res.json(wallet);
+        // Calculate pending top-ups
+        const pendingTransactions = await Transaction.find({
+            organization: org._id,
+            type: 'credit',
+            status: 'pending',
+            category: 'topup'
+        });
+        const pendingTopup = pendingTransactions.reduce((acc, curr) => acc + curr.amount, 0);
+
+        res.json({
+            ...wallet.toObject(),
+            pendingTopup
+        });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -48,26 +58,34 @@ const getTransactions = async (req, res) => {
 // @access  Private
 const topUpWallet = async (req, res) => {
     try {
-        const { amount, description } = req.body;
+        const { amount, description, referenceId, bankVoucherNumber, screenshotUrl } = req.body;
         const org = await Organization.findOne({ owner: req.user._id });
         if (!org) return res.status(404).json({ message: 'Organization not found' });
 
         const wallet = await Wallet.findOne({ organization: org._id });
         if (!wallet) return res.status(404).json({ message: 'Wallet not found' });
 
-        wallet.balance += Number(amount);
-        await wallet.save();
-
-        await Transaction.create({
+        // Create a PENDING transaction instead of immediate credit
+        const transaction = await Transaction.create({
             wallet: wallet._id,
             organization: org._id,
             type: 'credit',
             amount,
-            description: description || 'Balance Top-up',
-            category: 'topup'
+            description: description || 'Balance Top-up Request',
+            category: 'topup',
+            status: 'pending',
+            referenceId: referenceId || `TOPUP-${Date.now()}`,
+            metadata: {
+                bankVoucherNumber,
+                screenshotUrl
+            }
         });
 
-        res.json({ message: 'Top-up successful', balance: wallet.balance });
+        res.json({ 
+            message: 'Top-up request submitted. Pending admin verification.', 
+            transactionId: transaction._id,
+            status: 'pending'
+        });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

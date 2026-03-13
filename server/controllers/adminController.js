@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const KYCRecord = require('../models/KYCRecord');
+const Transaction = require('../models/Transaction');
+const Wallet = require('../models/Wallet');
 const { ROLE_LEVELS } = require('../middleware/authMiddleware');
 const { logAction } = require('./auditController');
 
@@ -183,6 +185,70 @@ const lookupUser = async (req, res) => {
     }
 };
 
+// @desc    Get all pending transactions for approval
+// @route   GET /api/admin/transactions/pending
+// @access  Private/Admin
+const getPendingTransactions = async (req, res) => {
+    try {
+        const transactions = await Transaction.find({ status: 'pending', type: 'credit', category: 'topup' })
+            .populate('organization', 'name')
+            .sort({ createdAt: -1 });
+        res.json(transactions);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+};
+
+// @desc    Approve a pending top-up transaction
+// @route   PUT /api/admin/transactions/:id/approve
+// @access  Private/Admin
+const approveTransaction = async (req, res) => {
+    try {
+        const transaction = await Transaction.findById(req.params.id);
+        if (!transaction) return res.status(404).json({ message: 'Transaction not found' });
+        if (transaction.status !== 'pending') return res.status(400).json({ message: 'Transaction is already processed' });
+
+        const wallet = await Wallet.findById(transaction.wallet);
+        if (!wallet) return res.status(404).json({ message: 'Wallet not found' });
+
+        // Update status and credit balance
+        transaction.status = 'completed';
+        wallet.balance += transaction.amount;
+
+        await transaction.save();
+        await wallet.save();
+
+        await logAction(req, 'Approve Top-up', 'Transaction', transaction._id, { amount: transaction.amount }, 'Success');
+
+        res.json({ message: 'Transaction approved and wallet credited', transaction });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+};
+
+// @desc    Reject a pending top-up transaction
+// @route   PUT /api/admin/transactions/:id/reject
+// @access  Private/Admin
+const rejectTransaction = async (req, res) => {
+    try {
+        const { reason } = req.body;
+        const transaction = await Transaction.findById(req.params.id);
+        if (!transaction) return res.status(404).json({ message: 'Transaction not found' });
+        if (transaction.status !== 'pending') return res.status(400).json({ message: 'Transaction is already processed' });
+
+        transaction.status = 'rejected';
+        transaction.description = `${transaction.description} (Rejected: ${reason || 'No reason provided'})`;
+
+        await transaction.save();
+
+        await logAction(req, 'Reject Top-up', 'Transaction', transaction._id, { reason }, 'Success');
+
+        res.json({ message: 'Transaction rejected', transaction });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+};
+
 module.exports = {
     getDashboardStats,
     getAllUsers,
@@ -190,5 +256,8 @@ module.exports = {
     updateUser,
     assignRole,
     getUsersByRole,
-    lookupUser
+    lookupUser,
+    getPendingTransactions,
+    approveTransaction,
+    rejectTransaction
 };

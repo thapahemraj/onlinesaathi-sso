@@ -12,6 +12,7 @@ import Organizations from './pages/admin/Organizations';
 import SecuritySettings from './pages/admin/SecuritySettings';
 import AuditLogs from './pages/admin/AuditLogs';
 import RoleManagement from './pages/admin/RoleManagement';
+import TransactionManagement from './pages/admin/TransactionManagement';
 import AdminRoute from './components/AdminRoute';
 import RoleRoute from './components/RoleRoute';
 import AgentDashboard from './pages/agent/AgentDashboard';
@@ -83,6 +84,7 @@ function App() {
           <Route path="orgs" element={<Organizations />} />
           <Route path="security" element={<SecuritySettings />} />
           <Route path="audit" element={<AuditLogs />} />
+          <Route path="transactions" element={<TransactionManagement />} />
         </Route>
       </Routes>
     </div>

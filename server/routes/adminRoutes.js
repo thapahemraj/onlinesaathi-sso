@@ -8,7 +8,10 @@ const {
     updateUser,
     assignRole,
     getUsersByRole,
-    lookupUser
+    lookupUser,
+    getPendingTransactions,
+    approveTransaction,
+    rejectTransaction
 } = require('../controllers/adminController');
 
 // All routes require authentication + at least supportTeam level
@@ -25,5 +28,10 @@ router.route('/users/:id')
     .delete(isSubAdmin, deleteUser)
     .put(isSubAdmin, updateUser);
 router.put('/users/:id/role', isSubAdmin, assignRole); // subAdmin and above
+
+// Transaction management (Approvals)
+router.get('/transactions/pending', isSubAdmin, getPendingTransactions);
+router.put('/transactions/:id/approve', isSubAdmin, approveTransaction);
+router.put('/transactions/:id/reject', isSubAdmin, rejectTransaction);
 
 module.exports = router;
