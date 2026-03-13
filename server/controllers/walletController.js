@@ -2,20 +2,34 @@ const Wallet = require('../models/Wallet');
 const Transaction = require('../models/Transaction');
 const Organization = require('../models/Organization');
 
+// Helper to find or create organization and wallet for a user
+const getOrCreateUserContext = async (userId, username) => {
+    let org = await Organization.findOne({ owner: userId });
+    
+    if (!org) {
+        // Create a default personal organization for the user
+        const slug = `${username.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString(36)}`;
+        org = await Organization.create({
+            name: `${username}'s Workspace`,
+            slug,
+            owner: userId
+        });
+    }
+
+    let wallet = await Wallet.findOne({ organization: org._id });
+    if (!wallet) {
+        wallet = await Wallet.create({ organization: org._id });
+    }
+
+    return { org, wallet };
+};
+
 // @desc    Get organization wallet
 // @route   GET /api/wallet
 // @access  Private
 const getWallet = async (req, res) => {
     try {
-        // Assuming the user is linked to an organization. 
-        // For now, if the user doesn't have an organization, we'll return an error or find the one they own.
-        const org = await Organization.findOne({ owner: req.user._id });
-        if (!org) return res.status(404).json({ message: 'Organization not found' });
-
-        let wallet = await Wallet.findOne({ organization: org._id });
-        if (!wallet) {
-            wallet = await Wallet.create({ organization: org._id });
-        }
+        const { org, wallet } = await getOrCreateUserContext(req.user._id, req.user.username);
 
         // Calculate pending top-ups
         const pendingTransactions = await Transaction.find({
@@ -40,8 +54,7 @@ const getWallet = async (req, res) => {
 // @access  Private
 const getTransactions = async (req, res) => {
     try {
-        const org = await Organization.findOne({ owner: req.user._id });
-        if (!org) return res.status(404).json({ message: 'Organization not found' });
+        const { org } = await getOrCreateUserContext(req.user._id, req.user.username);
 
         const transactions = await Transaction.find({ organization: org._id })
             .sort({ createdAt: -1 })
@@ -59,11 +72,7 @@ const getTransactions = async (req, res) => {
 const topUpWallet = async (req, res) => {
     try {
         const { amount, description, referenceId, bankVoucherNumber, screenshotUrl } = req.body;
-        const org = await Organization.findOne({ owner: req.user._id });
-        if (!org) return res.status(404).json({ message: 'Organization not found' });
-
-        const wallet = await Wallet.findOne({ organization: org._id });
-        if (!wallet) return res.status(404).json({ message: 'Wallet not found' });
+        const { org, wallet } = await getOrCreateUserContext(req.user._id, req.user.username);
 
         // Create a PENDING transaction instead of immediate credit
         const transaction = await Transaction.create({
