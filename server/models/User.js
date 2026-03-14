@@ -45,6 +45,14 @@ const userSchema = new mongoose.Schema({
         enum: ['user', 'member', 'saathi', 'agent', 'supportTeam', 'subAdmin', 'superAdmin', 'admin'],
         default: 'user'
     },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
     // KYC Verification Status
     kycStatus: {
         type: String,
@@ -57,6 +65,11 @@ const userSchema = new mongoose.Schema({
     // Profile fields
     firstName: { type: String, default: '' },
     lastName: { type: String, default: '' },
+    gender: {
+        type: String,
+        enum: ['male', 'female', 'other', 'prefer_not_to_say'],
+        default: 'prefer_not_to_say'
+    },
     dateOfBirth: { type: Date, default: null },
     country: { type: String, default: '' },
     language: { type: String, default: 'English (United States)' },

@@ -7,6 +7,7 @@ import {
     Key,
     Smartphone,
     CreditCard,
+    Settings,
     Menu,
     X,
     LogOut,
@@ -22,7 +23,6 @@ import {
     Star,
     UserCheck,
     HeartHandshake,
-    LifeBuoy,
     Users,
     Wallet
 } from 'lucide-react';
@@ -31,6 +31,7 @@ import { useTheme } from '../context/ThemeContext';
 const ROLE_LEVELS = {
     user: 10, member: 15, saathi: 20, agent: 30, supportTeam: 40, subAdmin: 70, superAdmin: 100, admin: 100
 };
+
 const hasMinRole = (userRole, minRole) => (ROLE_LEVELS[userRole] || 0) >= (ROLE_LEVELS[minRole] || 0);
 
 const DashboardLayout = ({ children }) => {
@@ -133,7 +134,7 @@ const DashboardLayout = ({ children }) => {
     );
 
     return (
-        <div className="min-h-screen bg-[#f2f2f2] dark:bg-[#1b1b1b] font-segoe transition-colors duration-300">
+        <div className="h-screen bg-[#f2f2f2] dark:bg-[#1b1b1b] font-segoe transition-colors duration-300 overflow-hidden">
             {/* Header */}
             <header className="bg-[#0078D4] dark:bg-[#2b2b2b] text-white h-12 flex items-center justify-between px-4 sticky top-0 z-50 transition-colors">
                 <div className="flex items-center gap-4">
@@ -171,9 +172,9 @@ const DashboardLayout = ({ children }) => {
                 </div>
             </header>
 
-            <div className="flex max-w-[1600px] mx-auto">
+            <div className="flex w-full h-[calc(100vh-48px)] overflow-hidden">
                 {/* Sidebar - Desktop */}
-                <aside className="hidden md:block w-64 bg-[#f2f2f2] dark:bg-[#1b1b1b] min-h-[calc(100vh-48px)] pt-8 pl-4 pr-6 transition-colors overflow-y-auto">
+                <aside className="hidden md:block w-64 bg-[#f2f2f2] dark:bg-[#1b1b1b] h-full pt-3 pl-4 pr-6 transition-colors overflow-y-auto overscroll-contain hide-scrollbar">
                     <SidebarNav />
                 </aside>
 
@@ -181,7 +182,7 @@ const DashboardLayout = ({ children }) => {
                 {isMobileMenuOpen && (
                     <div className="fixed inset-0 z-40 md:hidden">
                         <div className="absolute inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}></div>
-                        <div className="absolute left-0 top-12 bottom-0 w-64 bg-white dark:bg-[#2c2c2c] shadow-xl py-4 overflow-y-auto transition-colors">
+                        <div className="absolute left-0 top-12 bottom-0 w-64 bg-white dark:bg-[#2c2c2c] shadow-xl py-4 overflow-y-auto hide-scrollbar transition-colors">
                             <div className="px-2">
                                 <SidebarNav onClickItem={() => setIsMobileMenuOpen(false)} />
                             </div>
@@ -190,7 +191,7 @@ const DashboardLayout = ({ children }) => {
                 )}
 
                 {/* Main Content */}
-                <main className="flex-1 p-4 sm:p-6 md:p-8 md:pt-14 overflow-hidden min-w-0">
+                <main className="flex-1 h-full px-4 sm:px-6 md:px-8 pb-4 sm:pb-6 md:pb-8 pt-3 overflow-y-auto overflow-x-hidden overscroll-contain hide-scrollbar min-w-0">
                     {children}
                 </main>
             </div>
