@@ -5,12 +5,13 @@ import Dashboard from './pages/Dashboard';
 import ConsentPage from './pages/ConsentPage';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
-import UserManagement from './pages/admin/UserManagement';
 import Applications from './pages/admin/Applications';
 import ApplicationDetail from './pages/admin/ApplicationDetail';
 import Organizations from './pages/admin/Organizations';
 import SecuritySettings from './pages/admin/SecuritySettings';
 import AuditLogs from './pages/admin/AuditLogs';
+import WalletBalance from './pages/admin/WalletBalance';
+import WalletHistory from './pages/admin/WalletHistory';
 import RoleManagement from './pages/admin/RoleManagement';
 import TransactionManagement from './pages/admin/TransactionManagement';
 import AdminRoute from './components/AdminRoute';
@@ -19,12 +20,22 @@ import AgentDashboard from './pages/agent/AgentDashboard';
 import KYCReview from './pages/agent/KYCReview';
 import SaathiDashboard from './pages/saathi/SaathiDashboard';
 import SupportDashboard from './pages/support/SupportDashboard';
+import UsersList from './pages/dashboard/UsersList';
+import MemberList from './pages/dashboard/MemberList';
+import SaathiList from './pages/dashboard/SaathiList';
+import DistrictPartnerList from './pages/dashboard/DistrictPartnerList';
+import StatePartnerList from './pages/dashboard/StatePartnerList';
+import ParentMappingRequests from './pages/dashboard/ParentMappingRequests';
 import { useAuth } from './context/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div>Loading...</div>;
-  if (!user) return <Navigate to="/login" />;
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+  if (!user) return <Navigate to="/login" replace />;
   return children;
 };
 
@@ -34,15 +45,50 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* OAuth Consent Screen */}
         <Route path="/oauth/consent" element={<ProtectedRoute><ConsentPage /></ProtectedRoute>} />
 
-        {/* User Dashboard */}
+        {/* ── ADMIN PANEL ──────────────────────────────────────────────
+            MUST be defined BEFORE /dashboard/* wildcard.
+            Two-level guard: outer AdminRoute checks auth, inner
+            AdminLayout renders the sidebar + <Outlet /> for page content.
+        ──────────────────────────────────────────────────────────────── */}
+        <Route
+          path="/dashboard/admin"
+          element={
+            <ProtectedRoute>
+              <AdminRoute minRole="supportTeam">
+                <AdminLayout />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<UsersList />} />
+          <Route path="members" element={<MemberList />} />
+          <Route path="saathi" element={<SaathiList />} />
+          <Route path="district-partner" element={<DistrictPartnerList />} />
+          <Route path="state-partner" element={<StatePartnerList />} />
+          <Route path="parent-mapping-requests" element={<ParentMappingRequests />} />
+          <Route path="roles" element={
+            <AdminRoute minRole="subAdmin"><RoleManagement /></AdminRoute>
+          } />
+          <Route path="apps" element={<Applications />} />
+          <Route path="apps/:id" element={<ApplicationDetail />} />
+          <Route path="orgs" element={<Organizations />} />
+          <Route path="security" element={<SecuritySettings />} />
+          <Route path="audit" element={<AuditLogs />} />
+          <Route path="transactions" element={<TransactionManagement />} />
+          <Route path="wallet-balance" element={<WalletBalance />} />
+          <Route path="wallet-history" element={<WalletHistory />} />
+        </Route>
+
+        {/* ── USER DASHBOARD — wildcard kept AFTER /dashboard/admin ── */}
         <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
-        {/* Agent KYC Dashboard */}
+        {/* Agent KYC */}
         <Route path="/agent" element={
           <RoleRoute roles={['agent', 'subAdmin', 'superAdmin', 'admin']}>
             <AgentDashboard />
@@ -67,25 +113,6 @@ function App() {
             <SupportDashboard />
           </RoleRoute>
         } />
-
-        {/* Admin Dashboard */}
-        <Route path="/dashboard/admin" element={
-          <AdminRoute minRole="supportTeam">
-            <AdminLayout />
-          </AdminRoute>
-        }>
-          <Route index element={<AdminDashboard />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="roles" element={
-            <AdminRoute minRole="subAdmin"><RoleManagement /></AdminRoute>
-          } />
-          <Route path="apps" element={<Applications />} />
-          <Route path="apps/:id" element={<ApplicationDetail />} />
-          <Route path="orgs" element={<Organizations />} />
-          <Route path="security" element={<SecuritySettings />} />
-          <Route path="audit" element={<AuditLogs />} />
-          <Route path="transactions" element={<TransactionManagement />} />
-        </Route>
       </Routes>
     </div>
   );

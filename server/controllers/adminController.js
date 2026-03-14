@@ -52,6 +52,110 @@ const getAllUsers = async (req, res) => {
     }
 };
 
+// @desc    Create user (admin flow)
+// @route   POST /api/admin/users
+// @access  Private (subAdmin and above)
+const createUser = async (req, res) => {
+    try {
+        const {
+            username,
+            email,
+            password,
+            phoneNumber,
+            role = 'user',
+            firstName,
+            lastName,
+            dateOfBirth,
+            gender,
+            city,
+            state,
+            parent,
+            isActive,
+            emailVerified
+        } = req.body;
+        const validRoles = ['user', 'member', 'saathi', 'agent', 'supportTeam', 'subAdmin', 'superAdmin', 'admin'];
+        const validGenders = ['male', 'female', 'other', 'prefer_not_to_say'];
+
+        if (!username || !password) {
+            return res.status(400).json({ message: 'Username and password are required.' });
+        }
+        if (password.length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters.' });
+        }
+        if (!validRoles.includes(role)) {
+            return res.status(400).json({ message: 'Invalid role specified.' });
+        }
+        if (gender && !validGenders.includes(gender)) {
+            return res.status(400).json({ message: 'Invalid gender specified.' });
+        }
+
+        const requesterLevel = ROLE_LEVELS[req.user.role] || 0;
+        const targetRoleLevel = ROLE_LEVELS[role] || 0;
+        if (!['superAdmin', 'admin'].includes(req.user.role) && targetRoleLevel >= requesterLevel) {
+            return res.status(403).json({ message: 'Cannot create user with role at or above your own level.' });
+        }
+
+        const trimmedUsername = String(username).trim();
+        const trimmedEmail = email ? String(email).trim().toLowerCase() : undefined;
+        const trimmedPhone = phoneNumber ? String(phoneNumber).trim() : undefined;
+
+        const usernameExists = await User.findOne({ username: trimmedUsername });
+        if (usernameExists) return res.status(400).json({ message: 'Username already exists.' });
+
+        if (trimmedEmail) {
+            const emailExists = await User.findOne({ email: trimmedEmail });
+            if (emailExists) return res.status(400).json({ message: 'Email already exists.' });
+        }
+
+        if (trimmedPhone) {
+            const phoneExists = await User.findOne({ phoneNumber: trimmedPhone });
+            if (phoneExists) return res.status(400).json({ message: 'Phone number already exists.' });
+        }
+
+        const user = await User.create({
+            username: trimmedUsername,
+            email: trimmedEmail,
+            phoneNumber: trimmedPhone,
+            password,
+            role,
+            firstName: firstName ? String(firstName).trim() : '',
+            lastName: lastName ? String(lastName).trim() : '',
+            dateOfBirth: dateOfBirth || null,
+            gender: gender || 'prefer_not_to_say',
+            city: city ? String(city).trim() : '',
+            state: state ? String(state).trim() : '',
+            parent: parent ? String(parent).trim() : '',
+            isActive: typeof isActive === 'boolean' ? isActive : true,
+            emailVerified: typeof emailVerified === 'boolean' ? emailVerified : false
+        });
+
+        await logAction(req, 'Create User', 'User', user._id, { username: user.username, role: user.role }, 'Success');
+
+        res.status(201).json({
+            message: 'User created successfully.',
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                role: user.role,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                gender: user.gender,
+                dateOfBirth: user.dateOfBirth,
+                city: user.city,
+                state: user.state,
+                parent: user.parent,
+                isActive: user.isActive,
+                emailVerified: user.emailVerified,
+                createdAt: user.createdAt
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+};
+
 // @desc    Delete user
 // @route   DELETE /api/admin/users/:id
 // @access  Private/Admin
@@ -78,9 +182,19 @@ const updateUser = async (req, res) => {
         const user = await User.findById(req.params.id);
 
         if (user) {
-            user.role = req.body.role || user.role;
-            user.username = req.body.username || user.username;
-            user.email = req.body.email || user.email;
+            if (req.body.role) user.role = req.body.role;
+            if (req.body.username) user.username = req.body.username;
+            if (typeof req.body.email === 'string') user.email = req.body.email;
+            if (typeof req.body.phoneNumber === 'string') user.phoneNumber = req.body.phoneNumber;
+            if (typeof req.body.firstName === 'string') user.firstName = req.body.firstName;
+            if (typeof req.body.lastName === 'string') user.lastName = req.body.lastName;
+            if (req.body.dateOfBirth !== undefined) user.dateOfBirth = req.body.dateOfBirth || null;
+            if (typeof req.body.gender === 'string') user.gender = req.body.gender;
+            if (typeof req.body.city === 'string') user.city = req.body.city;
+            if (typeof req.body.state === 'string') user.state = req.body.state;
+            if (typeof req.body.parent === 'string') user.parent = req.body.parent;
+            if (typeof req.body.isActive === 'boolean') user.isActive = req.body.isActive;
+            if (typeof req.body.emailVerified === 'boolean') user.emailVerified = req.body.emailVerified;
 
             const updatedUser = await user.save();
 
@@ -88,7 +202,19 @@ const updateUser = async (req, res) => {
                 _id: updatedUser._id,
                 username: updatedUser.username,
                 email: updatedUser.email,
-                role: updatedUser.role
+                phoneNumber: updatedUser.phoneNumber,
+                role: updatedUser.role,
+                firstName: updatedUser.firstName,
+                lastName: updatedUser.lastName,
+                dateOfBirth: updatedUser.dateOfBirth,
+                gender: updatedUser.gender,
+                city: updatedUser.city,
+                state: updatedUser.state,
+                parent: updatedUser.parent,
+                isActive: updatedUser.isActive,
+                emailVerified: updatedUser.emailVerified,
+                lastLogin: updatedUser.lastLogin,
+                createdAt: updatedUser.createdAt
             });
         } else {
             res.status(404).json({ message: 'User not found' });
@@ -252,6 +378,7 @@ const rejectTransaction = async (req, res) => {
 module.exports = {
     getDashboardStats,
     getAllUsers,
+    createUser,
     deleteUser,
     updateUser,
     assignRole,

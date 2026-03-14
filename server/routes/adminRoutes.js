@@ -4,6 +4,7 @@ const { protect, isSupportPlus, isSubAdmin, isSuperAdmin, requireMinRole } = req
 const {
     getDashboardStats,
     getAllUsers,
+    createUser,
     deleteUser,
     updateUser,
     assignRole,
@@ -22,6 +23,7 @@ router.get('/stats', getDashboardStats);
 
 // User management
 router.get('/users', getAllUsers);
+router.post('/users', createUser);
 router.get('/users/lookup', lookupUser);             // Support team can use this
 router.get('/users/by-role', isSubAdmin, getUsersByRole);
 router.route('/users/:id')
