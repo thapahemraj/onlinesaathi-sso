@@ -30,8 +30,64 @@ router.route('/users/:id')
 router.put('/users/:id/role', isSubAdmin, assignRole); // subAdmin and above
 
 // Transaction management (Approvals)
+/**
+ * @swagger
+ * /admin/transactions/pending:
+ *   get:
+ *     summary: Get all pending top-up transactions
+ *     tags: [Admin / Wallet]
+ *     responses:
+ *       200:
+ *         description: List of pending transactions retrieved successfully
+ */
 router.get('/transactions/pending', isSubAdmin, getPendingTransactions);
+/**
+ * @swagger
+ * /admin/transactions/{id}/approve:
+ *   put:
+ *     summary: Approve a pending top-up transaction
+ *     tags: [Admin / Wallet]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Transaction ID
+ *     responses:
+ *       200:
+ *         description: Transaction approved successfully
+ */
 router.put('/transactions/:id/approve', isSubAdmin, approveTransaction);
+/**
+ * @swagger
+ * /admin/transactions/{id}/reject:
+ *   put:
+ *     summary: Reject a pending top-up transaction
+ *     tags: [Admin / Wallet]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Transaction ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - reason
+ *             properties:
+ *               reason:
+ *                 type: string
+ *                 description: Reason for rejection
+ *     responses:
+ *       200:
+ *         description: Transaction rejected successfully
+ */
 router.put('/transactions/:id/reject', isSubAdmin, rejectTransaction);
 
 module.exports = router;
