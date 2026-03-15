@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import {
     Users,
     UserCheck,
@@ -150,6 +151,7 @@ const DEMO = Array.from({ length: 36 }, (_, i) => {
 });
 
 export default function StatePartnerList() {
+    const navigate = useNavigate();
     const [partners, setPartners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isDemoMode, setIsDemoMode] = useState(false);
@@ -506,7 +508,7 @@ export default function StatePartnerList() {
                                 </div>
 
                                 <div className="overflow-x-auto hide-scrollbar w-full xl:w-auto xl:max-w-[1000px]">
-                                    <div className="grid grid-cols-5 gap-3 min-w-[880px]">
+                                    <div className="grid grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-3 min-w-[880px]">
                                         <div className="flex flex-col gap-1 min-w-0">
                                             <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Created Date</label>
                                             <div className="relative">
@@ -564,9 +566,9 @@ export default function StatePartnerList() {
                                         <div className="flex items-end">
                                             <button
                                                 type="button"
-                                                onClick={handleAddStatePartner}
+                                                onClick={() => navigate('/dashboard/admin/state-partner/add')}
                                                 title="Add state partner"
-                                                className="h-10 w-12 inline-flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                                                className="h-10 w-10 inline-flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                                             >
                                                 <UserPlus size={18} />
                                             </button>

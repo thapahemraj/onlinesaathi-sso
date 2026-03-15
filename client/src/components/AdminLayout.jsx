@@ -48,6 +48,13 @@ const EXTRA_UI_SECTIONS = [
     { id: 'survey-management', label: 'Survey Management', icon: AppWindow },
 ];
 
+const UI_SECTION_ITEMS = {
+    account: [
+        { id: 'admin-ledger', path: '/dashboard/admin/account/admin-ledger', label: 'Admin Ledger' },
+        { id: 'add-money-request', path: '/dashboard/admin/account/add-money-request', label: 'Add Money Request' },
+    ],
+};
+
 const AdminLayout = ({ children }) => {
     const { user, logout } = useAuth(); // Assuming 'user' has 'role'
     const { theme, toggleTheme } = useTheme();
@@ -245,24 +252,45 @@ const AdminLayout = ({ children }) => {
                         {EXTRA_UI_SECTIONS.map((section) => {
                             const Icon = section.icon;
                             const isOpen = openUiSections[section.id];
+                            const sectionItems = UI_SECTION_ITEMS[section.id] || [];
 
                             return (
-                                <button
-                                    key={section.id}
-                                    type="button"
-                                    onClick={() => toggleUiSection(section.id)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-[14px] rounded-md transition-colors ${section.highlighted
-                                        ? 'bg-[#e8f1fb] dark:bg-[#3b3b3b] text-[#1f3a52] dark:text-[#d9e6f2] font-semibold'
-                                        : 'text-[#323130] dark:text-gray-300 hover:bg-[#f3f2f1] dark:hover:bg-[#3b3b3b]'
-                                        }`}
-                                >
-                                    <Icon size={16} strokeWidth={1.5} />
-                                    <span className="flex-1 text-left">{section.label}</span>
-                                    <ChevronDown
-                                        size={14}
-                                        className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                                    />
-                                </button>
+                                <div key={section.id} className="space-y-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleUiSection(section.id)}
+                                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-[14px] rounded-md transition-colors ${section.highlighted
+                                            ? 'bg-[#e8f1fb] dark:bg-[#3b3b3b] text-[#1f3a52] dark:text-[#d9e6f2] font-semibold'
+                                            : 'text-[#323130] dark:text-gray-300 hover:bg-[#f3f2f1] dark:hover:bg-[#3b3b3b]'
+                                            }`}
+                                    >
+                                        <Icon size={16} strokeWidth={1.5} />
+                                        <span className="flex-1 text-left">{section.label}</span>
+                                        <ChevronDown
+                                            size={14}
+                                            className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                                        />
+                                    </button>
+
+                                    {isOpen && sectionItems.length > 0 && (
+                                        <div className="ml-6 pl-3 border-l border-gray-200 dark:border-gray-700 space-y-1">
+                                            {sectionItems.map((item) => (
+                                                <NavLink
+                                                    key={item.id}
+                                                    to={item.path}
+                                                    className={({ isActive }) =>
+                                                        `block px-3 py-2 text-[13px] rounded-md transition-colors ${isActive
+                                                            ? 'bg-[#1f4e79] text-white font-semibold'
+                                                            : 'text-[#5a5958] dark:text-gray-400 hover:bg-[#f3f2f1] dark:hover:bg-[#3b3b3b]'
+                                                        }`
+                                                    }
+                                                >
+                                                    {item.label}
+                                                </NavLink>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             );
                         })}
                     </div>

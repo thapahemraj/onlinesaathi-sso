@@ -52,7 +52,7 @@ const SortArrow = ({ active, direction }) => (
 );
 
 export default function WalletBalance() {
-    const [collapsed, setCollapsed] = useState(false);
+    const [filtersCollapsed, setFiltersCollapsed] = useState(false);
     const [selectedDate, setSelectedDate] = useState('2026-03-13T21:26');
     const [selectedRole, setSelectedRole] = useState('All');
     const [pageSize, setPageSize] = useState(50);
@@ -158,15 +158,14 @@ export default function WalletBalance() {
         <div className="space-y-3">
             <button
                 type="button"
-                onClick={() => setCollapsed((current) => !current)}
+                onClick={() => setFiltersCollapsed((current) => !current)}
                 className="inline-flex items-center gap-1 text-[28px] font-bold uppercase tracking-wide text-[#586fe5]"
             >
                 <span className="text-[28px] leading-none">User Wallet Balance</span>
-                {collapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                {filtersCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
             </button>
 
-            {!collapsed && (
-                <>
+            {!filtersCollapsed && (
                     <div className="rounded-md border border-gray-200 bg-[#f4f4f5] p-5 dark:border-gray-700 dark:bg-[#2c2c2c]">
                         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_200px_255px] lg:items-end">
                             <div className="min-h-[82px] rounded-md bg-transparent" />
@@ -198,182 +197,181 @@ export default function WalletBalance() {
                             </div>
                         </div>
                     </div>
+            )}
 
-                    <div className="rounded-md border border-gray-200 bg-[#f4f4f5] p-5 dark:border-gray-700 dark:bg-[#2c2c2c]">
-                        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                            <div className="flex items-center gap-3 text-[28px] text-gray-700 dark:text-gray-300">
-                                <span className="text-sm">Show</span>
-                                <select
-                                    value={pageSize}
-                                    onChange={(event) => setPageSize(Number(event.target.value))}
-                                    className="w-[70px] rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-[#5a6ff0] focus:outline-none dark:border-gray-600 dark:bg-[#323232] dark:text-gray-200"
-                                >
-                                    {PAGE_SIZES.map((size) => (
-                                        <option key={size} value={size}>{size}</option>
-                                    ))}
-                                </select>
-                                <span className="text-sm">entries</span>
-                            </div>
+            <div className="rounded-md border border-gray-200 bg-[#f4f4f5] p-5 dark:border-gray-700 dark:bg-[#2c2c2c]">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                    <div className="flex items-center gap-3 text-[28px] text-gray-700 dark:text-gray-300">
+                        <span className="text-sm">Show</span>
+                        <select
+                            value={pageSize}
+                            onChange={(event) => setPageSize(Number(event.target.value))}
+                            className="w-[70px] rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-[#5a6ff0] focus:outline-none dark:border-gray-600 dark:bg-[#323232] dark:text-gray-200"
+                        >
+                            {PAGE_SIZES.map((size) => (
+                                <option key={size} value={size}>{size}</option>
+                            ))}
+                        </select>
+                        <span className="text-sm">entries</span>
+                    </div>
 
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                                <button
-                                    type="button"
-                                    onClick={exportRows}
-                                    className="inline-flex items-center justify-center gap-2 rounded-md bg-[#5b6ff0] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#4b5de0]"
-                                >
-                                    <Download size={14} />
-                                    Export to Excel
-                                </button>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <button
+                            type="button"
+                            onClick={exportRows}
+                            className="inline-flex items-center justify-center gap-2 rounded-md bg-[#5b6ff0] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#4b5de0]"
+                        >
+                            <Download size={14} />
+                            Export to Excel
+                        </button>
 
-                                <div className="flex overflow-hidden rounded-md border border-gray-300 bg-white dark:border-gray-600 dark:bg-[#323232]">
-                                    <input
-                                        type="text"
-                                        value={search}
-                                        onChange={(event) => setSearch(event.target.value)}
-                                        placeholder="Search..."
-                                        className="w-full min-w-[190px] border-0 bg-transparent px-4 py-2 text-sm text-gray-700 outline-none dark:text-gray-200"
-                                    />
-                                    <button
-                                        type="button"
-                                        className="inline-flex items-center justify-center bg-[#5b6ff0] px-4 text-white"
-                                    >
-                                        <Search size={14} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-4 overflow-hidden rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-[#262626]">
-                            <div className="max-h-[520px] overflow-auto hide-scrollbar">
-                                <table className="min-w-full text-sm">
-                                    <thead className="sticky top-0 z-10 bg-[#f7f7f8] dark:bg-[#202020]">
-                                        <tr className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-                                            <th className="border-b border-r border-gray-200 px-6 py-3 text-left dark:border-gray-700">
-                                                <button type="button" onClick={() => handleSort('lastTransactionDate')} className="inline-flex items-center font-semibold">
-                                                    Last Transaction Date
-                                                    <SortArrow active={sortField === 'lastTransactionDate'} direction={sortDirection} />
-                                                </button>
-                                            </th>
-                                            <th className="border-b border-r border-gray-200 px-6 py-3 text-left dark:border-gray-700">
-                                                <button type="button" onClick={() => handleSort('userName')} className="inline-flex items-center font-semibold">
-                                                    User Name
-                                                    <SortArrow active={sortField === 'userName'} direction={sortDirection} />
-                                                </button>
-                                            </th>
-                                            <th className="border-b border-r border-gray-200 px-6 py-3 text-left dark:border-gray-700">
-                                                <button type="button" onClick={() => handleSort('userRole')} className="inline-flex items-center font-semibold">
-                                                    User Role
-                                                    <SortArrow active={sortField === 'userRole'} direction={sortDirection} />
-                                                </button>
-                                            </th>
-                                            <th className="border-b border-r border-gray-200 px-6 py-3 text-left dark:border-gray-700">
-                                                <button type="button" onClick={() => handleSort('closingBalance')} className="inline-flex items-center font-semibold">
-                                                    Closing Balance
-                                                    <SortArrow active={sortField === 'closingBalance'} direction={sortDirection} />
-                                                </button>
-                                            </th>
-                                            <th className="border-b border-r border-gray-200 px-6 py-3 text-left dark:border-gray-700">Phone Number</th>
-                                            <th className="border-b border-gray-200 px-6 py-3 text-left dark:border-gray-700">
-                                                <button type="button" onClick={() => handleSort('transactionCounts')} className="inline-flex items-center font-semibold">
-                                                    Transaction Counts
-                                                    <SortArrow active={sortField === 'transactionCounts'} direction={sortDirection} />
-                                                </button>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                                        {visibleRows.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={6} className="px-6 py-16 text-center text-sm text-gray-500 dark:text-gray-400">
-                                                    No wallet balance records found.
-                                                </td>
-                                            </tr>
-                                        ) : visibleRows.map((row) => (
-                                            <tr key={row.id} className="text-gray-700 transition-colors hover:bg-[#f8f9ff] dark:text-gray-200 dark:hover:bg-white/5">
-                                                <td className="border-r border-gray-100 px-6 py-4 whitespace-nowrap dark:border-gray-800">{formatDateTime(row.lastTransactionDate)}</td>
-                                                <td className="border-r border-gray-100 px-6 py-4 font-medium whitespace-nowrap dark:border-gray-800">{row.userName}</td>
-                                                <td className="border-r border-gray-100 px-6 py-4 whitespace-nowrap dark:border-gray-800">{row.userRole}</td>
-                                                <td className="border-r border-gray-100 px-6 py-4 font-semibold text-[#5168eb] whitespace-nowrap dark:border-gray-800">{formatCurrency(row.closingBalance)}</td>
-                                                <td className="border-r border-gray-100 px-6 py-4 whitespace-nowrap dark:border-gray-800">{row.phoneNumber}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{row.transactionCounts}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 bg-gray-50/70 px-5 py-4 dark:border-gray-700 dark:bg-black/10">
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    Showing{' '}
-                                    <span className="font-semibold text-gray-700 dark:text-gray-300">
-                                        {sortedRows.length === 0 ? 0 : (safePage - 1) * pageSize + 1}
-                                    </span>
-                                    –
-                                    <span className="font-semibold text-gray-700 dark:text-gray-300">
-                                        {Math.min(safePage * pageSize, sortedRows.length)}
-                                    </span>
-                                    {' '}of{' '}
-                                    <span className="font-semibold text-gray-700 dark:text-gray-300">{sortedRows.length}</span> entries
-                                </p>
-
-                                <div className="flex items-center gap-1">
-                                    <button
-                                        type="button"
-                                        onClick={() => setPage(1)}
-                                        disabled={safePage === 1}
-                                        className="px-2 py-1.5 text-xs rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        «
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPage((current) => Math.max(1, current - 1))}
-                                        disabled={safePage === 1}
-                                        className="p-1.5 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        <ChevronLeft size={14} />
-                                    </button>
-
-                                    {pageNums.map((n, index) => (
-                                        n === '…'
-                                            ? <span key={`e-${index}`} className="px-2 text-xs text-gray-400">…</span>
-                                            : (
-                                                <button
-                                                    type="button"
-                                                    key={n}
-                                                    onClick={() => setPage(n)}
-                                                    className={`min-w-[30px] py-1.5 text-xs rounded border transition-colors ${safePage === n
-                                                        ? 'bg-blue-600 border-blue-600 text-white font-semibold'
-                                                        : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                                                    }`}
-                                                >
-                                                    {n}
-                                                </button>
-                                            )
-                                    ))}
-
-                                    <button
-                                        type="button"
-                                        onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                                        disabled={safePage === totalPages}
-                                        className="p-1.5 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        <ChevronRight size={14} />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPage(totalPages)}
-                                        disabled={safePage === totalPages}
-                                        className="px-2 py-1.5 text-xs rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        »
-                                    </button>
-                                </div>
-                            </div>
+                        <div className="flex overflow-hidden rounded-md border border-gray-300 bg-white dark:border-gray-600 dark:bg-[#323232]">
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(event) => setSearch(event.target.value)}
+                                placeholder="Search..."
+                                className="w-full min-w-[190px] border-0 bg-transparent px-4 py-2 text-sm text-gray-700 outline-none dark:text-gray-200"
+                            />
+                            <button
+                                type="button"
+                                className="inline-flex items-center justify-center bg-[#5b6ff0] px-4 text-white"
+                            >
+                                <Search size={14} />
+                            </button>
                         </div>
                     </div>
-                </>
-            )}
+                </div>
+
+                <div className="mt-4 overflow-hidden rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-[#262626]">
+                    <div className="max-h-[520px] overflow-auto hide-scrollbar">
+                        <table className="min-w-full text-sm">
+                            <thead className="sticky top-0 z-10 bg-[#f7f7f8] dark:bg-[#202020]">
+                                <tr className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                                    <th className="border-b border-r border-gray-200 px-6 py-3 text-left dark:border-gray-700">
+                                        <button type="button" onClick={() => handleSort('lastTransactionDate')} className="inline-flex items-center font-semibold">
+                                            Last Transaction Date
+                                            <SortArrow active={sortField === 'lastTransactionDate'} direction={sortDirection} />
+                                        </button>
+                                    </th>
+                                    <th className="border-b border-r border-gray-200 px-6 py-3 text-left dark:border-gray-700">
+                                        <button type="button" onClick={() => handleSort('userName')} className="inline-flex items-center font-semibold">
+                                            User Name
+                                            <SortArrow active={sortField === 'userName'} direction={sortDirection} />
+                                        </button>
+                                    </th>
+                                    <th className="border-b border-r border-gray-200 px-6 py-3 text-left dark:border-gray-700">
+                                        <button type="button" onClick={() => handleSort('userRole')} className="inline-flex items-center font-semibold">
+                                            User Role
+                                            <SortArrow active={sortField === 'userRole'} direction={sortDirection} />
+                                        </button>
+                                    </th>
+                                    <th className="border-b border-r border-gray-200 px-6 py-3 text-left dark:border-gray-700">
+                                        <button type="button" onClick={() => handleSort('closingBalance')} className="inline-flex items-center font-semibold">
+                                            Closing Balance
+                                            <SortArrow active={sortField === 'closingBalance'} direction={sortDirection} />
+                                        </button>
+                                    </th>
+                                    <th className="border-b border-r border-gray-200 px-6 py-3 text-left dark:border-gray-700">Phone Number</th>
+                                    <th className="border-b border-gray-200 px-6 py-3 text-left dark:border-gray-700">
+                                        <button type="button" onClick={() => handleSort('transactionCounts')} className="inline-flex items-center font-semibold">
+                                            Transaction Counts
+                                            <SortArrow active={sortField === 'transactionCounts'} direction={sortDirection} />
+                                        </button>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                {visibleRows.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-16 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            No wallet balance records found.
+                                        </td>
+                                    </tr>
+                                ) : visibleRows.map((row) => (
+                                    <tr key={row.id} className="text-gray-700 transition-colors hover:bg-[#f8f9ff] dark:text-gray-200 dark:hover:bg-white/5">
+                                        <td className="border-r border-gray-100 px-6 py-4 whitespace-nowrap dark:border-gray-800">{formatDateTime(row.lastTransactionDate)}</td>
+                                        <td className="border-r border-gray-100 px-6 py-4 font-medium whitespace-nowrap dark:border-gray-800">{row.userName}</td>
+                                        <td className="border-r border-gray-100 px-6 py-4 whitespace-nowrap dark:border-gray-800">{row.userRole}</td>
+                                        <td className="border-r border-gray-100 px-6 py-4 font-semibold text-[#5168eb] whitespace-nowrap dark:border-gray-800">{formatCurrency(row.closingBalance)}</td>
+                                        <td className="border-r border-gray-100 px-6 py-4 whitespace-nowrap dark:border-gray-800">{row.phoneNumber}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">{row.transactionCounts}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 bg-gray-50/70 px-5 py-4 dark:border-gray-700 dark:bg-black/10">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Showing{' '}
+                            <span className="font-semibold text-gray-700 dark:text-gray-300">
+                                {sortedRows.length === 0 ? 0 : (safePage - 1) * pageSize + 1}
+                            </span>
+                            –
+                            <span className="font-semibold text-gray-700 dark:text-gray-300">
+                                {Math.min(safePage * pageSize, sortedRows.length)}
+                            </span>
+                            {' '}of{' '}
+                            <span className="font-semibold text-gray-700 dark:text-gray-300">{sortedRows.length}</span> entries
+                        </p>
+
+                        <div className="flex items-center gap-1">
+                            <button
+                                type="button"
+                                onClick={() => setPage(1)}
+                                disabled={safePage === 1}
+                                className="px-2 py-1.5 text-xs rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                «
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                                disabled={safePage === 1}
+                                className="p-1.5 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                <ChevronLeft size={14} />
+                            </button>
+
+                            {pageNums.map((n, index) => (
+                                n === '…'
+                                    ? <span key={`e-${index}`} className="px-2 text-xs text-gray-400">…</span>
+                                    : (
+                                        <button
+                                            type="button"
+                                            key={n}
+                                            onClick={() => setPage(n)}
+                                            className={`min-w-[30px] py-1.5 text-xs rounded border transition-colors ${safePage === n
+                                                ? 'bg-blue-600 border-blue-600 text-white font-semibold'
+                                                : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                            }`}
+                                        >
+                                            {n}
+                                        </button>
+                                    )
+                            ))}
+
+                            <button
+                                type="button"
+                                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                                disabled={safePage === totalPages}
+                                className="p-1.5 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                <ChevronRight size={14} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setPage(totalPages)}
+                                disabled={safePage === totalPages}
+                                className="px-2 py-1.5 text-xs rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                »
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

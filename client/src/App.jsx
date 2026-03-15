@@ -8,6 +8,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import Applications from './pages/admin/Applications';
 import ApplicationDetail from './pages/admin/ApplicationDetail';
 import Organizations from './pages/admin/Organizations';
+import AdminLedger from './pages/admin/AdminLedger';
+import AddMoneyRequest from './pages/admin/AddMoneyRequest';
 import SecuritySettings from './pages/admin/SecuritySettings';
 import AuditLogs from './pages/admin/AuditLogs';
 import WalletBalance from './pages/admin/WalletBalance';
@@ -21,9 +23,12 @@ import KYCReview from './pages/agent/KYCReview';
 import SaathiDashboard from './pages/saathi/SaathiDashboard';
 import SupportDashboard from './pages/support/SupportDashboard';
 import UsersList from './pages/dashboard/UsersList';
+import AddUser from './pages/dashboard/AddUser';
 import MemberList from './pages/dashboard/MemberList';
 import SaathiList from './pages/dashboard/SaathiList';
 import DistrictPartnerList from './pages/dashboard/DistrictPartnerList';
+import AddDistrictPartner from './pages/dashboard/AddDistrictPartner';
+import AddStatePartner from './pages/dashboard/AddStatePartner';
 import StatePartnerList from './pages/dashboard/StatePartnerList';
 import ParentMappingRequests from './pages/dashboard/ParentMappingRequests';
 import { useAuth } from './context/AuthContext';
@@ -67,10 +72,13 @@ function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<UsersList />} />
+          <Route path="users/add" element={<AddUser />} />
           <Route path="members" element={<MemberList />} />
           <Route path="saathi" element={<SaathiList />} />
           <Route path="district-partner" element={<DistrictPartnerList />} />
+          <Route path="district-partner/add" element={<AddDistrictPartner />} />
           <Route path="state-partner" element={<StatePartnerList />} />
+          <Route path="state-partner/add" element={<AddStatePartner />} />
           <Route path="parent-mapping-requests" element={<ParentMappingRequests />} />
           <Route path="roles" element={
             <AdminRoute minRole="subAdmin"><RoleManagement /></AdminRoute>
@@ -78,6 +86,8 @@ function App() {
           <Route path="apps" element={<Applications />} />
           <Route path="apps/:id" element={<ApplicationDetail />} />
           <Route path="orgs" element={<Organizations />} />
+          <Route path="account/admin-ledger" element={<AdminLedger />} />
+          <Route path="account/add-money-request" element={<AddMoneyRequest />} />
           <Route path="security" element={<SecuritySettings />} />
           <Route path="audit" element={<AuditLogs />} />
           <Route path="transactions" element={<TransactionManagement />} />

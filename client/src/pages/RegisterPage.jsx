@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle, XCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import PasswordStrength from '../components/PasswordStrength';
 import { auth } from '../firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
@@ -35,6 +35,10 @@ const RegisterPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [codeSent, setCodeSent] = useState(false);
+    const [isCheckingIdentifier, setIsCheckingIdentifier] = useState(false);
+    const [isSendingCode, setIsSendingCode] = useState(false);
+    const [isResendingCode, setIsResendingCode] = useState(false);
+    const [isSubmittingRegistration, setIsSubmittingRegistration] = useState(false);
 
     const [error, setError] = useState('');
     // Custom Alert State
@@ -89,7 +93,26 @@ const RegisterPage = () => {
         return date.toISOString();
     };
 
-    const handleNext = (e) => {
+    const validatePasswordStrength = (value) => {
+        if (!value || value.length < 8) {
+            return 'Password must be at least 8 characters.';
+        }
+        if (!/[A-Z]/.test(value)) {
+            return 'Password must contain at least one uppercase letter.';
+        }
+        if (!/[a-z]/.test(value)) {
+            return 'Password must contain at least one lowercase letter.';
+        }
+        if (!/[0-9]/.test(value)) {
+            return 'Password must contain at least one number.';
+        }
+        if (!/[@$!%*?&#]/.test(value)) {
+            return 'Password must contain at least one special character (@$!%*?&#).';
+        }
+        return '';
+    };
+
+    const handleNext = async (e) => {
         e.preventDefault();
         setError('');
 
@@ -108,19 +131,24 @@ const RegisterPage = () => {
                 }
             }
             // Check existence on backend
-            axios.post(`${import.meta.env.VITE_API_URL}/auth/check-email`, { identifier: usePhone ? phoneNumber : email })
-                .then(res => {
-                    if (res.data.exists) {
-                        setError(`${usePhone ? 'Phone number' : 'Email'} is already unavailable.`);
-                    } else {
-                        setStep(2);
-                    }
-                })
-                .catch(() => setStep(2)); // Fallback if check fails
+            setIsCheckingIdentifier(true);
+            try {
+                const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/check-email`, { identifier: usePhone ? phoneNumber : email });
+                if (res.data.exists) {
+                    setError(`${usePhone ? 'Phone number' : 'Email'} is already unavailable.`);
+                } else {
+                    setStep(2);
+                }
+            } catch {
+                setStep(2); // Fallback if check fails
+            } finally {
+                setIsCheckingIdentifier(false);
+            }
         }
         else if (step === 2) {
-            if (!password || password.length < 8) {
-                setError('Password must be at least 8 characters.');
+            const passwordValidationError = validatePasswordStrength(password);
+            if (passwordValidationError) {
+                setError(passwordValidationError);
                 return;
             }
             if (password !== confirmPassword) {
@@ -154,44 +182,50 @@ const RegisterPage = () => {
             }
 
             // Trigger verification
+            setIsSendingCode(true);
             if (usePhone) {
-                showAlert('Sending verification code to phone...', 'loading');
-                if (!window.recaptchaVerifier) {
-                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                        'size': 'invisible',
-                        'callback': (response) => {
-                            // reCAPTCHA solved
-                        }
-                    });
-                }
-
-                const appVerifier = window.recaptchaVerifier;
-                signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-                    .then((confirmResult) => {
-                        setConfirmationResult(confirmResult);
-                        setCodeSent(true);
-                        showAlert('OTP sent to your phone!', 'success');
-                        setStep(5);
-                    }).catch((error) => {
-                        console.error(error);
-                        showAlert('Failed to send SMS. Try again.', 'error');
-                        window.recaptchaVerifier.render().then(widgetId => {
-                            grecaptcha.reset(widgetId);
+                try {
+                    showAlert('Sending verification code to phone...', 'loading');
+                    if (!window.recaptchaVerifier) {
+                        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                            'size': 'invisible',
+                            'callback': () => {
+                                // reCAPTCHA solved
+                            }
                         });
-                    });
+                    }
 
+                    const appVerifier = window.recaptchaVerifier;
+                    const confirmResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+                    setConfirmationResult(confirmResult);
+                    setCodeSent(true);
+                    showAlert('OTP sent to your phone!', 'success');
+                    setStep(5);
+                } catch (sendError) {
+                    console.error(sendError);
+                    showAlert('Failed to send SMS. Try again.', 'error');
+                    if (window.recaptchaVerifier && window.grecaptcha) {
+                        window.recaptchaVerifier.render().then((widgetId) => {
+                            window.grecaptcha.reset(widgetId);
+                        });
+                    }
+                } finally {
+                    setIsSendingCode(false);
+                }
             } else {
                 // Email Flow
-                axios.post(`${import.meta.env.VITE_API_URL}/auth/send-verification`, { email })
-                    .then(res => {
-                        console.log("OTP sent:", res.data);
-                        setCodeSent(true);
-                        showAlert('Verification code sent to your email!', 'success');
-                        setStep(5);
-                    })
-                    .catch(err => {
-                        showAlert(err.response?.data?.message || 'Failed to send verification code.', 'error');
-                    });
+                try {
+                    showAlert('Sending verification code to email...', 'loading');
+                    const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/send-verification`, { email });
+                    console.log("OTP sent:", res.data);
+                    setCodeSent(true);
+                    showAlert('Verification code sent to your email!', 'success');
+                    setStep(5);
+                } catch (err) {
+                    showAlert(err.response?.data?.message || 'Failed to send verification code.', 'error');
+                } finally {
+                    setIsSendingCode(false);
+                }
             }
         }
         // Step 5 is handled by handleSubmit
@@ -202,42 +236,64 @@ const RegisterPage = () => {
         setError('');
     };
 
-    const resendCode = () => {
+    const resendCode = async () => {
+        if (isResendingCode) {
+            return;
+        }
+
+        setIsResendingCode(true);
         setCodeSent(false);
         setOtp('');
-        if (usePhone) {
-            showAlert('Resending verification code to phone...', 'loading');
-            const appVerifier = window.recaptchaVerifier;
-            signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-                .then((confirmResult) => {
-                    setConfirmationResult(confirmResult);
-                    setCodeSent(true);
-                    showAlert('New OTP sent to your phone!', 'success');
-                }).catch((error) => {
-                    console.error(error);
-                    showAlert('Failed to resend SMS. Try again.', 'error');
-                });
-        } else {
-            axios.post(`${import.meta.env.VITE_API_URL}/auth/send-verification`, { email })
-                .then(res => {
-                    console.log("OTP resent:", res.data);
-                    setCodeSent(true);
-                    showAlert('New verification code sent to your email!', 'success');
-                })
-                .catch(err => {
-                    showAlert(err.response?.data?.message || 'Failed to resend verification code.', 'error');
-                });
+
+        try {
+            if (usePhone) {
+                showAlert('Resending verification code to phone...', 'loading');
+                if (!window.recaptchaVerifier) {
+                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                        size: 'invisible',
+                        callback: () => {
+                            // reCAPTCHA solved
+                        }
+                    });
+                }
+                const appVerifier = window.recaptchaVerifier;
+                const confirmResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+                setConfirmationResult(confirmResult);
+                setCodeSent(true);
+                showAlert('New OTP sent to your phone!', 'success');
+            } else {
+                const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/send-verification`, { email });
+                console.log("OTP resent:", res.data);
+                setCodeSent(true);
+                showAlert('New verification code sent to your email!', 'success');
+            }
+        } catch (err) {
+            showAlert(err.response?.data?.message || 'Failed to resend verification code.', 'error');
+        } finally {
+            setIsResendingCode(false);
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmittingRegistration) {
+            return;
+        }
+
+        const passwordValidationError = validatePasswordStrength(password);
+        if (passwordValidationError) {
+            setError(passwordValidationError);
+            setStep(2);
+            return;
+        }
+
         if (otp.length < 4) {
-            setError('Please enter the code sent to your email.');
+            setError(`Please enter the code sent to your ${usePhone ? 'phone' : 'email'}.`);
             return;
         }
 
         try {
+            setIsSubmittingRegistration(true);
             // Verify OTP
             showAlert('Verifying code...', 'loading');
             let firebaseUid = null;
@@ -300,6 +356,8 @@ const RegisterPage = () => {
             }
 
             showAlert(errorMessage, 'error');
+        } finally {
+            setIsSubmittingRegistration(false);
         }
     };
 
@@ -387,7 +445,9 @@ const RegisterPage = () => {
                                     </span>
                                 </div>
                                 <div className="flex justify-end w-full">
-                                    <button type="submit" className={buttonClasses}>Next</button>
+                                    <button type="submit" className={buttonClasses} disabled={isCheckingIdentifier}>
+                                        {isCheckingIdentifier ? 'Checking...' : 'Next'}
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -484,8 +544,20 @@ const RegisterPage = () => {
                                     />
                                 </div>
                                 <div className="flex justify-end mt-8 w-full">
-                                    <button type="submit" className={buttonClasses}>Next</button>
+                                    <button type="submit" className={buttonClasses} disabled={isSendingCode}>
+                                        {isSendingCode ? (
+                                            <span className="inline-flex items-center justify-center gap-2">
+                                                <Loader2 size={16} className="animate-spin" />
+                                                Sending OTP...
+                                            </span>
+                                        ) : 'Next'}
+                                    </button>
                                 </div>
+                                {isSendingCode && (
+                                    <p className="mt-2 text-xs text-[#0067b8] dark:text-[#7cb3df] text-right">
+                                        Sending verification code to your {usePhone ? 'phone' : 'email'}, please wait...
+                                    </p>
+                                )}
                             </form>
                         </div>
                     )}
@@ -614,7 +686,16 @@ const RegisterPage = () => {
                             <h2 className="text-2xl font-bold text-[#1b1b1b] dark:text-white mb-2 leading-tight text-center">Verify {usePhone ? 'phone' : 'email'}</h2>
                             <p className="text-[15px] mb-4 text-[#1b1b1b] dark:text-gray-300 text-center">
                                 Enter the code we sent to <span className="font-semibold">{usePhone ? phoneNumber : email}</span>.
-                                If you didn't receive the {usePhone ? 'code' : 'email'}, check your junk folder or <button type="button" onClick={resendCode} className="text-[#0067b8] dark:text-[#4f93ce] hover:underline">try again</button>.
+                                If you didn't receive the {usePhone ? 'code' : 'email'}, check your junk folder or{' '}
+                                <button
+                                    type="button"
+                                    onClick={resendCode}
+                                    disabled={isResendingCode}
+                                    className="text-[#0067b8] dark:text-[#4f93ce] hover:underline disabled:opacity-60 disabled:no-underline"
+                                >
+                                    {isResendingCode ? 'sending...' : 'try again'}
+                                </button>
+                                .
                             </p>
                             <div id="recaptcha-container"></div>
 
@@ -638,7 +719,9 @@ const RegisterPage = () => {
                                 </div>
 
                                 <div className="flex justify-end mt-8 w-full">
-                                    <button type="submit" className={buttonClasses}>Next</button>
+                                    <button type="submit" className={buttonClasses} disabled={isSubmittingRegistration}>
+                                        {isSubmittingRegistration ? 'Verifying...' : 'Next'}
+                                    </button>
                                 </div>
                             </form>
                         </div>

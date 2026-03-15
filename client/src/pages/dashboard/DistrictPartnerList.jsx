@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import {
     Users,
     UserCheck,
@@ -8,6 +9,7 @@ import {
     User,
     Settings,
     Pencil,
+    Save,
     ChevronDown,
     ChevronUp,
     Download,
@@ -26,6 +28,46 @@ const AREA_OF_EXPERTISE = ['Finance', 'Healthcare', 'Retail', 'Education', 'IT']
 const PAGE_SIZES = [10, 25, 50, 100];
 const DISTRICT_ROLE_VALUES = ['user', 'member', 'saathi', 'agent', 'supportTeam', 'subAdmin', 'superAdmin', 'admin'];
 const DISTRICT_SOURCE_ROLES = new Set(['agent']);
+const COUNTRY_CODES = ['+91', '+977', '+1', '+44'];
+const GENDERS = [
+    { value: '', label: 'Select Gender' },
+    { value: 'male', label: 'Male' },
+    { value: 'female', label: 'Female' },
+    { value: 'other', label: 'Other' },
+    { value: 'prefer_not_to_say', label: 'Prefer not to say' }
+];
+
+const buildInitialAddForm = () => ({
+    country: '',
+    state: '',
+    district: '',
+    firstName: '',
+    lastName: '',
+    birthDate: '',
+    gender: '',
+    email: '',
+    countryCode: '+91',
+    mobileNo: '',
+    aadharNo: '',
+    panNo: '',
+    logoFile: null,
+    signatureFile: null,
+    partnerType: '',
+    areaOfExpertise: '',
+    about: '',
+    currentAddress: '',
+    currentCountry: '',
+    currentState: '',
+    currentDistrict: '',
+    currentPinCode: '',
+    permanentAddress: '',
+    permanentCountry: '',
+    permanentState: '',
+    permanentDistrict: '',
+    permanentPinCode: '',
+    sameAsCurrent: false,
+    documents: []
+});
 
 const parseFullName = (value) => {
     const parts = String(value || '').trim().split(/\s+/).filter(Boolean);
@@ -171,6 +213,7 @@ const DEMO = Array.from({ length: 30 }, (_, i) => {
 });
 
 export default function DistrictPartnerList() {
+    const navigate = useNavigate();
     const [partners, setPartners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isDemoMode, setIsDemoMode] = useState(false);
@@ -185,6 +228,11 @@ export default function DistrictPartnerList() {
     const [page, setPage] = useState(1);
     const [sortField, setSortField] = useState('createdAt');
     const [sortDir, setSortDir] = useState('desc');
+    const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+    const [creatingPartner, setCreatingPartner] = useState(false);
+    const [addError, setAddError] = useState('');
+    const [addSuccess, setAddSuccess] = useState('');
+    const [addForm, setAddForm] = useState(buildInitialAddForm);
 
     useEffect(() => {
         const load = async () => {
@@ -219,6 +267,36 @@ export default function DistrictPartnerList() {
         setPage(1);
     }, [search, status, country, stateFilter, districtFilter, pageSize]);
 
+    useEffect(() => {
+        if (!addForm.sameAsCurrent) return;
+
+        setAddForm((prev) => {
+            const sameValues = prev.permanentAddress === prev.currentAddress
+                && prev.permanentCountry === prev.currentCountry
+                && prev.permanentState === prev.currentState
+                && prev.permanentDistrict === prev.currentDistrict
+                && prev.permanentPinCode === prev.currentPinCode;
+
+            if (sameValues) return prev;
+
+            return {
+                ...prev,
+                permanentAddress: prev.currentAddress,
+                permanentCountry: prev.currentCountry,
+                permanentState: prev.currentState,
+                permanentDistrict: prev.currentDistrict,
+                permanentPinCode: prev.currentPinCode
+            };
+        });
+    }, [
+        addForm.sameAsCurrent,
+        addForm.currentAddress,
+        addForm.currentCountry,
+        addForm.currentState,
+        addForm.currentDistrict,
+        addForm.currentPinCode
+    ]);
+
     const updatePartnerRecord = async (partnerId, payload) => {
         if (isDemoMode) {
             setPartners((prev) => prev.map((p) => (p._id === partnerId ? normalizeDistrictPartner({ ...p, ...payload }) : p)));
@@ -230,92 +308,106 @@ export default function DistrictPartnerList() {
         setPartners((prev) => prev.map((p) => (p._id === partnerId ? { ...p, ...updated } : p)));
     };
 
-    const handleAddDistrictPartner = async () => {
-        const fullName = window.prompt('Enter district partner full name');
-        if (fullName === null) return;
+    const openAddDistrictPartnerForm = () => {
+        setAddError('');
+        setAddSuccess('');
+        setAddForm(buildInitialAddForm());
+        setIsAddFormOpen(true);
+    };
 
-        const email = window.prompt('Enter district partner email', '');
-        if (email === null) return;
+    const closeAddDistrictPartnerForm = () => {
+        setIsAddFormOpen(false);
+    };
 
-        const phoneNumber = window.prompt('Enter district partner phone number', '');
-        if (phoneNumber === null) return;
+    const handleAddFieldChange = (field, value) => {
+        setAddForm((prev) => ({ ...prev, [field]: value }));
+    };
 
-        const selectedCountry = window.prompt(`Enter country (${COUNTRIES.slice(1).join(', ')})`, 'India');
-        if (selectedCountry === null) return;
+    const handleAddDistrictPartner = async (event) => {
+        event.preventDefault();
+        setAddError('');
+        setAddSuccess('');
 
-        const selectedState = window.prompt(`Enter state (${STATES.slice(1).join(', ')})`, 'Delhi');
-        if (selectedState === null) return;
+        const firstName = addForm.firstName.trim();
+        const lastName = addForm.lastName.trim();
+        const email = addForm.email.trim().toLowerCase();
+        const mobileCore = addForm.mobileNo.trim();
+        const phoneNumber = mobileCore ? `${addForm.countryCode}${mobileCore}` : '';
 
-        const selectedDistrict = window.prompt(`Enter district (${DISTRICTS.slice(1).join(', ')})`, 'Delhi');
-        if (selectedDistrict === null) return;
-
-        const { firstName, lastName } = parseFullName(fullName);
         if (!firstName) {
-            alert('First name is required.');
+            setAddError('First name is required.');
+            return;
+        }
+        if (!lastName) {
+            setAddError('Last name is required.');
+            return;
+        }
+        if (!email && !phoneNumber) {
+            setAddError('Provide at least email or mobile number.');
+            return;
+        }
+        if (!addForm.country || !addForm.state || !addForm.district) {
+            setAddError('Country, state and district are required.');
             return;
         }
 
-        const normalizedCountry = selectedCountry.trim();
-        const normalizedState = selectedState.trim();
-        const normalizedDistrict = selectedDistrict.trim();
+        const username = makeUsername({ firstName, lastName, email });
+        const payload = {
+            username,
+            email,
+            phoneNumber,
+            password: makeTempPassword(),
+            role: 'agent',
+            firstName,
+            lastName,
+            dateOfBirth: addForm.birthDate || undefined,
+            gender: addForm.gender || undefined,
+            country: addForm.country,
+            state: addForm.state,
+            district: addForm.district,
+            city: addForm.district,
+            partnerType: addForm.partnerType || undefined,
+            areaOfExpertise: addForm.areaOfExpertise || undefined,
+            about: addForm.about || undefined,
+            aadharNo: addForm.aadharNo || undefined,
+            panNo: addForm.panNo || undefined,
+            currentAddress: addForm.currentAddress || undefined,
+            currentCountry: addForm.currentCountry || undefined,
+            currentState: addForm.currentState || undefined,
+            currentDistrict: addForm.currentDistrict || undefined,
+            currentPinCode: addForm.currentPinCode || undefined,
+            permanentAddress: addForm.permanentAddress || undefined,
+            permanentCountry: addForm.permanentCountry || undefined,
+            permanentState: addForm.permanentState || undefined,
+            permanentDistrict: addForm.permanentDistrict || undefined,
+            permanentPinCode: addForm.permanentPinCode || undefined,
+            isActive: true
+        };
 
-        if (!COUNTRIES.includes(normalizedCountry)) {
-            alert('Invalid country.');
-            return;
-        }
-        if (!STATES.includes(normalizedState)) {
-            alert('Invalid state.');
-            return;
-        }
-        if (!DISTRICTS.includes(normalizedDistrict)) {
-            alert('Invalid district.');
-            return;
-        }
-
-        const trimmedEmail = email.trim().toLowerCase();
-        const trimmedPhone = phoneNumber.trim();
-        const username = makeUsername({ firstName, lastName, email: trimmedEmail });
-
+        setCreatingPartner(true);
         try {
             if (isDemoMode) {
                 const demoPartner = normalizeDistrictPartner({
                     _id: `local-${Date.now()}`,
-                    role: 'agent',
-                    username,
-                    firstName,
-                    lastName,
-                    email: trimmedEmail,
-                    phone: trimmedPhone,
-                    country: normalizedCountry,
-                    state: normalizedState,
-                    district: normalizedDistrict,
-                    parent: `Parent ${Math.floor(Math.random() * 9) + 1}`,
-                    isActive: true,
-                    createdAt: new Date().toISOString()
+                    ...payload,
+                    phone: phoneNumber,
+                    createdAt: new Date().toISOString(),
+                    lastLogin: null
                 });
                 setPartners((prev) => [demoPartner, ...prev]);
-                return;
+            } else {
+                const res = await axios.post('/admin/users', payload);
+                const created = normalizeDistrictPartner({ ...payload, ...(res.data?.user || res.data) });
+                setPartners((prev) => [created, ...prev]);
             }
 
-            const payload = {
-                username,
-                email: trimmedEmail,
-                phoneNumber: trimmedPhone,
-                password: makeTempPassword(),
-                role: 'agent',
-                firstName,
-                lastName,
-                country: normalizedCountry,
-                state: normalizedState,
-                city: normalizedDistrict,
-                district: normalizedDistrict,
-                isActive: true
-            };
-            const res = await axios.post('/admin/users', payload);
-            const created = normalizeDistrictPartner(res.data?.user || res.data);
-            setPartners((prev) => [created, ...prev]);
-        } catch {
-            alert('Failed to add district partner.');
+            setAddSuccess('District partner added successfully.');
+            setAddForm(buildInitialAddForm());
+            setIsAddFormOpen(false);
+        } catch (error) {
+            setAddError(error?.response?.data?.message || 'Failed to add district partner.');
+        } finally {
+            setCreatingPartner(false);
         }
     };
 
@@ -499,7 +591,13 @@ export default function DistrictPartnerList() {
                 <div className="bg-white dark:bg-[#2c2c2c]">
                     <div
                         className="flex items-center gap-3 px-5 py-3 border-b border-gray-200 dark:border-gray-700 cursor-pointer select-none"
-                        onClick={() => setCollapsed((c) => !c)}
+                        onClick={() => {
+                            setCollapsed((c) => {
+                                const next = !c;
+                                if (next) setIsAddFormOpen(false);
+                                return next;
+                            });
+                        }}
                     >
                         <Users size={16} className="text-blue-600 flex-shrink-0" />
                         <span className="font-semibold text-sm text-blue-600 tracking-wide uppercase">District Partner List</span>
@@ -516,7 +614,7 @@ export default function DistrictPartnerList() {
                                 </div>
 
                                 <div className="overflow-x-auto hide-scrollbar w-full xl:w-auto xl:max-w-[1100px]">
-                                    <div className="grid grid-cols-6 gap-3 min-w-[980px]">
+                                    <div className="grid grid-cols-[repeat(5,minmax(0,1fr))_auto] gap-3 min-w-[980px]">
                                         <div className="flex flex-col gap-1 min-w-0">
                                             <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Created Date</label>
                                             <div className="relative">
@@ -589,9 +687,10 @@ export default function DistrictPartnerList() {
                                         <div className="flex items-end">
                                             <button
                                                 type="button"
-                                                onClick={handleAddDistrictPartner}
+                                                onClick={() => navigate('/dashboard/admin/district-partner/add')}
                                                 title="Add district partner"
-                                                className="h-10 w-12 inline-flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                                                aria-label="Add district partner"
+                                                className="h-10 w-10 inline-flex items-center justify-center rounded-md bg-blue-600 text-white transition-colors hover:bg-blue-700"
                                             >
                                                 <UserPlus size={18} />
                                             </button>
@@ -602,6 +701,426 @@ export default function DistrictPartnerList() {
                         </div>
                     )}
                 </div>
+
+                {!collapsed && addSuccess && (
+                    <div className="mx-5 mt-3 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300">
+                        {addSuccess}
+                    </div>
+                )}
+
+                {!collapsed && addError && (
+                    <div className="mx-5 mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
+                        {addError}
+                    </div>
+                )}
+
+                {!collapsed && isAddFormOpen && (
+                    <div className="mx-5 mt-3 rounded-md border border-gray-200 dark:border-gray-700 bg-[#f7f7f8] dark:bg-[#303030] p-4">
+                        <form onSubmit={handleAddDistrictPartner} className="space-y-5">
+                            <div>
+                                <h3 className="text-xl font-bold uppercase tracking-wide text-blue-600">Add District Partner</h3>
+                                <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-3">
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Select Country</label>
+                                        <select
+                                            value={addForm.country}
+                                            onChange={(e) => handleAddFieldChange('country', e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Select Country</option>
+                                            {COUNTRIES.filter((item) => item !== 'All').map((item) => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Select State</label>
+                                        <select
+                                            value={addForm.state}
+                                            onChange={(e) => handleAddFieldChange('state', e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Select State</option>
+                                            {STATES.filter((item) => item !== 'All').map((item) => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Select District</label>
+                                        <select
+                                            value={addForm.district}
+                                            onChange={(e) => handleAddFieldChange('district', e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Select District</option>
+                                            {DISTRICTS.filter((item) => item !== 'All').map((item) => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="text-lg font-bold uppercase tracking-wide text-blue-600">Basic Details</h4>
+                                <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">First Name</label>
+                                        <input
+                                            type="text"
+                                            value={addForm.firstName}
+                                            onChange={(e) => handleAddFieldChange('firstName', e.target.value)}
+                                            placeholder="Enter First Name"
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Last Name</label>
+                                        <input
+                                            type="text"
+                                            value={addForm.lastName}
+                                            onChange={(e) => handleAddFieldChange('lastName', e.target.value)}
+                                            placeholder="Enter Last Name"
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Birth Date</label>
+                                        <input
+                                            type="date"
+                                            value={addForm.birthDate}
+                                            onChange={(e) => handleAddFieldChange('birthDate', e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Gender</label>
+                                        <select
+                                            value={addForm.gender}
+                                            onChange={(e) => handleAddFieldChange('gender', e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        >
+                                            {GENDERS.map((item) => (
+                                                <option key={item.value || 'empty'} value={item.value}>{item.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Email</label>
+                                        <input
+                                            type="email"
+                                            value={addForm.email}
+                                            onChange={(e) => handleAddFieldChange('email', e.target.value)}
+                                            placeholder="Enter Email"
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Mobile No</label>
+                                        <div className="flex">
+                                            <select
+                                                value={addForm.countryCode}
+                                                onChange={(e) => handleAddFieldChange('countryCode', e.target.value)}
+                                                className="w-28 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                            >
+                                                {COUNTRY_CODES.map((code) => (
+                                                    <option key={code} value={code}>{code}</option>
+                                                ))}
+                                            </select>
+                                            <input
+                                                type="text"
+                                                value={addForm.mobileNo}
+                                                onChange={(e) => handleAddFieldChange('mobileNo', e.target.value)}
+                                                placeholder="Enter Mobile No"
+                                                className="flex-1 rounded-r-md border-y border-r border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Aadhar Card No</label>
+                                        <input
+                                            type="text"
+                                            value={addForm.aadharNo}
+                                            onChange={(e) => handleAddFieldChange('aadharNo', e.target.value)}
+                                            placeholder="Enter Aadhar Card Number"
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Pan Card No</label>
+                                        <input
+                                            type="text"
+                                            value={addForm.panNo}
+                                            onChange={(e) => handleAddFieldChange('panNo', e.target.value)}
+                                            placeholder="Enter PanCard No"
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Logo</label>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => handleAddFieldChange('logoFile', e.target.files?.[0] || null)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] text-sm file:mr-3 file:border-0 file:bg-gray-100 dark:file:bg-[#444] file:px-3 file:py-2"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Signature</label>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => handleAddFieldChange('signatureFile', e.target.files?.[0] || null)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] text-sm file:mr-3 file:border-0 file:bg-gray-100 dark:file:bg-[#444] file:px-3 file:py-2"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Partner Type</label>
+                                        <select
+                                            value={addForm.partnerType}
+                                            onChange={(e) => handleAddFieldChange('partnerType', e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Select Partner Type</option>
+                                            {PARTNER_TYPES.map((item) => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Area Of Expertise</label>
+                                        <select
+                                            value={addForm.areaOfExpertise}
+                                            onChange={(e) => handleAddFieldChange('areaOfExpertise', e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Select Area Of Expertise</option>
+                                            {AREA_OF_EXPERTISE.map((item) => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1 md:col-span-2">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">About</label>
+                                        <textarea
+                                            value={addForm.about}
+                                            onChange={(e) => handleAddFieldChange('about', e.target.value)}
+                                            placeholder="Enter About"
+                                            rows={3}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="text-lg font-bold uppercase tracking-wide text-blue-600">Current Address Details</h4>
+                                <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    <div className="space-y-1 md:col-span-2">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Address</label>
+                                        <textarea
+                                            value={addForm.currentAddress}
+                                            onChange={(e) => handleAddFieldChange('currentAddress', e.target.value)}
+                                            placeholder="Enter Your Address"
+                                            rows={2}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        />
+                                    </div>
+
+                                    <button type="button" className="w-fit text-sm font-medium text-blue-600">Use my current location</button>
+                                    <div />
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Country</label>
+                                        <select
+                                            value={addForm.currentCountry}
+                                            onChange={(e) => handleAddFieldChange('currentCountry', e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Select Country</option>
+                                            {COUNTRIES.filter((item) => item !== 'All').map((item) => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">State</label>
+                                        <select
+                                            value={addForm.currentState}
+                                            onChange={(e) => handleAddFieldChange('currentState', e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Select State</option>
+                                            {STATES.filter((item) => item !== 'All').map((item) => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">District</label>
+                                        <select
+                                            value={addForm.currentDistrict}
+                                            onChange={(e) => handleAddFieldChange('currentDistrict', e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        >
+                                            <option value="">Select District</option>
+                                            {DISTRICTS.filter((item) => item !== 'All').map((item) => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Pin Code</label>
+                                        <input
+                                            type="text"
+                                            value={addForm.currentPinCode}
+                                            onChange={(e) => handleAddFieldChange('currentPinCode', e.target.value)}
+                                            placeholder="Enter PinCode"
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="text-lg font-bold uppercase tracking-wide text-blue-600">Permanent Address Details</h4>
+                                <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    <div className="space-y-1 md:col-span-2">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Address</label>
+                                        <textarea
+                                            value={addForm.permanentAddress}
+                                            onChange={(e) => handleAddFieldChange('permanentAddress', e.target.value)}
+                                            placeholder="Enter Your Address"
+                                            rows={2}
+                                            disabled={addForm.sameAsCurrent}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm disabled:opacity-70"
+                                        />
+                                    </div>
+
+                                    <button type="button" className="w-fit text-sm font-medium text-blue-600">Use my current location</button>
+
+                                    <label className="inline-flex items-center gap-2 text-sm font-medium text-blue-600">
+                                        <input
+                                            type="checkbox"
+                                            checked={addForm.sameAsCurrent}
+                                            onChange={(e) => handleAddFieldChange('sameAsCurrent', e.target.checked)}
+                                            className="h-4 w-4"
+                                        />
+                                        Same as current address
+                                    </label>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Country</label>
+                                        <select
+                                            value={addForm.permanentCountry}
+                                            onChange={(e) => handleAddFieldChange('permanentCountry', e.target.value)}
+                                            disabled={addForm.sameAsCurrent}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm disabled:opacity-70"
+                                        >
+                                            <option value="">Select Country</option>
+                                            {COUNTRIES.filter((item) => item !== 'All').map((item) => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">State</label>
+                                        <select
+                                            value={addForm.permanentState}
+                                            onChange={(e) => handleAddFieldChange('permanentState', e.target.value)}
+                                            disabled={addForm.sameAsCurrent}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm disabled:opacity-70"
+                                        >
+                                            <option value="">Select State</option>
+                                            {STATES.filter((item) => item !== 'All').map((item) => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">District</label>
+                                        <select
+                                            value={addForm.permanentDistrict}
+                                            onChange={(e) => handleAddFieldChange('permanentDistrict', e.target.value)}
+                                            disabled={addForm.sameAsCurrent}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm disabled:opacity-70"
+                                        >
+                                            <option value="">Select District</option>
+                                            {DISTRICTS.filter((item) => item !== 'All').map((item) => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Pin Code</label>
+                                        <input
+                                            type="text"
+                                            value={addForm.permanentPinCode}
+                                            onChange={(e) => handleAddFieldChange('permanentPinCode', e.target.value)}
+                                            placeholder="Enter PinCode"
+                                            disabled={addForm.sameAsCurrent}
+                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#3b3b3b] px-3 py-2 text-sm disabled:opacity-70"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="text-lg font-bold uppercase tracking-wide text-blue-600">Upload Documents</h4>
+                                <label
+                                    htmlFor="district-partner-documents"
+                                    className="mt-2 flex h-14 cursor-pointer items-center justify-center rounded-md border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-[#2e2e2e] px-4 text-sm text-green-700"
+                                >
+                                    Drop files here or click to upload.
+                                </label>
+                                <input
+                                    id="district-partner-documents"
+                                    type="file"
+                                    multiple
+                                    className="hidden"
+                                    onChange={(e) => handleAddFieldChange('documents', Array.from(e.target.files || []))}
+                                />
+                                {addForm.documents.length > 0 && (
+                                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                        {addForm.documents.length} file(s) selected
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={creatingPartner}
+                                    className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                                >
+                                    <Save size={14} />
+                                    {creatingPartner ? 'Saving...' : 'Save Partner'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}
 
                 <div className="flex flex-1 min-h-0 flex-col">
                     <div className="flex flex-wrap items-center gap-3 px-5 py-3 border-b border-gray-100 dark:border-gray-800">

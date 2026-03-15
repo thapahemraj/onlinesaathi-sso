@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import {
     Trash2, Search, ChevronDown, ChevronUp,
     Download, ChevronLeft, ChevronRight, UserCheck, UserX, Users,
-    Pencil, X, Plus, Loader2, Settings, User, Check
+    Pencil, X, UserPlus, Loader2, Settings, User, Check
 } from 'lucide-react';
 
 /* ── constants ── */
@@ -153,6 +154,7 @@ const SortIcon = ({ active, dir }) => (
    MAIN COMPONENT
 ══════════════════════════════════════ */
 export default function UserManagement() {
+    const navigate = useNavigate();
     const [users,        setUsers]       = useState([]);
     const [loading,      setLoading]     = useState(true);
     const [isDemoMode,   setIsDemoMode]  = useState(false);
@@ -530,19 +532,12 @@ export default function UserManagement() {
 
                             {/* Add User */}
                             <button
-                                onClick={() => {
-                                    if (isAddModalOpen) {
-                                        setIsAddModalOpen(false);
-                                    } else {
-                                        openAddModal();
-                                    }
-                                }}
-                                className={`flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-md transition-colors shadow-sm ${isAddModalOpen
-                                    ? 'bg-gray-200 hover:bg-gray-300 dark:bg-[#3b3b3b] dark:hover:bg-[#4a4a4a] text-gray-700 dark:text-gray-200'
-                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                                }`}
+                                onClick={() => navigate('/dashboard/admin/users/add')}
+                                title="Add user"
+                                aria-label="Add user"
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-blue-600 text-white transition-colors shadow-sm hover:bg-blue-700"
                             >
-                                <Plus size={14} /> {isAddModalOpen ? 'Close Form' : 'Add User'}
+                                <UserPlus size={18} />
                             </button>
                         </div>
                     </div>
@@ -560,7 +555,19 @@ export default function UserManagement() {
 
                     {isAddModalOpen && (
                         <div className="m-5 mt-4 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2c2c2c] p-4 sm:p-5">
-                            <h3 className="text-lg font-semibold tracking-wide text-blue-600 uppercase mb-4">Add User</h3>
+                            <div className="mb-4 flex items-center justify-between gap-3">
+                                <h3 className="text-lg font-semibold tracking-wide text-blue-600 uppercase">Add User</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsAddModalOpen(false)}
+                                    title="Close form"
+                                    aria-label="Close form"
+                                    className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-[#2f2f2f] dark:text-gray-200"
+                                >
+                                    <X size={14} />
+                                    Close Form
+                                </button>
+                            </div>
 
                             <form onSubmit={handleAddUser} className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
