@@ -69,6 +69,7 @@ app.use('/api/kyc', require('./routes/kycRoutes'));
 app.use('/api/documents', require('./routes/documentRoutes'));
 app.use('/api/schemes', require('./routes/schemeRoutes'));
 app.use('/api/jobs', require('./routes/jobRoutes'));
+app.use('/api/ime', require('./routes/imeRoutes'));
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

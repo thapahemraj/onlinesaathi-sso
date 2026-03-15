@@ -24,7 +24,8 @@ import {
     UserCheck,
     HeartHandshake,
     Users,
-    Wallet
+    Wallet,
+    LayoutGrid
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -49,6 +50,7 @@ const DashboardLayout = ({ children }) => {
         { path: '/dashboard/devices', label: 'Devices', icon: Smartphone },
         { path: '/dashboard/sessions', label: 'Sessions', icon: Monitor },
         { path: '/dashboard/wallet', label: 'My Wallet', icon: Wallet },
+        { path: '/dashboard/services', label: 'Services', icon: LayoutGrid },
         { path: '/dashboard/payment', label: 'Payment options', icon: CreditCard },
         { path: '/dashboard/orders', label: 'Order history', icon: History },
         { path: '/dashboard/addresses', label: 'Address book', icon: MapPin },
