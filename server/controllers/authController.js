@@ -358,7 +358,7 @@ const sendVerificationCode = async (req, res) => {
     await Verification.findOneAndUpdate(
         { email },
         { email, otp, createdAt: Date.now() },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
     );
 
     const message = `Your Online Saathi verification code is: ${otp}`;

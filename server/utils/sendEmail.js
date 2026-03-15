@@ -13,7 +13,9 @@ const sendEmail = async (options) => {
     const transporter = nodemailer.createTransport({
         host: smtpHost,
         port: smtpPort,
-        secure: smtpPort === 465, // true for 465, false for other ports
+        secure: smtpPort === 465, // true for 465 (SSL), false for 587 (STARTTLS)
+        requireTLS: smtpPort !== 465, // Enforce STARTTLS on port 587
+        family: 4, // Force IPv4 — avoids ENETUNREACH on IPv6-blocked hosts (e.g. Render)
         auth: {
             user: smtpUser,
             pass: smtpPass,

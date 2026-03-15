@@ -25,7 +25,7 @@ const upsertFeatureFlag = async (req, res) => {
         const flag = await FeatureFlag.findOneAndUpdate(
             { key },
             { name, description, isEnabled, scope, conditions },
-            { new: true, upsert: true }
+            { returnDocument: 'after', upsert: true }
         );
 
         res.json(flag);

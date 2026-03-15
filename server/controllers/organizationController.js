@@ -63,7 +63,7 @@ const createOrganization = async (req, res) => {
 const updateOrganization = async (req, res) => {
     try {
         const org = await Organization.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
+            returnDocument: 'after',
             runValidators: true
         });
 

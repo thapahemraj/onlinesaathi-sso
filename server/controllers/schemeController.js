@@ -21,7 +21,7 @@ const createScheme = async (req, res) => {
 // @access  Private (subAdmin, superAdmin)
 const updateScheme = async (req, res) => {
     try {
-        const scheme = await Scheme.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const scheme = await Scheme.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after', runValidators: true });
         if (!scheme) return res.status(404).json({ message: 'Scheme not found.' });
         res.json(scheme);
     } catch (error) {

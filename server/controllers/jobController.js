@@ -19,7 +19,7 @@ const createJob = async (req, res) => {
 // @access  Private (subAdmin, superAdmin)
 const updateJob = async (req, res) => {
     try {
-        const job = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const job = await Job.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after', runValidators: true });
         if (!job) return res.status(404).json({ message: 'Job not found.' });
         res.json(job);
     } catch (error) {
