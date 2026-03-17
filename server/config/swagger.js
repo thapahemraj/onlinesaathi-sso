@@ -1,4 +1,36 @@
 const swaggerJsdoc = require('swagger-jsdoc');
+const fs = require('fs');
+const path = require('path');
+
+const partnerSwaggerPath = path.join(__dirname, 'partner-swagger.json');
+
+const loadPartnerSwagger = () => {
+    try {
+        if (!fs.existsSync(partnerSwaggerPath)) return null;
+        return JSON.parse(fs.readFileSync(partnerSwaggerPath, 'utf8'));
+    } catch (error) {
+        console.error('Failed to load partner-swagger.json:', error.message);
+        return null;
+    }
+};
+
+const partnerSwagger = loadPartnerSwagger();
+
+const normalizePartnerPath = (swaggerPath) => swaggerPath.replace(/^\/api/, '');
+
+const includePartnerPath = (swaggerPath) => (
+    swaggerPath.startsWith('/api/IME/') ||
+    swaggerPath.startsWith('/api/Prabhu/') ||
+    swaggerPath.startsWith('/api/Remittance/')
+);
+
+const detailedPartnerPaths = Object.entries(partnerSwagger?.paths || {}).reduce((acc, [swaggerPath, pathDef]) => {
+    if (!includePartnerPath(swaggerPath)) return acc;
+    acc[normalizePartnerPath(swaggerPath)] = pathDef;
+    return acc;
+}, {});
+
+const partnerComponents = partnerSwagger?.components || {};
 
 const options = {
     definition: {
@@ -23,7 +55,9 @@ const options = {
             },
         ],
         components: {
+            ...partnerComponents,
             securitySchemes: {
+                ...(partnerComponents.securitySchemes || {}),
                 bearerAuth: {
                     type: 'http',
                     scheme: 'bearer',
@@ -36,12 +70,27 @@ const options = {
                 bearerAuth: [],
             },
         ],
+        tags: [
+            {
+                name: 'IME',
+                description: 'IME service endpoints',
+            },
+            {
+                name: 'Prabhu',
+                description: 'Prabhu service endpoints',
+            },
+            {
+                name: 'Remittance',
+                description: 'Remittance service endpoints',
+            },
+        ],
+        paths: detailedPartnerPaths,
     },
     // Vercel serverless environment path resolution
     apis: [
-        require('path').join(__dirname, '../routes/*.js'), // Local/Standard
-        require('path').join(process.cwd(), 'routes/*.js'), // Vercel potentially
-        require('path').join(process.cwd(), 'server/routes/*.js') // Vercel monorepo structure
+        path.join(__dirname, '../routes/*.js'), // Local/Standard
+        path.join(process.cwd(), 'routes/*.js'), // Vercel potentially
+        path.join(process.cwd(), 'server/routes/*.js') // Vercel monorepo structure
     ],
 };
 

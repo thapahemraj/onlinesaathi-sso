@@ -61,6 +61,7 @@ app.use('/api/2fa', twoFactorRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/wallet', require('./routes/walletRoutes'));
+app.use('/api/account', require('./routes/accountRoutes'));
 app.use('/api/features', require('./routes/featureRoutes'));
 app.use('/api/apps/voice-ai', require('./routes/appRoutes'));
 
@@ -70,6 +71,8 @@ app.use('/api/documents', require('./routes/documentRoutes'));
 app.use('/api/schemes', require('./routes/schemeRoutes'));
 app.use('/api/jobs', require('./routes/jobRoutes'));
 app.use('/api/ime', require('./routes/imeRoutes'));
+app.use('/api/IME', require('./routes/imeSwaggerRoutes'));
+app.use('/api', require('./routes/partnerServiceRoutes'));
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
