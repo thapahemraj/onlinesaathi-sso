@@ -1,4 +1,6 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const { protect } = require('../middleware/authMiddleware');
 const { proxyPartnerService } = require('../controllers/partnerServiceProxyController');
 
@@ -11,7 +13,33 @@ const register = (method, swaggerPath) => {
     router[method](expressPath, proxyPartnerService);
 };
 
-const partnerServiceEndpoints = [
+const partnerSwaggerPath = path.join(__dirname, '../config/partner-swagger.json');
+
+const loadSwaggerEndpoints = () => {
+    try {
+        if (!fs.existsSync(partnerSwaggerPath)) return [];
+
+        const swagger = JSON.parse(fs.readFileSync(partnerSwaggerPath, 'utf8'));
+        const endpoints = [];
+
+        Object.entries(swagger.paths || {}).forEach(([swaggerPath, pathDef]) => {
+            if (!swaggerPath.startsWith('/api/')) return;
+
+            Object.keys(pathDef || {}).forEach((method) => {
+                const lower = method.toLowerCase();
+                if (!['get', 'post', 'put', 'patch', 'delete'].includes(lower)) return;
+                endpoints.push([lower, swaggerPath]);
+            });
+        });
+
+        return endpoints;
+    } catch (error) {
+        console.error('Failed to load partner-swagger endpoints:', error.message);
+        return [];
+    }
+};
+
+const fallbackEndpoints = [
     // IME
     ['post', '/api/IME/AmendTransaction'],
     ['get', '/api/IME/BalanceInquiry'],
@@ -124,8 +152,11 @@ const partnerServiceEndpoints = [
     ['post', '/api/Remittance/UploadAgentDocument'],
 ];
 
+const partnerServiceEndpoints = loadSwaggerEndpoints();
+const activeEndpoints = partnerServiceEndpoints.length ? partnerServiceEndpoints : fallbackEndpoints;
+
 router.use(protect);
-partnerServiceEndpoints.forEach(([method, path]) => register(method, path));
+activeEndpoints.forEach(([method, path]) => register(method, path));
 
 module.exports = router;
-module.exports.partnerServiceEndpoints = partnerServiceEndpoints;
+module.exports.partnerServiceEndpoints = activeEndpoints;

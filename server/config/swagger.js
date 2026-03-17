@@ -18,11 +18,7 @@ const partnerSwagger = loadPartnerSwagger();
 
 const normalizePartnerPath = (swaggerPath) => swaggerPath.replace(/^\/api/, '');
 
-const includePartnerPath = (swaggerPath) => (
-    swaggerPath.startsWith('/api/IME/') ||
-    swaggerPath.startsWith('/api/Prabhu/') ||
-    swaggerPath.startsWith('/api/Remittance/')
-);
+const includePartnerPath = (swaggerPath) => swaggerPath.startsWith('/api/');
 
 const detailedPartnerPaths = Object.entries(partnerSwagger?.paths || {}).reduce((acc, [swaggerPath, pathDef]) => {
     if (!includePartnerPath(swaggerPath)) return acc;
@@ -31,6 +27,7 @@ const detailedPartnerPaths = Object.entries(partnerSwagger?.paths || {}).reduce(
 }, {});
 
 const partnerComponents = partnerSwagger?.components || {};
+const partnerTags = partnerSwagger?.tags || [];
 
 const options = {
     definition: {
@@ -71,6 +68,7 @@ const options = {
             },
         ],
         tags: [
+            ...partnerTags,
             {
                 name: 'IME',
                 description: 'IME service endpoints',
