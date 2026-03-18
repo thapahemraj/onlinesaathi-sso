@@ -10,6 +10,11 @@ import ApplicationDetail from './pages/admin/ApplicationDetail';
 import Organizations from './pages/admin/Organizations';
 import AdminLedger from './pages/admin/AdminLedger';
 import AddMoneyRequest from './pages/admin/AddMoneyRequest';
+import IMEAgentOnboarding from './pages/admin/service-management/IMEAgentOnboarding';
+import IMEKYCCustomer from './pages/admin/service-management/IMEKYCCustomer';
+import PrabhuAgentOnboarding from './pages/admin/service-management/PrabhuAgentOnboarding';
+import PrabhuCustomerList from './pages/admin/service-management/PrabhuCustomerList';
+import RemitterList from './pages/admin/service-management/RemitterList';
 import SecuritySettings from './pages/admin/SecuritySettings';
 import AuditLogs from './pages/admin/AuditLogs';
 import WalletBalance from './pages/admin/WalletBalance';
@@ -88,6 +93,11 @@ function App() {
           <Route path="orgs" element={<Organizations />} />
           <Route path="account/admin-ledger" element={<AdminLedger />} />
           <Route path="account/add-money-request" element={<AddMoneyRequest />} />
+          <Route path="service-management/ime-agent-onboarding" element={<IMEAgentOnboarding />} />
+          <Route path="service-management/ime-kyc-customer" element={<IMEKYCCustomer />} />
+          <Route path="service-management/prabhu-agent-onboarding" element={<PrabhuAgentOnboarding />} />
+          <Route path="service-management/prabhu-customer-list" element={<PrabhuCustomerList />} />
+          <Route path="service-management/remitter-list" element={<RemitterList />} />
           <Route path="security" element={<SecuritySettings />} />
           <Route path="audit" element={<AuditLogs />} />
           <Route path="transactions" element={<TransactionManagement />} />

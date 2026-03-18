@@ -14,6 +14,29 @@ const PAGE_SIZES = [10, 25, 50, 100];
 const ACCOUNT_TYPES = ['All', 'User Wallet', 'Saathi Wallet', 'Partner Wallet'];
 const SERVICES = ['All', 'Add Money', 'Recharge', 'Utility Bill', 'Government Service'];
 const SUB_SERVICES = ['All', 'UPI', 'Card', 'Wallet Transfer', 'AEPS'];
+const WALLET_HISTORY_COLUMN_WIDTHS = [
+    '170px',
+    '80px',
+    '90px',
+    '140px',
+    '145px',
+    '135px',
+    '65px',
+    '65px',
+    '135px',
+    '170px',
+    '150px',
+    '190px',
+    '240px',
+    '155px',
+];
+
+const WALLET_HISTORY_TABLE_MIN_WIDTH = WALLET_HISTORY_COLUMN_WIDTHS.reduce(
+    (total, width) => total + Number.parseInt(width, 10),
+    0
+);
+
+const HEADER_CELL_CLASS = 'border-b border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold whitespace-nowrap dark:border-gray-700 dark:bg-[#232323]';
 
 const TRANSACTIONS = [
     {
@@ -177,8 +200,8 @@ const getOpeningBalance = (row) => Math.max(row.walletBalance - row.credit + row
 
 const SortArrow = ({ active, direction }) => (
     <span className="ml-2 inline-flex flex-col leading-none">
-        <ChevronUp size={12} className={active && direction === 'asc' ? 'text-green-600' : 'text-gray-300'} />
-        <ChevronDown size={12} className={active && direction === 'desc' ? 'text-green-600' : 'text-gray-300'} />
+        <ChevronUp size={12} className={active && direction === 'asc' ? 'text-blue-600' : 'text-gray-300 dark:text-gray-600'} />
+        <ChevronDown size={12} className={active && direction === 'desc' ? 'text-blue-600' : 'text-gray-300 dark:text-gray-600'} />
     </span>
 );
 
@@ -305,183 +328,190 @@ export default function WalletHistory() {
     };
 
     return (
-        <div className="space-y-3">
-            <button
-                type="button"
-                onClick={() => setFiltersCollapsed((current) => !current)}
-                className="inline-flex items-center gap-1 text-[28px] font-bold uppercase tracking-wide text-[#586fe5]"
-            >
-                <span className="text-[28px] leading-none">Wallet History</span>
-                {filtersCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-            </button>
+        <div className="h-full min-h-0">
+            <div className="bg-white dark:bg-[#2c2c2c] rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 h-full min-h-0 flex flex-col">
+                <div className="bg-white dark:bg-[#2c2c2c]">
+                    <div
+                        className="flex items-center gap-3 px-5 py-3 border-b border-gray-200 dark:border-gray-700 cursor-pointer select-none"
+                        onClick={() => setFiltersCollapsed((current) => !current)}
+                    >
+                        <Wallet size={16} className="text-blue-600 flex-shrink-0" />
+                        <span className="font-semibold text-sm text-blue-600 tracking-wide uppercase">Wallet History</span>
+                        <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${filtersCollapsed ? '' : 'rotate-180'}`} />
+                    </div>
 
-            {!filtersCollapsed && (
-                <div className="rounded-md border border-gray-200 bg-[#f4f4f5] p-5 dark:border-gray-700 dark:bg-[#2c2c2c]">
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:items-end">
-                        <div className="space-y-2">
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">Transaction Date</label>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={dateRange}
-                                    onChange={(event) => setDateRange(event.target.value)}
-                                    className="w-full rounded-md border border-gray-300 bg-white py-2.5 pl-4 pr-10 text-sm text-gray-700 focus:border-[#5a6ff0] focus:outline-none dark:border-gray-600 dark:bg-[#323232] dark:text-gray-200"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setDateRange('')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                    title="Clear date range"
-                                >
-                                    <X size={16} />
-                                </button>
+                    {!filtersCollapsed && (
+                        <div className="flex flex-wrap items-end justify-between gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+                            <div className="flex-1 min-w-[160px]" />
+
+                            <div className="overflow-x-auto hide-scrollbar w-full xl:w-auto xl:max-w-[1120px]">
+                                <div className="grid grid-cols-4 gap-3 min-w-[860px]">
+                                    <div className="flex flex-col gap-1 min-w-0">
+                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Transaction Date</label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={dateRange}
+                                                onChange={(event) => setDateRange(event.target.value)}
+                                                className="w-full pl-3 pr-8 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#3b3b3b] text-gray-700 dark:text-gray-200"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setDateRange('')}
+                                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
+                                                title="Clear date range"
+                                            >
+                                                <X size={13} />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-1 min-w-0">
+                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Account Type</label>
+                                        <select
+                                            value={accountType}
+                                            onChange={(event) => setAccountType(event.target.value)}
+                                            className="w-full py-2 pl-3 pr-8 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#3b3b3b] text-gray-700 dark:text-gray-200"
+                                        >
+                                            {ACCOUNT_TYPES.map((item) => (
+                                                <option key={item} value={item}>{item === 'All' ? 'Select Account Type' : item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="flex flex-col gap-1 min-w-0">
+                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Service Name</label>
+                                        <select
+                                            value={serviceName}
+                                            onChange={(event) => setServiceName(event.target.value)}
+                                            className="w-full py-2 pl-3 pr-8 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#3b3b3b] text-gray-700 dark:text-gray-200"
+                                        >
+                                            {SERVICES.map((item) => (
+                                                <option key={item} value={item}>{item === 'All' ? 'Select Service' : item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="flex flex-col gap-1 min-w-0">
+                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Sub Service Name</label>
+                                        <select
+                                            value={subServiceName}
+                                            onChange={(event) => setSubServiceName(event.target.value)}
+                                            className="w-full py-2 pl-3 pr-8 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#3b3b3b] text-gray-700 dark:text-gray-200"
+                                        >
+                                            {SUB_SERVICES.map((item) => (
+                                                <option key={item} value={item}>{item === 'All' ? 'Select Sub Service' : item}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <div className="space-y-2">
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">Account Type</label>
-                            <select
-                                value={accountType}
-                                onChange={(event) => setAccountType(event.target.value)}
-                                className="w-full rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-[#5a6ff0] focus:outline-none dark:border-gray-600 dark:bg-[#323232] dark:text-gray-200"
-                            >
-                                {ACCOUNT_TYPES.map((item) => (
-                                    <option key={item} value={item}>{item === 'All' ? 'Select Account Type' : item}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">Service Name</label>
-                            <select
-                                value={serviceName}
-                                onChange={(event) => setServiceName(event.target.value)}
-                                className="w-full rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-[#5a6ff0] focus:outline-none dark:border-gray-600 dark:bg-[#323232] dark:text-gray-200"
-                            >
-                                {SERVICES.map((item) => (
-                                    <option key={item} value={item}>{item === 'All' ? 'Select Service' : item}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">Sub Service Name</label>
-                            <select
-                                value={subServiceName}
-                                onChange={(event) => setSubServiceName(event.target.value)}
-                                className="w-full rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-[#5a6ff0] focus:outline-none dark:border-gray-600 dark:bg-[#323232] dark:text-gray-200"
-                            >
-                                {SUB_SERVICES.map((item) => (
-                                    <option key={item} value={item}>{item === 'All' ? 'Select Sub Service' : item}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
+                    )}
                 </div>
-            )}
 
-            <div className="rounded-md border border-gray-200 bg-[#f4f4f5] p-5 dark:border-gray-700 dark:bg-[#2c2c2c]">
-                <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                    <div className="flex items-center gap-3 text-[28px] text-gray-700 dark:text-gray-300">
-                        <span className="text-sm">Show</span>
+                <div className="flex flex-1 min-h-0 flex-col">
+                    <div className="flex flex-wrap items-center gap-3 px-5 py-3 border-b border-gray-100 dark:border-gray-800">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Show</span>
                         <select
                             value={pageSize}
                             onChange={(event) => setPageSize(Number(event.target.value))}
-                            className="w-[70px] rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-[#5a6ff0] focus:outline-none dark:border-gray-600 dark:bg-[#323232] dark:text-gray-200"
+                            className="border border-gray-300 dark:border-gray-600 rounded-md py-1.5 px-2.5 bg-white dark:bg-[#3b3b3b] text-gray-700 dark:text-gray-200 text-sm"
                         >
                             {PAGE_SIZES.map((size) => (
                                 <option key={size} value={size}>{size}</option>
                             ))}
                         </select>
-                        <span className="text-sm">entries</span>
-                    </div>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">entries</span>
 
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <div className="flex-1" />
+
                         <button
                             type="button"
                             onClick={() => window.alert('Deduct wallet action can be connected to backend API.')}
-                            className="inline-flex items-center justify-center gap-2 rounded-md bg-[#ef6c66] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#e45750]"
+                            className="flex items-center gap-2 bg-[#ef6c66] hover:bg-[#e45750] text-white text-sm font-medium px-4 py-2 rounded-md transition-colors shadow-sm"
                         >
-                            <Wallet size={14} />
-                            Deduct Wallet
+                            <Wallet size={14} /> Deduct Wallet
                         </button>
 
                         <button
                             type="button"
                             onClick={handleExport}
-                            className="inline-flex items-center justify-center gap-2 rounded-md bg-[#5b6ff0] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#4b5de0]"
+                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors shadow-sm"
                         >
-                            <Download size={14} />
-                            Export to Excel
+                            <Download size={14} /> Export to Excel
                         </button>
 
-                        <div className="flex overflow-hidden rounded-md border border-gray-300 bg-white dark:border-gray-600 dark:bg-[#323232]">
+                        <div className="relative">
                             <input
                                 type="text"
+                                placeholder="Search..."
                                 value={search}
                                 onChange={(event) => setSearch(event.target.value)}
-                                placeholder="Search..."
-                                className="w-full min-w-[190px] border-0 bg-transparent px-4 py-2 text-sm text-gray-700 outline-none dark:text-gray-200"
+                                className="pl-3 pr-9 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#3b3b3b] text-gray-700 dark:text-gray-200 w-44"
                             />
-                            <button
-                                type="button"
-                                className="inline-flex items-center justify-center bg-[#5b6ff0] px-4 text-white"
-                            >
-                                <Search size={14} />
-                            </button>
+                            <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                         </div>
                     </div>
-                </div>
 
-                <div className="mt-4 overflow-hidden rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-[#262626]">
-                    <div className="relative max-h-[520px] overflow-auto hide-scrollbar overscroll-x-contain">
-                        <table className="w-full min-w-[1900px] text-sm text-left [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
-                            <thead className="sticky top-0 z-10 bg-[#f7f7f8] dark:bg-[#202020]">
-                                <tr className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">
-                                        <button type="button" onClick={() => handleSort('dateTime')} className="inline-flex items-center font-semibold">
+                    <div className="relative flex-1 min-h-0 overflow-auto hide-scrollbar overscroll-x-contain">
+                        <table
+                            className="table-fixed border-separate border-spacing-0 text-sm [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap"
+                            style={{ width: WALLET_HISTORY_TABLE_MIN_WIDTH, minWidth: WALLET_HISTORY_TABLE_MIN_WIDTH }}
+                        >
+                            <colgroup>
+                                {WALLET_HISTORY_COLUMN_WIDTHS.map((width, index) => (
+                                    <col key={`${width}-${index}`} style={{ width }} />
+                                ))}
+                            </colgroup>
+                            <thead>
+                                <tr className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                    <th className={HEADER_CELL_CLASS}>
+                                        <button type="button" onClick={() => handleSort('dateTime')} className="inline-flex items-center justify-center w-full font-semibold">
                                             Date & Time
                                             <SortArrow active={sortField === 'dateTime'} direction={sortDirection} />
                                         </button>
                                     </th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Credit</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Debit</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Wallet Balance</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Service Charge</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Platform Fees</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">GST</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">TDS</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Account Type</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Service Name</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">User Name</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">UTR Number / Receipts</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Narration</th>
-                                    <th className="border-b border-gray-200 px-4 py-3 text-left dark:border-gray-700">Opening Balance</th>
+                                    <th className={HEADER_CELL_CLASS}>Credit</th>
+                                    <th className={HEADER_CELL_CLASS}>Debit</th>
+                                    <th className={HEADER_CELL_CLASS}>Wallet Balance</th>
+                                    <th className={HEADER_CELL_CLASS}>Service Charge</th>
+                                    <th className={HEADER_CELL_CLASS}>Platform Fees</th>
+                                    <th className={HEADER_CELL_CLASS}>GST</th>
+                                    <th className={HEADER_CELL_CLASS}>TDS</th>
+                                    <th className={HEADER_CELL_CLASS}>Account Type</th>
+                                    <th className={HEADER_CELL_CLASS}>Service Name</th>
+                                    <th className={HEADER_CELL_CLASS}>User Name</th>
+                                    <th className={HEADER_CELL_CLASS}>UTR Number / Receipts</th>
+                                    <th className={HEADER_CELL_CLASS}>Narration</th>
+                                    <th className={HEADER_CELL_CLASS}>Opening Balance</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {visibleRows.length === 0 ? (
                                     <tr>
-                                        <td colSpan={14} className="px-6 py-16 text-center text-sm text-gray-500 dark:text-gray-400">
+                                        <td colSpan={WALLET_HISTORY_COLUMN_WIDTHS.length} className="px-6 py-16 text-center text-sm text-gray-500 dark:text-gray-400">
                                             No wallet history records found.
                                         </td>
                                     </tr>
                                 ) : visibleRows.map((row) => (
-                                    <tr key={row.id} className="text-gray-700 transition-colors hover:bg-[#f8f9ff] dark:text-gray-200 dark:hover:bg-white/5">
-                                        <td className="border-r border-gray-100 px-4 py-4 whitespace-nowrap dark:border-gray-800">{formatDateTime(row.dateTime)}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 text-green-600 whitespace-nowrap dark:border-gray-800">{formatCurrency(row.credit)}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 text-red-500 whitespace-nowrap dark:border-gray-800">{formatCurrency(row.debit)}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 font-semibold text-[#5168eb] whitespace-nowrap dark:border-gray-800">{formatCurrency(row.walletBalance)}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 whitespace-nowrap dark:border-gray-800">{formatCurrency(row.serviceCharge)}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 whitespace-nowrap dark:border-gray-800">{formatCurrency(row.platformFees)}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 whitespace-nowrap dark:border-gray-800">{formatCurrency(row.gst)}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 whitespace-nowrap dark:border-gray-800">{formatCurrency(row.tds)}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 whitespace-nowrap dark:border-gray-800">{row.accountType}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 whitespace-nowrap dark:border-gray-800">{row.serviceName}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 whitespace-nowrap dark:border-gray-800">{row.userName}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 whitespace-nowrap dark:border-gray-800">{row.utrNumber}</td>
-                                        <td className="border-r border-gray-100 px-4 py-4 whitespace-nowrap dark:border-gray-800">{row.narration}</td>
-                                        <td className="px-4 py-4 font-semibold text-[#5168eb] whitespace-nowrap">{formatCurrency(getOpeningBalance(row))}</td>
+                                    <tr key={row.id} className="hover:bg-blue-50/30 dark:hover:bg-white/5 transition-colors">
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center text-xs text-gray-500 dark:text-gray-400">{formatDateTime(row.dateTime)}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center text-green-600">{formatCurrency(row.credit)}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center text-red-500">{formatCurrency(row.debit)}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center font-semibold text-blue-600 dark:text-blue-400">{formatCurrency(row.walletBalance)}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center text-gray-600 dark:text-gray-400">{formatCurrency(row.serviceCharge)}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center text-gray-600 dark:text-gray-400">{formatCurrency(row.platformFees)}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center text-gray-600 dark:text-gray-400">{formatCurrency(row.gst)}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center text-gray-600 dark:text-gray-400">{formatCurrency(row.tds)}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center text-gray-600 dark:text-gray-400">{row.accountType}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center text-gray-600 dark:text-gray-400">{row.serviceName}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center font-semibold text-gray-700 dark:text-gray-200">{row.userName}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center text-gray-600 dark:text-gray-400">{row.utrNumber}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center text-gray-600 dark:text-gray-400">
+                                            <span className="inline-block max-w-[220px] truncate align-middle">{row.narration}</span>
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap align-middle text-center font-semibold text-blue-600 dark:text-blue-400">{formatCurrency(getOpeningBalance(row))}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -494,7 +524,7 @@ export default function WalletHistory() {
                             <span className="font-semibold text-gray-700 dark:text-gray-300">
                                 {sortedRows.length === 0 ? 0 : (safePage - 1) * pageSize + 1}
                             </span>
-                            –
+                            -
                             <span className="font-semibold text-gray-700 dark:text-gray-300">
                                 {Math.min(safePage * pageSize, sortedRows.length)}
                             </span>

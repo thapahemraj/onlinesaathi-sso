@@ -18,6 +18,44 @@ import {
 } from 'lucide-react';
 
 const PAGE_SIZES = [10, 25, 50, 100];
+const ADMIN_LEDGER_COLUMN_WIDTHS = [
+    '60px',
+    '170px',
+    '120px',
+    '140px',
+    '120px',
+    '120px',
+    '130px',
+    '140px',
+    '80px',
+    '80px',
+    '120px',
+    '140px',
+    '130px',
+    '150px',
+];
+
+const ADMIN_LEDGER_TABLE_MIN_WIDTH = ADMIN_LEDGER_COLUMN_WIDTHS.reduce(
+    (total, width) => total + Number.parseInt(width, 10),
+    0
+);
+
+const HEADER_CELL_CLASS = 'border-b border-r border-gray-200 bg-[#f7f7f8] px-4 py-3 text-left font-semibold whitespace-nowrap dark:border-gray-700 dark:bg-[#202020]';
+const LEDGER_EXPORT_HEADER = [
+    'User Name',
+    'User Role',
+    'Opening Balance',
+    'Add Money',
+    'Transaction',
+    'Platform Fees',
+    'Service Charges',
+    'GST',
+    'TDS',
+    'Commission',
+    'Refund Amount',
+    'Wallet Deduct',
+    'Closing Balance',
+];
 
 const METRIC_CARDS = [
     {
@@ -253,6 +291,26 @@ const calcClosingBalance = (row) => (
     - row.walletDeduct
 );
 
+const toCsvCell = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+
+const downloadCsv = (fileName, header, rows) => {
+    if (!rows.length) return;
+
+    const lines = [
+        header.map(toCsvCell).join(','),
+        ...rows.map((row) => row.map(toCsvCell).join(',')),
+    ];
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const anchor = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(blob),
+        download: fileName,
+    });
+
+    anchor.click();
+    URL.revokeObjectURL(anchor.href);
+};
+
 export default function AdminLedger() {
     const [summaryCollapsed, setSummaryCollapsed] = useState(false);
     const [dateRange, setDateRange] = useState('14/03/26 - 14/03/26');
@@ -292,26 +350,7 @@ export default function AdminLedger() {
         }
     }
 
-    const exportRows = () => {
-        if (!filteredRows.length) return;
-
-        const header = [
-            'User Name',
-            'User Role',
-            'Opening Balance',
-            'Add Money',
-            'Transaction',
-            'Platform Fees',
-            'Service Charges',
-            'GST',
-            'TDS',
-            'Commission',
-            'Refund Amount',
-            'Wallet Deduct',
-            'Closing Balance',
-        ];
-
-        const body = filteredRows.map((row) => [
+    const getLedgerExportRow = (row) => [
             row.userName,
             row.userRole,
             formatNumber(row.openingBalance),
@@ -325,16 +364,23 @@ export default function AdminLedger() {
             formatNumber(row.refundAmount),
             formatNumber(row.walletDeduct),
             formatNumber(calcClosingBalance(row)),
-        ].join(','));
+        ];
 
-        const blob = new Blob([[header.join(','), ...body].join('\n')], { type: 'text/csv' });
-        const anchor = Object.assign(document.createElement('a'), {
-            href: URL.createObjectURL(blob),
-            download: 'admin-ledger.csv',
-        });
+    const exportRows = () => {
+        downloadCsv(
+            'admin-ledger.csv',
+            LEDGER_EXPORT_HEADER,
+            filteredRows.map(getLedgerExportRow)
+        );
+    };
 
-        anchor.click();
-        URL.revokeObjectURL(anchor.href);
+    const downloadLedgerRow = (row) => {
+        const safeUserName = row.userName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        downloadCsv(
+            `admin-ledger-${safeUserName || row.id}.csv`,
+            LEDGER_EXPORT_HEADER,
+            [getLedgerExportRow(row)]
+        );
     };
 
     return (
@@ -433,40 +479,54 @@ export default function AdminLedger() {
 
                 <div className="mt-4 overflow-hidden rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-[#262626]">
                     <div className="relative max-h-[520px] overflow-auto hide-scrollbar overscroll-x-contain">
-                        <table className="w-full min-w-[1800px] text-sm text-left [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
-                            <thead className="sticky top-0 z-10 bg-[#f7f7f8] dark:bg-[#202020]">
+                        <table
+                            className="table-fixed border-separate border-spacing-0 text-sm text-left [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap"
+                            style={{ width: ADMIN_LEDGER_TABLE_MIN_WIDTH, minWidth: ADMIN_LEDGER_TABLE_MIN_WIDTH }}
+                        >
+                            <colgroup>
+                                {ADMIN_LEDGER_COLUMN_WIDTHS.map((width, index) => (
+                                    <col key={`${width}-${index}`} style={{ width }} />
+                                ))}
+                            </colgroup>
+                            <thead>
                                 <tr className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">
+                                    <th className={HEADER_CELL_CLASS}>
                                         <Wallet size={14} />
                                     </th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">User Name</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">User Role</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Opening Balance</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Add Money</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Transaction</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Platform Fees</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Service Charges</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">GST</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">TDS</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Commission</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Refund Amount</th>
-                                    <th className="border-b border-r border-gray-200 px-4 py-3 text-left dark:border-gray-700">Wallet Deduct</th>
-                                    <th className="border-b border-gray-200 px-4 py-3 text-left dark:border-gray-700">Closing Balance</th>
+                                    <th className={HEADER_CELL_CLASS}>User Name</th>
+                                    <th className={HEADER_CELL_CLASS}>User Role</th>
+                                    <th className={HEADER_CELL_CLASS}>Opening Balance</th>
+                                    <th className={HEADER_CELL_CLASS}>Add Money</th>
+                                    <th className={HEADER_CELL_CLASS}>Transaction</th>
+                                    <th className={HEADER_CELL_CLASS}>Platform Fees</th>
+                                    <th className={HEADER_CELL_CLASS}>Service Charges</th>
+                                    <th className={HEADER_CELL_CLASS}>GST</th>
+                                    <th className={HEADER_CELL_CLASS}>TDS</th>
+                                    <th className={HEADER_CELL_CLASS}>Commission</th>
+                                    <th className={HEADER_CELL_CLASS}>Refund Amount</th>
+                                    <th className={HEADER_CELL_CLASS}>Wallet Deduct</th>
+                                    <th className="border-b border-gray-200 bg-[#f7f7f8] px-4 py-3 text-left font-semibold whitespace-nowrap dark:border-gray-700 dark:bg-[#202020]">Closing Balance</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {visibleRows.length === 0 ? (
                                     <tr>
-                                        <td colSpan={14} className="px-6 py-16 text-center text-sm text-gray-500 dark:text-gray-400">
+                                        <td colSpan={ADMIN_LEDGER_COLUMN_WIDTHS.length} className="px-6 py-16 text-center text-sm text-gray-500 dark:text-gray-400">
                                             No admin ledger records found.
                                         </td>
                                     </tr>
                                 ) : visibleRows.map((row) => (
                                     <tr key={row.id} className="text-gray-700 transition-colors hover:bg-[#f8f9ff] dark:text-gray-200 dark:hover:bg-white/5">
                                         <td className="border-r border-gray-100 px-4 py-4 dark:border-gray-800">
-                                            <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-[#e6eefc] text-[#4168de]">
-                                                <Wallet size={12} />
-                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => downloadLedgerRow(row)}
+                                                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#e6eefc] text-[#4168de] transition-colors hover:bg-[#d9e5ff] hover:text-[#2f56d3]"
+                                                title={`Download ledger for ${row.userName}`}
+                                                aria-label={`Download ledger for ${row.userName}`}
+                                            >
+                                                <Download size={16} />
+                                            </button>
                                         </td>
                                         <td className="border-r border-gray-100 px-4 py-4 font-medium whitespace-nowrap dark:border-gray-800">{row.userName}</td>
                                         <td className="border-r border-gray-100 px-4 py-4 whitespace-nowrap dark:border-gray-800">{row.userRole}</td>

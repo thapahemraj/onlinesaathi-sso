@@ -53,6 +53,13 @@ const UI_SECTION_ITEMS = {
         { id: 'admin-ledger', path: '/dashboard/admin/account/admin-ledger', label: 'Admin Ledger' },
         { id: 'add-money-request', path: '/dashboard/admin/account/add-money-request', label: 'Add Money Request' },
     ],
+    'service-management': [
+        { id: 'ime-agent-onboarding', path: '/dashboard/admin/service-management/ime-agent-onboarding', label: 'IME Agent Onboarding' },
+        { id: 'ime-kyc-customer', path: '/dashboard/admin/service-management/ime-kyc-customer', label: 'IME KYC Customer' },
+        { id: 'prabhu-agent-onboarding', path: '/dashboard/admin/service-management/prabhu-agent-onboarding', label: 'Prabhu Agent Onboarding' },
+        { id: 'prabhu-customer-list', path: '/dashboard/admin/service-management/prabhu-customer-list', label: 'Prabhu Customer List' },
+        { id: 'remitter-list', path: '/dashboard/admin/service-management/remitter-list', label: 'Remitter List' },
+    ],
 };
 
 const AdminLayout = ({ children }) => {
