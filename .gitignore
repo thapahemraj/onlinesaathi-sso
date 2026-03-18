@@ -53,3 +53,6 @@ out/
 # temporary files
 *.tmp
 *.temp
+
+# local reference artifacts
+reference/
