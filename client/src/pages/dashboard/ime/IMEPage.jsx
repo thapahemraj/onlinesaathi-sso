@@ -92,6 +92,7 @@ const IMEPage = () => {
     const [customerToken, setCustomerToken] = useState('');
     const [customerOtpToken, setCustomerOtpToken] = useState('');
     const [customerVerified, setCustomerVerified] = useState(false);
+    const [receiverCreated, setReceiverCreated] = useState(false);
 
     const [lookups, setLookups] = useState({
         countries: [],
@@ -109,6 +110,26 @@ const IMEPage = () => {
         tempDistricts: [],
         permMunicipalities: [],
         bankBranches: [],
+        receiverDistricts: [],
+        receiverMunicipalities: [],
+    });
+
+    const [receiverForm, setReceiverForm] = useState({
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        gender: '',
+        relationship: '',
+        mobileNo: '',
+        country: 'NPL',
+        state: '',
+        district: '',
+        municipality: '',
+        paymentType: 'C',
+        bankId: '',
+        bankBranchId: '',
+        accountNo: '',
+        purposeOfRemittance: '',
     });
 
     const [customerForm, setCustomerForm] = useState({
@@ -255,7 +276,7 @@ const IMEPage = () => {
     }, [customerForm.temporaryAddress_State]);
 
     useEffect(() => {
-        const bankId = txnForm.bankId;
+        const bankId = receiverForm.bankId || txnForm.bankId;
         if (!bankId) {
             setLookups((prev) => ({ ...prev, bankBranches: [] }));
             return;
@@ -263,7 +284,31 @@ const IMEPage = () => {
         api.get(`/IME/BankBranchList/${bankId}`)
             .then((res) => setLookups((prev) => ({ ...prev, bankBranches: toDataList(res) })))
             .catch(() => setLookups((prev) => ({ ...prev, bankBranches: [] })));
-    }, [txnForm.bankId]);
+    }, [txnForm.bankId, receiverForm.bankId]);
+
+    useEffect(() => {
+        const stateId = receiverForm.state;
+        if (!stateId) {
+            setLookups((prev) => ({ ...prev, receiverDistricts: [], receiverMunicipalities: [] }));
+            return;
+        }
+
+        api.get(`/IME/Districts/${stateId}`)
+            .then((res) => setLookups((prev) => ({ ...prev, receiverDistricts: toDataList(res), receiverMunicipalities: [] })))
+            .catch(() => setLookups((prev) => ({ ...prev, receiverDistricts: [], receiverMunicipalities: [] })));
+    }, [receiverForm.state]);
+
+    useEffect(() => {
+        const districtId = receiverForm.district;
+        if (!districtId) {
+            setLookups((prev) => ({ ...prev, receiverMunicipalities: [] }));
+            return;
+        }
+
+        api.get(`/IME/Municipalities/${districtId}`)
+            .then((res) => setLookups((prev) => ({ ...prev, receiverMunicipalities: toDataList(res) })))
+            .catch(() => setLookups((prev) => ({ ...prev, receiverMunicipalities: [] })));
+    }, [receiverForm.district]);
 
     const runCall = async (key, method, url, data = undefined) => {
         setLoadingKey(key);
@@ -337,6 +382,41 @@ const IMEPage = () => {
 
         setCustomerVerified(true);
         setStep(3);
+    };
+
+    const handleCreateReceiver = () => {
+        if (!receiverForm.firstName || !receiverForm.lastName || !receiverForm.mobileNo || !receiverForm.gender || !receiverForm.relationship || !receiverForm.purposeOfRemittance) {
+            setErrorMessage('Please fill required receiver details before continuing.');
+            return;
+        }
+
+        const fullName = `${receiverForm.firstName} ${receiverForm.middleName} ${receiverForm.lastName}`.replace(/\s+/g, ' ').trim();
+
+        setTxnForm((prev) => ({
+            ...prev,
+            receiverName: fullName,
+            receiverMobileNo: receiverForm.mobileNo,
+            receiverGender: receiverForm.gender,
+            receiverAddress: receiverForm.municipality ? `${receiverForm.municipality}, ${receiverForm.district}, ${receiverForm.state}` : `${receiverForm.district}, ${receiverForm.state}`,
+            receiverCity: receiverForm.municipality,
+            receiverCountry: receiverForm.country,
+            relationship: receiverForm.relationship,
+            purposeOfRemittance: receiverForm.purposeOfRemittance,
+            paymentType: receiverForm.paymentType,
+            bankId: receiverForm.bankId,
+            bankBranchId: receiverForm.bankBranchId,
+            bankAccountNumber: receiverForm.accountNo,
+        }));
+
+        setCalcForm((prev) => ({
+            ...prev,
+            paymentType: receiverForm.paymentType,
+            payoutAgentId: receiverForm.bankId,
+        }));
+
+        setReceiverCreated(true);
+        setStep(4);
+        setErrorMessage('');
     };
 
     const handleGetCalculation = async () => {
@@ -536,7 +616,40 @@ const IMEPage = () => {
             ) : null}
 
             {step >= 3 && customerVerified ? (
-                <Section title="3) Send Transaction Summary">
+                <Section title="3) Receiver Registration">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <LabeledInput label="First Name" required value={receiverForm.firstName} onChange={(e) => setReceiverForm((p) => ({ ...p, firstName: e.target.value }))} />
+                        <LabeledInput label="Middle Name" value={receiverForm.middleName} onChange={(e) => setReceiverForm((p) => ({ ...p, middleName: e.target.value }))} />
+                        <LabeledInput label="Last Name" required value={receiverForm.lastName} onChange={(e) => setReceiverForm((p) => ({ ...p, lastName: e.target.value }))} />
+                        <LabeledSelect label="Gender" required options={lookups.genders} value={receiverForm.gender} onChange={(e) => setReceiverForm((p) => ({ ...p, gender: e.target.value }))} />
+                        <LabeledSelect label="Relationship" required options={lookups.relationship} value={receiverForm.relationship} onChange={(e) => setReceiverForm((p) => ({ ...p, relationship: e.target.value }))} />
+                        <LabeledInput label="Contact Number" required value={receiverForm.mobileNo} onChange={(e) => setReceiverForm((p) => ({ ...p, mobileNo: e.target.value }))} />
+                        <LabeledSelect label="Country" required options={lookups.countries} value={receiverForm.country} onChange={(e) => setReceiverForm((p) => ({ ...p, country: e.target.value }))} />
+                        <LabeledSelect label="State" required options={lookups.nepStates} value={receiverForm.state} onChange={(e) => setReceiverForm((p) => ({ ...p, state: e.target.value }))} />
+                        <LabeledSelect label="District" required options={lookups.receiverDistricts} value={receiverForm.district} onChange={(e) => setReceiverForm((p) => ({ ...p, district: e.target.value }))} />
+                        <LabeledSelect label="Municipality/VDC" options={lookups.receiverMunicipalities} value={receiverForm.municipality} onChange={(e) => setReceiverForm((p) => ({ ...p, municipality: e.target.value }))} />
+                        <LabeledSelect label="Preferred Payment Type" required options={[{ id: 'C', value: 'Cash Payment' }, { id: 'B', value: 'Bank Deposit' }]} value={receiverForm.paymentType} onChange={(e) => setReceiverForm((p) => ({ ...p, paymentType: e.target.value }))} />
+                        <LabeledSelect label="Purpose Of Transaction" required options={lookups.purpose} value={receiverForm.purposeOfRemittance} onChange={(e) => setReceiverForm((p) => ({ ...p, purposeOfRemittance: e.target.value }))} />
+                        {receiverForm.paymentType === 'B' ? (
+                            <>
+                                <LabeledSelect label="Bank Name" required options={lookups.banks} value={receiverForm.bankId} onChange={(e) => setReceiverForm((p) => ({ ...p, bankId: e.target.value }))} />
+                                <LabeledSelect label="Bank Branch" required options={lookups.bankBranches} value={receiverForm.bankBranchId} onChange={(e) => setReceiverForm((p) => ({ ...p, bankBranchId: e.target.value }))} />
+                                <LabeledInput label="Account No." required value={receiverForm.accountNo} onChange={(e) => setReceiverForm((p) => ({ ...p, accountNo: e.target.value }))} />
+                            </>
+                        ) : null}
+                    </div>
+
+                    <div className="flex gap-2">
+                        <button onClick={handleCreateReceiver} className="px-4 py-2 rounded-md bg-green-600 text-white text-sm">
+                            Create Receiver
+                        </button>
+                        {receiverCreated ? <span className="text-sm text-green-600 self-center">Receiver created. Continue to send money.</span> : null}
+                    </div>
+                </Section>
+            ) : null}
+
+            {step >= 4 && customerVerified && receiverCreated ? (
+                <Section title="4) Send Transaction Summary">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="bg-slate-800 text-white rounded-xl p-4 space-y-1">
                             <h3 className="font-semibold">Sender Details</h3>
