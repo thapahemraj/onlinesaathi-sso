@@ -120,6 +120,7 @@ const AdminLayout = ({ children }) => {
         { path: '/dashboard/admin/apps', label: 'Applications (OAuth)', icon: AppWindow },
         { path: '/dashboard/admin/security', label: 'Security & Auth', icon: Shield },
         { path: '/dashboard/admin/transactions', label: 'Wallet Approvals', icon: Wallet },
+        { path: '/dashboard/admin/partner-transactions', label: 'Partner Transactions', icon: Activity },
         { path: '/dashboard/admin/audit', label: 'Audit Logs', icon: Activity },
         { path: '/dashboard/admin/settings', label: 'Settings', icon: Settings },
     ];

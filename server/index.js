@@ -62,6 +62,7 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/wallet', require('./routes/walletRoutes'));
 app.use('/api/account', require('./routes/accountRoutes'));
+app.use('/api/role-controls', require('./routes/roleControlRoutes'));
 app.use('/api/features', require('./routes/featureRoutes'));
 app.use('/api/apps/voice-ai', require('./routes/appRoutes'));
 

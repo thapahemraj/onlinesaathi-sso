@@ -18,6 +18,8 @@ import KYCStatus from './dashboard/KYCStatus';
 import WalletPage from './dashboard/Wallet';
 import Services from './dashboard/Services';
 import IMEPage from './dashboard/ime/IMEPage';
+import PrabhuPage from './dashboard/remittance/PrabhuPage';
+import RemittanceAllPage from './dashboard/remittance/RemittanceAllPage';
 
 const Dashboard = () => {
     return (
@@ -41,6 +43,8 @@ const Dashboard = () => {
                 <Route path="wallet" element={<WalletPage />} />
                 <Route path="services" element={<Services />} />
                 <Route path="services/ime" element={<IMEPage />} />
+                <Route path="services/prabhu" element={<PrabhuPage />} />
+                <Route path="services/remittance" element={<RemittanceAllPage />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
         </DashboardLayout>

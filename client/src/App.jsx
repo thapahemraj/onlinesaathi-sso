@@ -19,6 +19,7 @@ import SecuritySettings from './pages/admin/SecuritySettings';
 import AuditLogs from './pages/admin/AuditLogs';
 import WalletBalance from './pages/admin/WalletBalance';
 import WalletHistory from './pages/admin/WalletHistory';
+import PartnerTransactionLogs from './pages/admin/PartnerTransactionLogs';
 import RoleManagement from './pages/admin/RoleManagement';
 import TransactionManagement from './pages/admin/TransactionManagement';
 import AdminRoute from './components/AdminRoute';
@@ -103,6 +104,7 @@ function App() {
           <Route path="transactions" element={<TransactionManagement />} />
           <Route path="wallet-balance" element={<WalletBalance />} />
           <Route path="wallet-history" element={<WalletHistory />} />
+          <Route path="partner-transactions" element={<PartnerTransactionLogs />} />
         </Route>
 
         {/* ── USER DASHBOARD — wildcard kept AFTER /dashboard/admin ── */}

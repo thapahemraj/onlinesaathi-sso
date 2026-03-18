@@ -14,6 +14,7 @@ const {
     approveTransaction,
     rejectTransaction
 } = require('../controllers/adminController');
+const { getPartnerTransactionLogs } = require('../controllers/partnerLogController');
 
 // All routes require authentication + at least supportTeam level
 router.use(protect);
@@ -91,5 +92,7 @@ router.put('/transactions/:id/approve', isSubAdmin, approveTransaction);
  *         description: Transaction rejected successfully
  */
 router.put('/transactions/:id/reject', isSubAdmin, rejectTransaction);
+
+router.get('/partner-transactions', isSubAdmin, getPartnerTransactionLogs);
 
 module.exports = router;

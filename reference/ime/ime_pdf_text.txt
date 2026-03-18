@@ -1,0 +1,4128 @@
+www.imeforex.com April 8, 2020
+IME FOREX
+Web Service Interface Document
+Indo Nepal Send API
+Version 1.2
+
+www.imeforex.com P a g e | a
+Table of Contents
+1. List of Methods, declared in Web Service ................................................................ 1
+2. Common Possible Response Codes........................................................................ 2
+3. Data Dictionary (GetStaticData) ............................................................................... 3
+3.1. Country List ........................................................................................................ 4
+3.2. Country State List............................................................................................... 6
+3.3. Country State District List ................................................................................... 8
+3.4. District Municipality List .................................................................................... 10
+3.5. Gender List....................................................................................................... 12
+3.6. Marital Status List............................................................................................. 14
+3.7. Occupation List ................................................................................................ 16
+3.8. Source of Fund List .......................................................................................... 18
+3.9. Customer Identification Type List ..................................................................... 20
+3.10. Issue Place List ............................................................................................. 22
+3.11. Relationship List............................................................................................ 24
+3.12. Purpose of Remittance ................................................................................. 26
+3.13. Transaction Cancel Reason .......................................................................... 28
+3.14. Bank List ....................................................................................................... 30
+3.15. Bank Branch List ........................................................................................... 32
+3.16. CSP RegistrationType List ............................................................................ 34
+3.17. CSP Address Proof Type List ....................................................................... 36
+3.18. CSP Business Type List ............................................................................... 38
+3.19. CSP Document Type List .............................................................................. 40
+3.20. Bank Account Type List ................................................................................ 42
+3.21. CSP Device List ............................................................................................ 44
+3.22. CSP Connectivity Type List .......................................................................... 46
+3.23. Owner Category List ..................................................................................... 48
+3.24. Owner Address Proof Type List .................................................................... 50
+3.25. Physically Handicapped List ......................................................................... 52
+3.26. Alternate Occupation Type List ..................................................................... 54
+3.27. Owner Id Type List ........................................................................................ 56
+3.28. Education Qualification List ........................................................................... 58
+
+www.imeforex.com P a g e | b
+3.29. Additional Course List ................................................................................... 60
+4. CSP Module ........................................................................................................... 62
+4.1. CSP Registration.............................................................................................. 63
+4.2. CSP Document Upload .................................................................................... 71
+4.3. Check CSP....................................................................................................... 73
+4.4. Balance Inquiry ................................................................................................ 76
+5. Customer Module ................................................................................................... 78
+5.1. Register Customer ........................................................................................... 78
+5.2. Send OTP ........................................................................................................ 83
+5.3. Confirm Customer Registration ........................................................................ 85
+5.4. Check Customer .............................................................................................. 87
+6. Transaction Creation .............................................................................................. 89
+6.1. Exchange Rate and Service Charge ................................................................ 90
+6.2. Send Transaction ............................................................................................. 92
+6.3. Send OTP ........................................................................................................ 94
+6.4. Confirm Send Transaction................................................................................ 95
+7. Modify Transaction ................................................................................................. 97
+7.1. Transaction Inquiry........................................................................................... 97
+7.2. Send OTP ...................................................................................................... 100
+7.3. Modify Transaction ......................................................................................... 101
+8. Cancel Transaction .............................................................................................. 104
+8.1. Transaction Inquiry......................................................................................... 104
+8.2. Send OTP ...................................................................................................... 104
+8.3. Cancel Transaction ........................................................................................ 105
+9. Reports ................................................................................................................ 107
+9.1. Reconcile Report............................................................................................ 108
+9.2. Statement of Account ..................................................................................... 111
+
+www.imeforex.com P a g e | c
+Table of Figures
+Figure 1: Methods Used in Web Service (API) ............................................................ 1
+Figure 2: Methods used for CSP Module .................................................................. 62
+Figure 3: Methods used for Customer Module ......................................................... 78
+Figure 4: Methods used for Transaction Creation.................................................... 89
+Figure 5: Methods used for Transaction Modification ............................................. 97
+Figure 6: Methods used for Transaction Cancellation ........................................... 104
+Figure 7: Methods used for Reports ........................................................................ 107
+
+IME FOREX 1
+1. List of Methods, declared in Web Service
+Figure 1: Methods Used in Web Service (API)
+
+IME FOREX 2
+S.N. Method Name Description
+1 GetStaticData Get static data needed for other methods
+2 CSPRegistration Register the CSP
+3 CSPDocumentUpload Upload the CSP Documents
+4 CSPCheck Check the CSP status and its documents status
+5 BalanceInquiry Get available balance of agent
+6 CheckCustomer Verify the customer, whether customer is registered or not
+7 SendOTP Send OTP on customer number
+8 CustomerRegistration Register sending customer
+9 ConfirmCustomerRegistration Confirm CreateCustomer data with OTP verification
+10 GetCalculation Get the latest Exchange Rate and Service Charges
+11 SendTransaciton Creates a new transaction. Requires ForexSessionID
+from GetCalculation method
+12 ConfirmSendTransaction Confirm SendTransaciton data with OTP verification
+13 TransactionInquiry Inquiry the status of transaction performed by agent
+14 AmendmentTransaction Modify transaction performed by agent
+15 CancelTransaction Cancel transaction performed by agent
+16 ReconcileReport Get list of transactions performed by agent
+17 SOAReport Statement of Account report of Agent
+2. Common Possible Response Codes
+Response Code Response Message
+0 Success
+101 Authentication Failed
+102 Need to change Password. Contact HO
+901 Technical Error
+999 Internal Server Error
+
+IME FOREX 3
+3. Data Dictionary (GetStaticData)
+This method is using to get API internal Data Value.
+Method Name: GetStaticData
+Request Codes
+S.N. Type Code Description (Static Data Name)
+1 WSST-CONV1 Country List
+2 WSST-STTV1 Country State List
+3 WSST-DISV1 State District List
+4 WSST-MUNV1 District Municipality List
+5 WSST-GDRV1 Gender List
+6 WSST-MSSV1 Marital Status List
+7 WSST-OCPV1 Occupation List
+8 WSST-SOFV1 Source of Fund List
+9 WSST-IDTV1 Identification Type List
+10 WSST-POIV1 Place of Issue List
+11 WSST-RELV1 Relationship List
+12 WSST-PORV1 Purpose of Remit List
+13 WSST-TCRV1 Transaction Cancel Reason List
+14 WSST-BKLV1 Bank List
+15 WSST-BBLV1 Bank Branch List
+16 WSST-REGV1 CSP Registration Type List
+17 WSST-ADPV1 CSP Address Proof Type List
+18 WSST-BUSV1 CSP BusinessType List
+19 WSST-ADOV1 CSP Document Type List
+20 WSST-ACCV1 Account Type List
+21 WSST-DEVV1 Device List
+22 WSST-CTVV1 Connectivity Type List
+23 WSST-CATV1 Owner Category Type List
+24 WSST-OAPV1 Owner Address Proof Type List
+25 WSST-PHCV1 Physically Handicapped Type List
+26 WSST-AOCV1 Alternate Occupation Type List
+27 WSST-OIDV1 Owner Id Type List
+28 WSST-EDQV1 Educational Qualification List
+29 WSST-ADCV1 AdditionalCourse List
+
+IME FOREX 4
+Possible Response Codes
+Response Code Response Message
+0 SUCCESS
+101 Login Failed
+102 Need to change the password. Contact HO
+203 Required Field
+204 Bad Request (Invalid Input Value)
+901 Technical Error
+999 Internal Error
+3.1. Country List
+Provides available Country List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-CONV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 5
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Country Id
+Value Country Name
+
+IME FOREX 6
+3.2. Country State List
+Provides available Country State List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-STTV1
+Code that is used to fetch static data
+ReferenceValue String Y 30
+Country code,
+NPL – Nepal
+IND - India
+
+IME FOREX 7
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id State Id
+Value State Name
+
+IME FOREX 8
+3.3. Country State District List
+Provides available Country State District List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-DISV1
+Code that is used to fetch static data
+ReferenceValue String Y 30 State ID of India or Nepal
+
+IME FOREX 9
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id District Id
+Value District Name
+
+IME FOREX 10
+3.4. District Municipality List
+Provides available Dristrict Municipality List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-MUNV1
+Code that is used to fetch static data
+ReferenceValue String Y 30 District ID of Nepal
+
+IME FOREX 11
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Municipality Id
+Value Municipality Name
+
+IME FOREX 12
+3.5. Gender List
+Provides available Gender List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-GDRV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 13
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Gender Id
+Value Gender Name
+
+IME FOREX 14
+3.6. Marital Status List
+Provides available Marital Status List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-MSSV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 15
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Marital Status Id
+Value Marital Status Name
+
+IME FOREX 16
+3.7. Occupation List
+Provides available Occupation List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-OCPV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 17
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Occupation Id
+Value Occupation Name
+
+IME FOREX 18
+3.8. Source of Fund List
+Provides available Source of Fund List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-SOFV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 19
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Source of Fund Id
+Value Source of Fund Name
+
+IME FOREX 20
+3.9. Customer Identification Type List
+Provides available Customer Identification Type List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-IDTV1
+Code that is used to fetch static data
+ReferenceValue String Y 30
+Country code,
+NPL – Nepal
+IND - India
+
+IME FOREX 21
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id ID Type Id
+Value ID Type Name
+
+IME FOREX 22
+3.10. Issue Place List
+Provides available Issue Place List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-POIV1
+Code that is used to fetch static data
+ReferenceValue String Y 30 Identification Type ID
+
+IME FOREX 23
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Issue Place Id
+Value Issue Place Name
+
+IME FOREX 24
+3.11. Relationship List
+Provides available Relationship List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-RELV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 25
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Relationship Id
+Value Relationship Name
+
+IME FOREX 26
+3.12. Purpose of Remittance
+Provides available Purpose of Remittance List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-PORV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 27
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Purpose of Remittance Id
+Value Purpose of Remittance Name
+
+IME FOREX 28
+3.13. Transaction Cancel Reason
+Provides available Transaction Cancel Reason List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-TCRV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 29
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Cancel Reason Id
+Value Cancel Reason Name
+
+IME FOREX 30
+3.14. Bank List
+Provides available Bank List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-BKLV1
+Code that is used to fetch static data
+ReferenceValue String Y 30
+Country code,
+NPL – Nepal
+IND - India
+
+IME FOREX 31
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Bank Id
+Value Bank Name
+
+IME FOREX 32
+3.15. Bank Branch List
+Provides available Bank Branch List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-BBLV1
+Code that is used to fetch static data
+ReferenceValue String Y 30 Bank ID
+
+IME FOREX 33
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Bank Branch ID
+Value Bank Branch Name
+
+IME FOREX 34
+3.16. CSP RegistrationType List
+Provides available CSP Registration Type List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-REGV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 35
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Registration Type Id
+Value Registration Type Name
+
+IME FOREX 36
+3.17. CSP Address Proof Type List
+Provides available CSP Address Proof Type List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-ADPV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 37
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id CSP Address Proof Type Id
+Value CSP Address Proof Type Name
+
+IME FOREX 38
+3.18. CSP Business Type List
+Provides available CSP Business Type List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-BUSV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 39
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Business Type Id
+Value Business Type Name
+
+IME FOREX 40
+3.19. CSP Document Type List
+Provides available CSP Document Type List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-ADOV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 41
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id CSP Document Type Id
+Value CSP Document Type Name
+
+IME FOREX 42
+3.20. Bank Account Type List
+Provides available Bank Account Type List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-ACCV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 43
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Bank Account Type Id
+Value Bank Account Type Name
+
+IME FOREX 44
+3.21. Device Type List
+Provides available CSP Device Type List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-DEVV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 45
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Device Type Id
+Value Device Type Name
+
+IME FOREX 46
+3.22. Connectivity Type List
+Provides available CSP Connectivity Type List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-CTVV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 47
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Connectivity Type Id
+Value Connectivity Type Name
+
+IME FOREX 48
+3.23. Owner Category List
+Provides available Owner Category List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-CATV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 49
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Owner Category Id
+Value Owner Category Name
+
+IME FOREX 50
+3.24. Owner Address Proof Type List
+Provides available Owner Address Proof Type List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-OAPV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 51
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Owner Address Proof Type Id
+Value Owner Address Proof Type Name
+
+IME FOREX 52
+3.25. Physically Handicapped List
+Provides available Physically Handicapped List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-PHCV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 53
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Physically Handicapped Id
+Value Physically Handicapped Name
+
+IME FOREX 54
+3.26. Alternate Occupation Type List
+Provides available Alternate Occupation Type List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-AOCV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 55
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Alternate Occupation Type Id
+Value Alternate Occupation Type Name
+
+IME FOREX 56
+3.27. Owner Id Type List
+Provides available Owner Id Type List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-OIDV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 57
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Owner Id Type Id
+Value Owner Id Type Name
+
+IME FOREX 58
+3.28. Education Qualification List
+Provides available Educational Qualification List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-EDQV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 59
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Educational Qualification Id
+Value Educational Qualification Name
+
+IME FOREX 60
+3.29. Additional Course List
+Provides available Additional List
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetStaticData>
+<ime:GetStaticDataRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:TypeCode>string</ime:TypeCode>
+<!--Optional:-->
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:GetStaticDataRequest>
+</ime:GetStaticData>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+TypeCode String Y 10 WSST-ADCV1
+Code that is used to fetch static data
+ReferenceValue String N 30 Type Code reference value if needed
+
+IME FOREX 61
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetStaticDataResponse xmlns="IME">
+<GetStaticDataResult>
+<Response>
+<Code>stirng</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RequestedTypeCode>string</RequestedTypeCode>
+<DataList>
+<Data>
+<Id>string</Id>
+<Value>string</Value>
+</Data>
+</DataList>
+</GetStaticDataResult>
+</GetStaticDataResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RequestedTypeCode Requested Type Code
+Id Additional Course Id
+Value Additional Course Name
+
+IME FOREX 62
+4. CSP Module
+Figure 2: Methods used for CSP Module
+Possible Response Codes
+Response Code Response Message
+0 Success
+101 Authentication Failed
+102 Need to change Password. Contact HO
+603 Parameter Missing
+604 Bad Request (Invalid Input Value)
+605 Balance Details Not Found
+901 Technical Error
+999 Internal Server Error
+
+IME FOREX 63
+4.1. CSP Registration
+This method is using to Register the CSP under Agents/ Corporate.
+Method Name: CSPRegistration
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soap:Body>
+<CSPRegistration>
+<CSPRegisterRequest>
+<Credentialss>
+<AccessCode>string</AccessCode>
+<UserName>string</UserName>
+<Password>string</Password>
+<PartnerBranchId>string</PartnerBranchId>
+<AgentSessionId>string</AgentSessionId>
+</Credentialss>
+<CompanyProfile>
+<PartnerCSPCode>string</PartnerCSPCode>
+<CSPName>string</CSPName>
+<RegistrationType>string</RegistrationType>
+<RegistrationNumber>string</RegistrationNumber>
+<BusinessType>string</BusinessType>
+<ContractExpiryDate>string</ContractExpiryDate>
+<ContractRenewalDate>string</ContractRenewalDate>
+<PANNumber>string</PANNumber>
+</CompanyProfile>
+<CompanyInfoDetails>
+<Country>string</Country>
+<State>string</State>
+<District>string</District>
+<City>string</City>
+<HouseNumber>string</HouseNumber>
+<RoadName>string</RoadName>
+<PINCode>string</PINCode>
+<AddressProofType>string</AddressProofType>
+</CompanyInfoDetails>
+<ContactPersonDetails>
+<ContactPersonName>string</ContactPersonName>
+<MobileNumber1>string</MobileNumber1>
+<MobileNumber2>string</MobileNumber2>
+<LandlineNumber>string</LandlineNumber>
+<Email>string</Email>
+</ContactPersonDetails>
+<BankDetails>
+<Bank>string</Bank>
+<AccountType>string</AccountType>
+<AccountNo>string</AccountNo>
+<IFSC>string</IFSC>
+</BankDetails>
+<BankDetails>
+<Bank>string</Bank>
+<AccountType>string</AccountType>
+
+IME FOREX 64
+<AccountNo>string</AccountNo>
+<IFSC>string</IFSC>
+</BankDetails>
+<DeviceConnectivityDetails>
+<Device>string</Device>
+<ConnectivityType>string</ConnectivityType>
+<Provider>string</Provider>
+</DeviceConnectivityDetails>
+<BusinessHourDetails>
+<StartTime>string</StartTime>
+<EndTime>string</EndTime>
+<HasWeekendOff>string</HasWeekendOff>
+<OffDay>string</OffDay>
+</BusinessHourDetails>
+<OwnerDetails>
+<OwnersInfoDetails>
+<OwnersName>string</OwnersName>
+<Gender>string</Gender>
+<DOB>string</DOB>
+<FatherName>string</FatherName>
+<SpouseName>string</SpouseName>
+<Category>string</Category>
+<PhysicallyHandicapped>string</PhysicallyHandicapped>
+<MobileNumber>string</MobileNumber>
+<ContactNumber>string</ContactNumber>
+<Email>string</Email>
+<AlternateOccupationType>string</AlternateOccupationType>
+</OwnersInfoDetails>
+<OwnerDocumentDetails>
+<PanCard>string</PanCard>
+<IdType>string</IdType>
+<IDTypeNumber>string</IDTypeNumber>
+</OwnerDocumentDetails>
+<OwnerAddressDetails>
+<Country>string</Country>
+<State>string</State>
+<District>string</District>
+<City>string</City>
+<HouseNumber>string</HouseNumber>
+<RoadName>string</RoadName>
+<PINCode>string</PINCode>
+<ResidentialAddressVillageCode>string</ResidentialAddressVillageCode>
+<AddressProofType>string</AddressProofType>
+</OwnerAddressDetails>
+<OwnerEducationDetails>
+<EducationalQualification>string</EducationalQualification>
+<AdditionalCourse>string</AdditionalCourse>
+<InstituteName>string</InstituteName>
+<DateofPassed>string</DateofPassed>
+</OwnerEducationDetails>
+</OwnerDetails>
+<OwnerDetails>
+<OwnersInfoDetails>
+<OwnersName>string</OwnersName>
+<Gender>string</Gender>
+<DOB>string</DOB>
+<FatherName>string</FatherName>
+
+IME FOREX 65
+<SpouseName>string</SpouseName>
+<Category>string</Category>
+<PhysicallyHandicapped>string</PhysicallyHandicapped>
+<MobileNumber>string</MobileNumber>
+<ContactNumber>string</ContactNumber>
+<Email>string</Email>
+<AlternateOccupationType>string</AlternateOccupationType>
+</OwnersInfoDetails>
+<OwnerDocumentDetails>
+<PanCard>string</PanCard>
+<IdType>string</IdType>
+<IDTypeNumber>string</IDTypeNumber>
+</OwnerDocumentDetails>
+<OwnerAddressDetails>
+<Country>string</Country>
+<State>string</State>
+<District>string</District>
+<City>string</City>
+<HouseNumber>string</HouseNumber>
+<RoadName>string</RoadName>
+<PINCode>string</PINCode>
+<ResidentialAddressVillageCode>string</ResidentialAddressVillageCode>
+<AddressProofType>string</AddressProofType>
+</OwnerAddressDetails>
+<OwnerEducationDetails>
+<EducationalQualification>string</EducationalQualification>
+<AdditionalCourse>string</AdditionalCourse>
+<InstituteName>string</InstituteName>
+<DateofPassed>string</DateofPassed>
+</OwnerEducationDetails>
+</OwnerDetails>
+</CSPRegisterRequest>
+</CSPRegistration>
+</soap:Body>
+</soap:Envelope>
+
+IME FOREX 66
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP
+Code of Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+CompanyProfile
+PartnerCSPCode String Y 20 Unique CSP Code in Partner
+System
+CSPName String Y 100 Name of CSP
+RegistrationType String Y 10 Registration Type (Id received
+from GetStaticData method)
+RegistrationNumber String Y 20 Registration Number
+BusinessType String Y 10 Business Type (Id received from
+GetStaticData method)
+ContractExpiryDate Date Y 20 Date of Contract Expiry. Format
+(YYYY/MM/DD)
+ContractRenewalDate Date Y 20 Date of Contract Renewal. Format
+(YYYY/MM/DD)
+PANNumber String Y 20 CSP PAN Number
+CompanyInfoDetails
+Country String Y 10 Country (Id received from
+GetStaticData method)
+State String Y 10
+State according to Country (Id
+received from GetStaticData
+method)
+District String Y 10
+District according to State (Id
+received from GetStaticData
+method)
+City String Y 100 City Name
+HouseNumber String Y 20 House Number
+RoadName String Y 200 Road Name
+PINCode String Y 6 PIN Code
+AddressProofType String Y 10 Address Proof Type (Id received
+from GetStaticData method)
+ContactPersonDetails
+ContactPersonName String Y 250 Contact Person Name
+
+IME FOREX 67
+MobileNumber1 String Y 10 Mobile Number 1
+MobileNumber2 String N 10 Mobile Number 2
+LandlineNumber String N 11 Landline Number
+Email String Y 100 Contact Person Email
+BankDetails – Bank Details of the CSP - Can have one or more banks
+Bank String Y 10
+Bank Id (ID Generated from
+GetStaticData Method where
+Country is India)
+AccountType String Y 10 Account Type (ID Generated from
+GetStaticData Method)
+AccountNo String Y 30 Bank Account Number
+IFSC String Y 30 Bank IFSC
+DeviceConnectivityDetails
+Device String Y 10 Device (ID Generated from
+GetStaticData Method)
+ConnectivityType String Y 10 Connectivity Type (ID Generated
+from GetStaticData Method)
+Provider String Y 100 Internet Provider Name
+BusinessHourDetails
+StartTime Time Y 10 Businees Start Time.
+Format (HH:mm:ss)
+EndTime Time Y 10 Businees End Time.
+Format (HH:mm:ss)
+HasWeekendOff String Y 1 Has off day or not
+(Input Y for Yes or N for No)
+OffDay String N 10
+Weekdays (ID Generated from
+GetStaticData Method)
+Mandatory if HasWeekendOff is Y
+OwnerDetails – Owner details of a CSP - Can have one or more Owner
+OwnersName String Y 50 CSP Owner Name
+Gender String Y 10 Owner Gender (Id received from
+GetStaticData method)
+DOB Date Y 20 Date of Birth. Format
+(YYYY/MM/DD)
+FatherName String Y 50 Father Name
+SpouseName String N 50 Spouse Name
+Category String N 10 Category (Id received from
+GetStaticData method)
+
+IME FOREX 68
+PhysicallyHandicapped String N 10
+Physically Handicapped (Id
+received from GetStaticData
+method)
+MobileNumber String Y 10 Mobile Number
+ContactNumber String N 11 Contact Number
+Email String N 50 Owner Email
+AlternateOccupationType String N 10
+Alternate Occupation Type (Id
+received from GetStaticData
+method)
+OwnerDocumentDetails
+PanCard String Y 20 Owner Pand Card Number
+IdType String Y 10 Id Type (Id received from
+GetStaticData method)
+IDTypeNumber String Y 50 Owner Id Type Number
+OwnerAddressDetails
+Country String Y 10 Country (Id received from
+GetStaticData method)
+State String Y 10
+State according to Country (Id
+received from GetStaticData
+method)
+District String Y 10
+District according to State (Id
+received from GetStaticData
+method)
+City String Y 50 City Name
+HouseNumber String Y 20 House Number
+RoadName String Y 50 Road Name
+PINCode String Y 6 PIN Code
+ResidentialAddressVillageCode String Y 10 Residential Address Village Code
+AddressProofType String Y 10 Address Proof Type (Id received
+from GetStaticData method)
+OwnerEducationDetails
+EducationalQualification String Y 10
+Educational Qualification (Id
+received from GetStaticData
+method)
+AdditionalCourse String Y 10 Additional Course (Id received
+from GetStaticData method)
+InstituteName String Y 50 Name of Institute of Additional
+Course
+DateofPassed String Y 50 Date of Passed in Year
+
+IME FOREX 69
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soap:Body>
+<CSPRegistrationResponse xmlns="IME">
+<CSPRegisterResponse>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<CompanyDetails>
+<CSPName>string</CSPName>
+<PartnerCSPCode>string</PartnerCSPCode>
+<Status>string</Status>
+</CompanyDetails>
+<AdditionalDetails>
+<OwnerDetails>
+<OwnerDetailsInfo>
+<OwnerId>string</OwnerId>
+<OwnerName>string</OwnerName>
+</OwnerDetailsInfo>
+<OwnerDetailsInfo>
+<OwnerId>string</OwnerId>
+<OwnerName>string</OwnerName>
+</OwnerDetailsInfo>
+</OwnerDetails>
+<BankDetails>
+<BankDetailsInfo>
+<BankId>string</BankId>
+<BankName>string</BankName>
+</BankDetailsInfo>
+<BankDetailsInfo>
+<BankId>string</BankId>
+<BankName>string</BankName>
+</BankDetailsInfo>
+</BankDetails>
+<DocumentDetails>
+<DocumentDetailsInfo>
+<DocumentType>string</DocumentType>
+<Status>string</Status>
+<ReferenceId>string</ReferenceId>
+<IsRequired>string</IsRequired>
+</DocumentDetailsInfo>
+<DocumentDetailsInfo>
+<DocumentType>string</DocumentType>
+<Status>string</Status>
+<ReferenceId>string</ReferenceId>
+<IsRequired>string</IsRequired>
+</DocumentDetailsInfo>
+</DocumentDetails>
+</AdditionalDetails>
+</CSPRegisterResponse>
+</CSPRegistrationResponse>
+</soap:Body>
+</soap:Envelope>
+
+IME FOREX 70
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+CompanyDetails
+CSPName Name of CSP
+PartnerCSPCode Unique CSP Code in Partner System
+Status Active / Inactive Status of CSP
+OwnerDetailsInfo - Oner or more Owner Details
+OwnerId Ower Id in IME Forex System for Document Upload
+OwnerName Owner Name
+BankDetailsInfo – One or more Bank Details
+BankId Bank Id in IME Forex System for Document Upload
+BankName Bank Name
+DocumentDetailsInfo – One or more Document Details
+DocumentType Document Type Id for Document Upload.
+(Need to map Id with Id received from GetStaticData method)
+Status True – Document is uploaded (available) in IME Forex
+False – Document is not uploaded (available) in IME Forex, need to upload.
+ReferenceId
+Reference Id for document.
+CSPCode – If document is of CSP
+BankId – If document is of Bank Cancel Cheque
+OwnerId – If document is of Owners
+IsRequired Yes – For Mandatory
+No – For Optional
+
+IME FOREX 71
+4.2. CSP Document Upload
+This method is using to Upload the CSP Documents.
+Method Name: CSPDocumentUpload
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soap:Body>
+<CSPDocumentUpload>
+<CSPDocumentUploadRequest>
+<Credentialss>
+<AccessCode>string</AccessCode>
+<UserName>string</UserName>
+<Password>string</Password>
+<PartnerBranchId>string</PartnerBranchId>
+<AgentSessionId>string</AgentSessionId>
+</Credentialss>
+<Documents>
+<DocumentType>string</DocumentType>
+<ReferenceId>string</ReferenceId>
+<DocumentData>string</DocumentData>
+<DocumentFormat>string</DocumentFormat>
+</Documents>
+<Documents>
+<DocumentType>string</DocumentType>
+<ReferenceId>string</ReferenceId>
+<DocumentData>string</DocumentData>
+<DocumentFormat>string</DocumentFormat>
+</Documents>
+</CSPDocumentUploadRequest>
+</CSPDocumentUpload>
+</soap:Body>
+</soap:Envelope>
+
+IME FOREX 72
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+Documents – Can have one or more Documents
+DocumentType String Y 10 Document Type (Id received from
+GetStaticData method)
+ReferenceId String Y 10
+Document Refrerence Id. (ReferenceId received
+while registering the CSP (CSPRegistration) or
+received from CheckCSP method for that
+Document Type)
+DocumentData String Y 2 MB Document Data in Base64 String Format
+DocumentFormat String Y 10 DocumentData format. Only support
+pdf, jpg, jpeg, png (do not include dot (.))
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<CSPDocumentUploadResponse xmlns="IME">
+<CSPDocumentUploadResponse>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+</CSPDocumentUploadResponse>
+</CSPDocumentUploadResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+
+IME FOREX 73
+4.3. Check CSP
+This method is using to Check the CSP status and its documents status.
+Method Name: CheckCSP
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soap:Body>
+<CheckCSP>
+<CheckCSPRequest>
+<Credentialss>
+<AccessCode>string</AccessCode>
+<UserName>string</UserName>
+<Password>string</Password>
+<PartnerBranchId>string</PartnerBranchId>
+<AgentSessionId>string</AgentSessionId>
+</Credentialss>
+</CheckCSPRequest>
+</CheckCSP>
+</soap:Body>
+</soap:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+
+IME FOREX 74
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soap:Body>
+<CSPRegistrationResponse xmlns="IME">
+<CSPRegisterResponse>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<CompanyDetails>
+<CSPName>string</CSPName>
+<PartnerCSPCode>string</PartnerCSPCode>
+<Status>string</Status>
+</CompanyDetails>
+<AdditionalDetails>
+<OwnerDetails>
+<OwnerDetailsInfo>
+<OwnerId>string</OwnerId>
+<OwnerName>string</OwnerName>
+</OwnerDetailsInfo>
+<OwnerDetailsInfo>
+<OwnerId>string</OwnerId>
+<OwnerName>string</OwnerName>
+</OwnerDetailsInfo>
+</OwnerDetails>
+<BankDetails>
+<BankDetailsInfo>
+<BankId>string</BankId>
+<BankName>string</BankName>
+</BankDetailsInfo>
+<BankDetailsInfo>
+<BankId>string</BankId>
+<BankName>string</BankName>
+</BankDetailsInfo>
+</BankDetails>
+<DocumentDetails>
+<DocumentDetailsInfo>
+<DocumentType>string</DocumentType>
+<Status>string</Status>
+<ReferenceId>string</ReferenceId>
+<IsRequired>string</IsRequired>
+</DocumentDetailsInfo>
+<DocumentDetailsInfo>
+<DocumentType>string</DocumentType>
+<Status>string</Status>
+<ReferenceId>string</ReferenceId>
+<IsRequired>string</IsRequired>
+</DocumentDetailsInfo>
+</DocumentDetails>
+</AdditionalDetails>
+</CSPRegisterResponse>
+</CSPRegistrationResponse>
+</soap:Body>
+</soap:Envelope>
+
+IME FOREX 75
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+CompanyDetails
+CSPName Name of CSP
+PartnerCSPCode Unique CSP Code in Partner System
+Status Active / Inactive Status of CSP
+OwnerDetailsInfo - Oner or more Owner Details
+OwnerId Ower Id in IME Forex System for Document Upload
+OwnerName Owner Name
+BankDetailsInfo – One or more Bank Details
+BankId Bank Id in IME Forex System for Document Upload
+BankName Bank Name
+DocumentDetailsInfo – One or more Document Details
+DocumentType Document Type Id for Document Upload.
+(Need to map Id with Id received from GetStaticData method)
+Status True – Document is uploaded (available) in IME Forex
+False – Document is not uploaded (available) in IME Forex, need to upload.
+ReferenceId
+Reference Id for document.
+CSPCode – If document is of CSP
+BankId – If document is of Bank Cancel Cheque
+OwnerId – If document is of Owners
+IsRequired Yes – For Mandatory
+No – For Optional
+
+IME FOREX 76
+4.4. Balance Inquiry
+This method is using to get available balance of agent.
+Method Name: BalanceInquiry
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:BalanceInquiry>
+<ime:BalanceInquiryRequest>
+<ime:Credentialss>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentialss>
+</ime:BalanceInquiryRequest>
+</ime:BalanceInquiry>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+
+IME FOREX 77
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<BalanceInquiryResponse xmlns="IME">
+<BalanceInquiryResponse>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<Balance>string</Balance>
+</BalanceInquiryResponse>
+</BalanceInquiryResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+Balance Current Balance of Agent
+
+IME FOREX 78
+5. Customer Module
+Figure 3: Methods used for Customer Module
+5.1. Register Customer
+This method is using to register the customer.
+Method Name: CustomerRegistration
+Possible Response Codes
+Response Code Response Message
+0 Success
+101 Authentication Failed
+102 Need to change Password. Contact HO
+503 Parameter Missing
+504 Bad Request (Invalid Input Value)
+901 Technical Error
+999 Internal Server Error
+
+IME FOREX 79
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:CustomerRegistration>
+<ime:RegisterCustomerRequest>
+<ime:Credentialss>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentialss>
+<ime:CustomerDetails>
+<ime:MobileNo>string</ime:MobileNo>
+<!--Optional:-->
+<ime:MembershipId>string</ime:MembershipId>
+<ime:FirstName>string</ime:FirstName>
+<!--Optional:-->
+<ime:MiddleName>string</ime:MiddleName>
+<ime:LastName>string</ime:LastName>
+<ime:Nationality>string</ime:Nationality>
+<ime:MaritalStatus>string</ime:MaritalStatus>
+<ime:DOB>date</ime:Dob>
+<ime:Gender>string</ime:Gender>
+<ime:FatherOrMotherName>string</ime:FatherOrMotherName>
+<!--Optional:-->
+<ime:Email>string</ime:Email>
+<ime:Occupation>string</ime:Occupation>
+<!--Optional:-->
+<ime:SourceOfFund>string</ime:SourceOfFund>
+</ime:CustomerDetails>
+<ime:PermanentAddresss>
+<ime:State>string</ime:State>
+<ime:District>string</ime:District>
+<!--Optional:-->
+<ime:Municipality>string</ime:Municipality>
+<ime:Address>string</ime:Address>
+<!--Optional:-->
+<ime:WardNo>string</ime:WardNo>
+<!--Optional:-->
+<ime:Tole>string</ime:Tole>
+<!--Optional:-->
+<ime:HouseNo>string</ime:HouseNo>
+</ime:PermanentAddresss>
+<ime:TemporaryAddress>
+<ime:State>string</ime:State>
+<ime:District>string</ime:District>
+<ime:Address>string</ime:Address>
+<!--Optional:-->
+<ime:PostalCode>string</ime:PostalCode>
+<!--Optional:-->
+<ime:HouseNo>string</ime:HouseNo>
+</ime:TemporaryAddress>
+<ime:IdentityDetails>
+
+IME FOREX 80
+<ime:IdType>string</ime:IdType>
+<ime:IdNo>string</ime:IdNo>
+<!--Optional:-->
+<ime:IdPlaceOfIssue>string</ime:IdPlaceOfIssue>
+<ime:IssueDate>date</ime:IssueDate>
+<!--Optional:-->
+<ime:ExpiryDate>date</ime:ExpiryDate>
+<!--Optional:-->
+<ime:IdNoCitizenship>string</ime:IdNoCitizenship>
+<!--Optional:-->
+<ime:IdIssuePlaceCitizenship>string</ime:IdIssuePlaceCitizenship>
+<!--Optional:-->
+<ime:IdIssueDateCitizenship>date</ime:IdIssueDateCitizenship>
+<!--Optional:-->
+<ime:PhotoData>string</ime:PhotoData>
+<!--Optional:-->
+<ime:PhotoDataType>string</ime:PhotoDataType>
+<ime:IdData>string</ime:IdData>
+<ime:IdDataType>string</ime:IdDataType>
+</ime:IdentityDetails>
+</ime:RegisterCustomerRequest>
+</ime:CustomerRegistration>
+</soapenv:Body>
+</soapenv:Envelope>
+
+IME FOREX 81
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+Customer Details
+MobileNo String Y 15 Customer Mobile number
+MembershipId String N 10 IME Forex Membership ID
+FirstName String Y 20 Customer First Name
+MiddleName String N 20 Customer Middle Name
+LastName String Y 20 Customer Last Name
+Nationality String Y 3 Customer Nationality (Id received from
+GetStaticData method)
+MaritalStatus String Y 10 Customer Marital Status (Id received from
+GetStaticData method)
+DOB Date Y 20 Date of Birth. Format (YYYY/MM/DD)
+Gender String Y 10 Customer Gender (Id received from
+GetStaticData method)
+FatherOrMotherName String Y 50 Either Customer Father or Mother Name
+Email String N 30 Customer Email
+Occupation String Y 10 Customer Occupation (Id received from
+GetStaticData method)
+SourceOfFund String N 10 Source of Fund (Id received from
+GetStaticData method)
+Permanent Address
+State String Y 10 State according to Nationality Country (Id
+received from GetStaticData method)
+District String Y 10 District according to State (Id received
+from GetStaticData method)
+Municipality String N 10
+Municipality according to District,
+mandatory if Nationality is NPL (Id
+received from GetStaticData method)
+Address String Y 50 Customer Permanent Address
+WardNo String N 10 Customer Permanent Ward Number
+HouseNo String N 20 Customer Permanent House Number
+Temporary Address
+State String Y 10 Customer Temporary State of India (Id
+received from GetStaticData method)
+District String Y 10
+Customer Temporary District according to
+state (Id received from GetStaticData
+method)
+Address String Y 50 Customer Temporary Address
+PostalCode String N 20 Customer Temporary Postal Code
+HouseNo String N 20 Customer Temporary House Number
+
+IME FOREX 82
+Identity Details
+IdType String Y 10 Identity Type according to Nationality (Id
+received from GetStaticData method)
+IdNo String Y 20 Identity Number of Customer
+IDPlaceofIssue String N 10
+Id Issue Place according to IdType,
+mandatory if Nationality is NPL (Id
+received from GetStaticData method)
+IssueDate Date Y 20 Id Issue Date. Format (YYYY/MM/DD)
+ExpiryDate Date N 20
+Id Expiry Date, Mandatory on Identity
+having expiry date.
+Format (YYYY/MM/DD)
+IdNoCitizenship String Mandatory
+if
+Nationality
+is NPL and
+IdType is
+not
+Citizenship
+20 Nepalese Citizenship Number
+IdIssuePlaceCitizenship String 10 Nepal Id Issue Place (Id received from
+GetStaticData method)
+IdIssueDateCitizenship Date 20 Citizenship Date of Issue
+Format (YYYY/MM/DD)
+PhotoData String N 500KB Base64 String Format of Personal Photo
+PhotoDataType String N 5 Data Format. Only support pdf, jpg, jpeg,
+png. Mandatory if PhotoData is not null.
+IdData String Y 500KB Image in Base64 String Format
+IdDataType String Y 5 Id Data Format. Only support pdf, jpg,
+jpeg, png (do not include dot (.))
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<CustomerRegistrationResponse xmlns="IME">
+<CustomerRegistrationResult>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<CustomerToken>string</CustomerToken>
+</CustomerRegistrationResult>
+</CustomerRegistrationResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+CustomerToken Unique customer token id for confirm customer registraion
+
+IME FOREX 83
+5.2. Send OTP
+This method is using to send the OTP to the sender mobile number with reference number
+collected from SendTransaction method.
+Method Name: SendOTP
+Possible Response Codes
+Response Code Response Message
+0 Success
+101 Authentication Failed
+102 Need to change Password. Contact HO
+703 Parameter Missing
+704 Bad Request (Invalid Input Value)
+706 Sending OTP Very Quick/ OTP Limit Exceeded. Please check response
+message
+708 Transaction with REF No not found for CT, ST, MT, CR module
+901 Technical Error
+999 Internal Server Error
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:SendOTP>
+<ime:SendOTPRequest>
+<ime:Credentialss>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentialss>
+<ime:Module>string</ime:Module>
+<ime:ReferenceValue>string</ime:ReferenceValue>
+</ime:SendOTPRequest>
+</ime:SendOTP>
+</soapenv:Body>
+</soapenv:Envelope>
+
+IME FOREX 84
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+Module String Y 2
+CR - Customer Registration
+ST - Send Transaction
+MT - Modify Transaction (Amendment
+Transaction)
+CT - Cancel Transaction
+ReferenceValue String Y 20
+- If Module is CR, then unique reference number
+generated by CustomerRegister method
+- If Module is ST, then unique reference number
+generated by SendTransaction method
+- If Module is MT, then unique reference number
+(ICN) generated by ConfirmSendTransaction
+method
+- If Module is CT, then unique reference number
+(ICN) generated by ConfirmSendTransaction
+method
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<SendOTPResponse xmlns="IME">
+<SendOTPResponse>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<OTPToken>string</OTPToken>
+</SendOTPResponse>
+</SendOTPResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+OTPToken Unique Token ID for OTP verification
+
+IME FOREX 85
+5.3. Confirm Customer Registration
+This method is using to confirm the customer registration by submitting customer token id
+generated from CustomerRegistration method, token id generated from SendOTP method
+and OTP sent to customer mobile number.
+Method Name: ConfirmCustomerRegistration
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:ConfirmCustomerRegistration>
+<ime:ConfirmCustomerRequest>
+<ime:Credentialss>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentialss>
+<ime:OTP>string</ime:OTP>
+<ime:CustomerToken>string</ime:CustomerToken>
+<ime:OTPToken>string</ime:OTPToken>
+</ime:ConfirmCustomerRequest>
+</ime:ConfirmCustomerRegistration>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+OTP String Y 6 One Time Password sent on customer mobile
+number
+CustomerToken String Y 15 Unique customer token id generated by
+CustomerRegistration method
+OTPToken String Y 100 Unique Token ID generated by SendOTP
+method
+
+IME FOREX 86
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<ConfirmCustomerRegistrationResponse xmlns="IME">
+<ConfirmCustomerRegistrationResult>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+</ConfirmCustomerRegistrationResult>
+</ConfirmCustomerRegistrationResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+
+IME FOREX 87
+5.4. Check Customer
+This method is using to verify the customer, whether customer is registered or not.
+Method Name: CheckCustomer
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:CheckCustomer>
+<ime:CheckCustomerRequest>
+<ime:Credentialss>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentialss>
+<ime:MobileNo>string</ime:MobileNo>
+</ime:CheckCustomerRequest>
+</ime:CheckCustomer>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+MobileNo String Y 10 Customer Mobile Number
+
+IME FOREX 88
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<CheckCustomerResponse xmlns="IME">
+<CheckCustomerResponse>
+<RESPONSE>
+<Code>string</Code>
+<Message>string</Message>
+</RESPONSE>
+<Name>string</Name>
+<MobileNo>string</MobileNo>
+<AMLStatus>string</AMLStatus>
+<KYCStatus>string</KYCStatus>
+<RejectedReason>string</RejectedReason>
+</CheckCustomerResponse>
+</CheckCustomerResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+Name Name of Customer
+MobileNo Mobile number of Customer
+AMLStatus True – Customer is eligible to send the Indo Nepal Transaction
+False – Customer is not eligible to send the Indo Nepal Transaction
+KYCStatus
+Approved – Customer KYC is fully approved by IME Forex
+Pending – Customer KYC is being verifying by IME Forex
+Rejected – Customer KYC is rejected by IME Forex
+RejectedReason If KYC Status is Rejected, will gives the rejected reason
+
+IME FOREX 89
+6. Transaction Creation
+Figure 4: Methods used for Transaction Creation
+Possible Response Codes
+Response Code Response Message
+0 Success
+101 Authentication Failed
+102 Need to change Password. Contact HO
+103 Required Field
+104 Bad Request (Invalid Input Value)
+105 Setup Required
+106 Limit/Balance Expired or Not Enough
+107 Forex ID expired or Already Used
+901 Technical Error
+999 Internal Server Error
+
+IME FOREX 90
+6.1. Exchange Rate and Service Charge
+This method is using to get the service charge and calculate the exchange rate.
+Method Name: GetCalculation
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:GetCalculation>
+<ime:GetCalculationRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<!--Optional:-->
+<ime:PayoutAgentId>string</ime:PayoutAgentId>
+<ime:RemitAmount>string</ime:RemitAmount>
+<ime:PaymentType>string</ime:PaymentType>
+<ime:PayoutCountry>string</ime:PayoutCountry>
+<ime:CalcBy>string</ime:CalcBy>
+</ime:GetCalculationRequest>
+</ime:GetCalculation>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+PayoutAgentId String N 10 Payout Bank Id (Generated from GetStaticData
+Method). Mandatory if PaymentType = B
+RemitAmount String Y 20 Amount whose service charge is to be calculated
+PaymentType String Y 10 C – Cash Payment
+B – Bank Deposit
+PayoutCountry String Y 15 NPL – Nepal
+CalcBy String Y 3
+C – Calculate by Sending Country Currency
+Collection Amount with service charge
+P – Calculate by Paying Country Currency Payout
+Amount
+
+IME FOREX 91
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<GetCalculationResponse xmlns="IME">
+<GetCalculationResponse>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<ForexSessionId>string</ForexSessionId>
+<CollectAmount>string</CollectAmount>
+<ServiceCharge>string</ServiceCharge>
+<ExchangeRate>string</ExchangeRate>
+<PayoutAmount>string</PayoutAmount>
+<PayoutCurrency>string</PayoutCurrency>
+</GetCalculationResponse>
+</GetCalculationResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+ForexSessionId Unique Session ID for Exchange Rate
+CollectAmount Total Amount to be collected from Customer including service charge
+ServiceCharge Service Charge in Collect Currency
+ExchangeRate Exchange Rate as of date
+PayoutAmount Total Payout Amount to Payout Country
+PayoutCurrency Payout Currency
+
+IME FOREX 92
+6.2. Send Transaction
+This method is using to Send money along with the Exchange Rate and Service Charges
+collected from GetCalculation method by agent.
+Method Name: SendTransaction
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:SendTransaction>
+<ime:SendTransactionRequest>
+<ime:Credentialss>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentialss>
+<ime:SenderDetails>
+<ime:SenderName>string</ime:SenderName>
+<ime:SenderMobileNo>string</ime:SenderMobileNo>
+<ime:Occupation>string</ime:Occupation>
+</ime:SenderDetails>
+<ime:ReceiverDetails>
+<ime:ReceiverName>string</ime:ReceiverName>
+<ime:ReceiverAddress>string</ime:ReceiverAddress>
+<ime:ReceiverGender>string</ime:ReceiverGender>
+<ime:ReceiverMobileNo>string</ime:ReceiverMobileNo>
+<!--Optional:-->
+<ime:ReceiverCity>string</ime:ReceiverCity>
+<ime:ReceiverCountry>string</ime:ReceiverCountry>
+</ime:ReceiverDetails>
+<ime:TransactionDetails>
+<ime:ForexSessionId>string</ime:ForexSessionId>
+<ime:AgentTxnRefId>string</ime:AgentTxnRefId>
+<ime:CollectAmount>string</ime:CollectAmount>
+<ime:PayoutAmount>string</ime:PayoutAmount>
+<ime:SourceOfFund>string</ime:SourceOfFund>
+<ime:Relationship>string</ime:Relationship>
+<ime:PurposeOfRemittance>string</ime:PurposeOfRemittance>
+<ime:PaymentType>string</ime:PaymentType>
+<!--Optional:-->
+<ime:BankId>string</ime:BankId>
+<!--Optional:-->
+<ime:BankBranchId>string</ime:BankBranchName>
+<!--Optional:-->
+<ime:BankAccountNumber>string</ime:BankAccountNumber>
+<ime:CalcBy>string</ime:CalcBy>
+</ime:TransactionDetails>
+</ime:SendTransactionRequest>
+</ime:SendTransaction>
+</soapenv:Body>
+</soapenv:Envelope>
+
+IME FOREX 93
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+Sender Details
+SenderName String Y 100 Sender Full Name
+SenderMobileNo String Y 15
+Sender Mobile Number (Should be
+Registered Customer, use
+CheckCustomer method for verification)
+Occupation String Y 10 Sender Occupation (ID received from
+GetStaticData method)
+Receiver Details
+ReceiverName String Y 100 Receiver Full Name
+ReceiverAddress String Y 100 Receiver Address
+ReceiverGender String Y 15 Receiver Gender
+ReceiverMobileNo String Y 15 Receiver Mobile Number
+ReceiverCity String N 30 Receiver City
+ReceiverCountry String Y 3 Nepal as Receiver Country
+Transaction Details
+ForexSessionId String Y 10 Session ID for Exchange Rate, must be
+unique every time
+AgentTxnRefId String Y 20 Unique Transaction ID of Agent to track the
+request and response
+CollectAmount String Y 20 Amount to be collected from sender along
+with service charge
+PayoutAmount String Y 20 Amount that receiver gets (In Payout
+Currency)
+SourceOfFund String Y 10 Source of Fund (ID received from
+GetStaticData method)
+Relationship String Y 10 Send Relationship with Receiver (ID
+received from GetStaticData method)
+PurposeOfRemittance String Y 10 Propose of Remittance (ID received from
+GetStaticData method)
+PaymentType String Y 3 C – Cash Payment
+B – Bank Deposit
+BankId String Mandatory
+if Payment
+Type is
+Bank
+10 Bank Id (ID Generated from GetStaticData
+Method)
+BankBranchId String 100 Bank Branch Id (ID Generated from
+GetStaticData Method)
+BankAccountNumber String 30 Beneficiary Bank Account Number
+CalcBy String Y 3
+C – Calculate by Sending Country Currency
+Collection Amount with service charge
+P – Calculate by Paying Country Currency
+Payout Amount
+
+IME FOREX 94
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<SendTransactionResponse xmlns="IME">
+<SendTransactionResponse>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>sasg</AgentSessionId>
+</Response>
+<RefNo>string</RefNo>
+<ime:AgentTxnRefId>string</ime:AgentTxnRefId>
+<CollectAmount>string</CollectAmount>
+<ExchangeRate>string</ExchangeRate>
+<ServiceCharge>string</ServiceCharge>
+<PayoutAmount>string</PayoutAmount>
+<PayoutCurrency>string</PayoutCurrency>
+</SendTransactionResponse>
+</SendTransactionResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RefNo Unique reference number for confirm transaction
+AgentTxnRefId Unique Transaction ID of Agent
+CollectAmount Total Amount to be collected from Customer including service charge
+ServiceCharge Service Charge in Collect Currency
+ExchangeRate Exchange Rate as of date
+PayoutAmount Total Payout Amount to Payout Country
+PayoutCurrency Payout Currency
+6.3. Send OTP
+This method is using to send the OTP to the sender mobile number with reference number
+collected from SendTransaction method.
+Method Name: SendOTP
+Note: Refer to Section 5.2.
+
+IME FOREX 95
+6.4. Confirm Send Transaction
+This method is using to confirm the send transaction by submitting reference number
+generated from SendTransaction method, token id generated from SendOTP method and
+OTP sent to customer mobile number.
+Method Name: ConfirmSendTrasaction
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:ConfirmSendTransaction>
+<ime:ConfirmSendTransactionRequest>
+<ime:Credentials>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentials>
+<ime:RefNo>string</ime:RefNo>
+<ime:OTPToken>sting</ime:OTPToken>
+<ime:OTP>string</ime:OTP>
+</ime:ConfirmSendTransactionRequest>
+</ime:ConfirmSendTransaction>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+RefNo String Y 20 Unique reference number generated by
+SendTransaction method
+OTPToken String Y 100 Unique Token ID generated by SendOTP
+method
+OTP String Y 6 One Time Password sent on sender mobile
+number
+
+IME FOREX 96
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<ConfirmSendTransactionResponse xmlns="IME">
+<ConfirmSendTransactionResponse>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RefNo>string</RefNo>
+<ime:AgentTxnRefId>string</ime:AgentTxnRefId>
+<CollectAmount>string</CollectAmount>
+<ExchangeRate>string</ExchangeRate>
+<ServiceCharge>string</ServiceCharge>
+<PayoutAmount>string</PayoutAmount>
+<PayoutCurrency>string</PayoutCurrency>
+</ConfirmSendTransactionResponse>
+</ConfirmSendTransactionResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RefNo Unique reference number (ICN), which beneficiary must provide at
+payout location for payment
+AgentTxnRefId Unique Transaction ID of Agent
+CollectAmount Total Amount to be collected from Customer including service charge
+ServiceCharge Service Charge in Collect Currency
+ExchangeRate Exchange Rate as of date
+PayoutAmount Total Payout Amount to Payout Country
+PayoutCurrency Payout Currency
+
+IME FOREX 97
+7. Modify Transaction
+Figure 5: Methods used for Transaction Modification
+7.1. Transaction Inquiry
+This method is using to inquiry the status of transaction performed by agent.
+Method Name: TransactionInquiry
+Possible Response Codes
+Response Code Response Message
+0 Success
+101 Authentication Failed
+102 Need to change Password. Contact HO
+103 Parameter Missing
+104 Bad Request (Invalid Input Value)
+108 Transaction Not Found of supplied RefNo
+109 Unauthorized
+901 Technical Error
+999 Internal Server Error
+
+IME FOREX 98
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:TransactionInquiry>
+<ime:TransactionInquiryRequest>
+<ime:Credentialss>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentialss>
+<ime:RefNoType>string</ime:RefNoType>
+<ime:RefNo>sting</ime:RefNo>
+</ime:TransactionInquiryRequest>
+</ime:TransactionInquiry>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+RefNoType String Y 1
+1 – Search by IME Forex Reference Number
+Search (ICN)
+2 – Search by Agent Transaction Reference Id
+RefNo String Y 20
+If 1 then, enter IME Forex Reference Number
+Search (ICN)
+If 2 then, enter Agent Transaction Reference Id
+
+IME FOREX 99
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<TransactionInquiryResponse xmlns="IME">
+<TransactionInquiryResponse>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RefNo>string</RefNo>
+<SenderDetails>
+<SenderName>string</SenderName>
+<SenderGender>string</SenderGender>
+<SenderCountry>string</SenderCountry>
+<SenderAddress>string</SenderAddress>
+<SenderMobileNo>string</SenderMobileNo>
+<SenderIdType>string</SenderIdType>
+<SenderEmail/>
+</SenderDetails>
+<ReceiverDetails>
+<ReceiverName>string</ReceiverName>
+<ReceiverGender>string</ReceiverGender>
+<ReceiverCountry>string</ReceiverCountry>
+<ReceiverAddress>string</ReceiverAddress>
+<ReceiverMobileNo>string</ReceiverMobileNo>
+<ReceiverRelationWithSender>string</ReceiverRelationWithSender>
+</ReceiverDetails>
+<TransactionDetails>
+<TransferAmount>string</TransferAmount>
+<ServiceCharge>string</ServiceCharge>
+<CollectedAmount>string</CollectedAmount>
+<ExchangeRate>string</ExchangeRate>
+<PayoutAmount>string</PayoutAmount>
+<PayoutCurrency>string</PayoutCurrency>
+<SendingBranch>string</SendingBranch>
+<PaymentMethod>string</PaymentMethod>
+<PurposeOfRemit>string</PurposeOfRemit>
+<SourceOfFund>string</SourceOfFund>
+<TransactionDate>string</TransactionDate>
+<Status>string</Status>
+<StatusDate>string</StatusDate>
+</TransactionDetails>
+</TransactionInquiryResponse>
+</TransactionInquiryResponse>
+</soap:Body>
+</soap:Envelope>
+
+IME FOREX 100
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RefNo Unique reference number (ICN), Transaction Id
+Sender Details
+SenderName Sender Name
+SenderGender Sender Gender
+SenderCountry Sender Country
+SenderMobileNo Sender Mobile Number
+SenderIdType Sender Id Type
+SenderEmail Sender Email Address
+Receiver Details
+ReceiverName Receiver Name
+ReceiverGender Receiver Gender
+ReceiverCountry Receiver Country
+ReceiverAddress Receiver Address
+ReceiverMobileNo Receiver Mobile Number
+ReceiverRelationWithSender Receiver Relationship with Sender
+Transaction Details
+TransferAmount Transfer Amount in sending currency without service charge
+ServiceCharge Transaction Service Charge
+CollectedAmount Total Amount to be collected from Customer including service
+charge
+ExchangeRate Exchange Rate as of date
+PayoutAmount Total Payout Amount to Payout Country
+PayoutCurrency Payout Currency
+SendingBranch Sending Agent Branch
+PaymentMethod Payment Method
+PurposeOfRemit Purpose of Remittance
+SourceOfFund Source of Fund
+TransactionDate Transaction Creation Date
+Status Transaction status
+StatusDate If Status is Cancel, then Cancel Date
+If Status is Paid, then Paid Date
+7.2. Send OTP
+This method is using to send the OTP to the sender mobile number with reference number
+(ICN/ Transaction number).
+Method Name: SendOTP
+Note: Refer to Section 5.2.
+
+IME FOREX 101
+7.3. Modify Transaction
+This method is using to modify transaction performed by agent.
+Method Name: AmendmentTransaction
+Possible Response Codes
+Response Code Response Message
+0 Success
+101 Authentication Failed
+102 Need to change Password. Contact HO
+403 Parameter Missing
+404 Bad Request (Invalid Input Value)
+901 Technical Error
+999 Internal Server Error
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:AmendmentTransaction>
+<ime:ModifyTxnRequest>
+<ime:Credentialss>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentialss>
+<ime:RefNo>string</ime:RefNo>
+<!--Optional:-->
+<ime:ReceiverName>string</ime:ReceiverName>
+<!--Optional:-->
+<ime:ReceiverGender>string</ime:ReceiverGender>
+<!--Optional:-->
+<ime:ReceiverAddress>string</ime:ReceiverAddress>
+<!--Optional:-->
+<ime:RelationWithSender>string</ime:RelationWithSender>
+<!--Optional:-->
+<ime:PurposeOfRemit>string</ime:PurposeOfRemit>
+<!--Optional:-->
+<ime:SoureOfFund>string</ime:SoureOfFund>
+<!--Optional:-->
+<ime:ReceiverMobileNo>string</ime:ReceiverMobileNo>
+<!--Optional:-->
+<ime:BankId></ime:BankId>
+<!--Optional:-->
+<ime:BankBranchId></ime:BankBranchId>
+<!--Optional:-->
+<ime:AccountNo>string</ime:AccountNo>
+<!--Optional:-->
+<ime:OTP>string</ime:OTP>
+<!--Optional:-->
+
+IME FOREX 102
+<ime:OTPToken>string</ime:OTPToken>
+</ime:ModifyTxnRequest>
+</ime:AmendmentTransaction>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+RefNo String Y 20 Unique reference number (ICN) /
+transaction number
+ReceiverName String
+At least
+one
+parameter
+Mandatory
+50 Receiver Full Name
+ReceiverGender String 10 Receiver Gender
+ReceiverAddress String 30 Receiver Address
+RelationWithSender String 10 Send Relationship with Receiver (ID
+received from GetStaticData method)
+PurposeOfRemittance String 10 Propose of Remittance (ID received from
+GetStaticData method)
+SourceOfFund String 10 Source of Fund (ID received from
+GetStaticData method)
+ReceiverMobileNo String 15 Receiver Mobile Number
+BankId String 100 Bank Id (ID Generated from GetStaticData
+Method)
+BankBranchId String 10 Bank Branch Id (ID Generated from
+GetStaticData Method)
+AccountNo String 20 Beneficiary Bank Account Number
+OTP String Y 6 One Time Password sent on sender mobile
+number.
+OTPToken String Y 100 Unique Token ID generated by SendOTP
+method
+
+IME FOREX 103
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<AmendmentTransactionResponse xmlns="http://tempuri.org/">
+<AmendmentTransactionResult>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+</AmendmentTransactionResult>
+</AmendmentTransactionResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+
+IME FOREX 104
+8. Cancel Transaction
+Figure 6: Methods used for Transaction Cancellation
+Possible Response Codes
+Response Code Response Message
+0 Success
+101 Authentication Failed
+102 Need to change Password. Contact HO
+303 Parameter Missing
+304 Bad Request (Invalid Input Value)
+901 Technical Error
+999 Internal Server Error
+8.1. Transaction Inquiry
+This method is using to inquiry the status of transaction performed by agent.
+Method Name: TransactionInquiry
+Note: Refer to Section 7.1.
+8.2. Send OTP
+This method is using to send the OTP to the sender mobile number with reference number
+(ICN/ Transaction number).
+Method Name: SendOTP
+Note: Refer to Section 5.2.
+
+IME FOREX 105
+8.3. Cancel Transaction
+This method is using to modify transaction performed by agent.
+Method Name: CancelTransaction
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:CancelTransaction>
+<ime:CancelTxnRequest>
+<ime:Credentialss>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentialss>
+<ime:RefNo>string</ime:RefNo>
+<ime:CancelReason>string</ime:CancelReason>
+<ime:OTP>string</ime:OTP>
+<ime:OTPToken>string</ime:OTPToken>
+</ime:CancelTxnRequest>
+</ime:CancelTransaction>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+RefNo String Y 20 Unique reference number (ICN) / transaction
+number
+CancelReason String Y 10 Transaction Cancel Reason (ID Generated from
+GetStaticData method)
+OTP String Y 6 One Time Password sent on sender mobile
+number.
+OTPToken String Y 100 Unique Token ID generated by SendOTP
+method
+
+IME FOREX 106
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<CancelTransactionResponse xmlns="http://tempuri.org/">
+<CancelTransactionResult>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<RefId>string</RefId>
+<CollectedAmount>string</CollectedAmount>
+<ExchangeRate>string</ExchangeRate>
+<ServiceCharge>string</ServiceCharge>
+<payoutAmount>string</payoutAmount>
+<PayoutCurrency>string</PayoutCurrency>
+</CancelTransactionResult>
+</CancelTransactionResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RefId Unique reference number (ICN),
+CollectedAmount Total Amount to be collected from Customer including service charge
+ExchangeRate Exchange Rate as of date
+ServiceCharge Service Charge in Collect Currency
+PayoutAmount Total Payout Amount to Payout Country
+PayoutCurrency Payout Currency
+
+IME FOREX 107
+9. Reports
+Figure 7: Methods used for Reports
+Possible Response Codes
+Response Code Response Message
+0 Success
+101 Authentication Failed
+102 Need to change Password. Contact HO
+803 Parameter Missing
+804 Bad Request (Invalid Input Value)
+809 Report Record Not Found
+901 Technical Error
+999 Internal Server Error
+
+IME FOREX 108
+9.1. Reconcile Report
+This method is using to get list of transactions performed by agent.
+Method Name: ReconcileReport
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:ReconcileReport>
+<ime:ReconcileReportRequest>
+<ime:Credentialss>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentialss>
+<ime:ReportType>string</ime:ReportType>
+<ime:FromDate>Date</ime:FromDate>
+<ime:ToDate>Date</ime:ToDate>
+</ime:ReconcileReportRequest>
+</ime:ReconcileReport>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+ReportType String Y 1
+A - All
+S - Sent Only
+C - Cancel Only
+FromDate Date Y 20 Transaction From Date. Format (YYYY/MM/DD)
+ToDate Date Y 20 Transaction To Date. Format (YYYY/MM/DD)
+
+IME FOREX 109
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<ReconcileReportResponse xmlns="IME">
+<ReconcileReportResponse>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<ReconcileReportList>
+<ReconcileReportDetail>
+<RefNo>string</RefNo>
+<AgentTxnRefId>string</AgentTxnRefId>
+<SenderDetails>
+<SenderName>string</SenderName>
+</SenderDetails>
+<ReceiverDetails>
+<ReceiverName>string</ReceiverName>
+<ReceiverCountry>string</ReceiverCountry>
+</ReceiverDetails>
+<TransactionDetails>
+<ServiceCharge>string</ServiceCharge>
+<ServiceChargeCurrency>string</ServiceChargeCurrency>
+<CollectedAmount>sting</CollectedAmount>
+<CollectedAmountCurrency>string</CollectedAmountCurrency>
+<PayoutAmount>string</PayoutAmount>
+<PayoutCurrency>string</PayoutCurrency >
+<SendingAgent>string</SendingAgent>
+<SendingBranch>string</SendingBranch>
+<TransactionDate>string</TransactionDate>
+<Status>string</Status>
+<PaidDate>string</>
+<PayoutAgent>string</>
+<CancelDate>string</>
+</TransactionDetails>
+</ReconcileReportDetail>
+</ReconcileReportList>
+</ReconcileReportResponse>
+</ReconcileReportResponse>
+</soap:Body>
+</soap:Envelope>
+
+IME FOREX 110
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+RefNo Unique reference number (ICN), Transaction Id
+AgentTxnRefId Unique reference number of Partner System passed during
+sending transaction
+SenderName Sender Name
+ReceiverName Receiver Name
+ReceiverCountry Receiver Country
+ServiceCharge Service Charge
+ServiceChargeCurrency Service Charge Currency
+CollectedAmount Collected Amount
+CollectedAmountCurrency Collection Amount Currency
+PayoutAmount Total Payout Amount to Payout Country
+PayoutCurrency Payout Currency
+SendingAgent Sending Agent
+SendingBranch Sending Agent Branch
+TransactionDate Transaction Creation Date
+Status Transaction status
+PaidDate Transaction Paid Date
+PayoutAgent Transaction paying Agent
+CancelDate Transaction Cancel Date
+
+IME FOREX 111
+9.2. Statement of Account
+This method is using to get Statement of Account of agent.
+Method Name: SOAReport
+Request XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ime="IME">
+<soapenv:Header/>
+<soapenv:Body>
+<ime:SOAReport>
+<ime:SOAReportRequest>
+<ime:Credentialss>
+<ime:AccessCode>string</ime:AccessCode>
+<ime:UserName>string</ime:UserName>
+<ime:Password>string</ime:Password>
+<ime:PartnerBranchId>string</ime:PartnerBranchId>
+<ime:AgentSessionId>string</ime:AgentSessionId>
+</ime:Credentialss>
+<ime:FromDate>Date</ime:FromDate>
+<ime:ToDate>Date</ime:ToDate>
+</ime:SOAReportRequest>
+</ime:SOAReport>
+</soapenv:Body>
+</soapenv:Envelope>
+Request Parameters
+Parameter Type Mandatory Length Description
+AccessCode String Y 10 Unique code assigned to Agent
+UserName String Y 20 Username of Agent
+Password String Y 20 Password of Agent
+PartnerBranchId String Y 10 Unique Partner Branch Id or CSP Code of
+Partner
+AgentSessionId String Y 30 Unique Session ID of Agent
+FromDate Date Y 20 Transaction From Date. Format (YYYY/MM/DD)
+ToDate Date Y 20 Transaction To Date. Format (YYYY/MM/DD)
+
+IME FOREX 112
+Response XML
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+<SOAReportResponse xmlns="IME">
+<SOAReportResponse>
+<Response>
+<Code>string</Code>
+<Message>string</Message>
+<AgentSessionId>string</AgentSessionId>
+</Response>
+<SOAReportList>
+<SOAReportDetail>
+<Date>string</Date>
+<Particulars>string</Particulars>
+<DR>string</DR>
+<CR>string</CR>
+<Balance>string</Balance>
+<Indicator>string</Indicator>
+<Narration>string</Narration>
+</SOAReportDetail>
+</SOAReportList>
+</SOAReportResponse>
+</SOAReportResponse>
+</soap:Body>
+</soap:Envelope>
+Response Parameters
+Field Description
+Code 0 if Success otherwise error code
+Message Success/ Error Message
+AgentSessionId Unique Session ID of Agent
+Date Date
+Particulars Particulars to indicate the transactions.
+DR Debit Amount
+CR Credit Amount
+Balance Amount after DR or CR
+Indicator Amount Indicator, Debit (DR) or Credit (CR)
+Narration Remark for the transaction

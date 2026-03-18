@@ -17,8 +17,17 @@ const REMITTANCE_SERVICES = [
         logo: 'https://www.prabhupay.com/assets/img/logo.png',
         fallback: 'Prabhu',
         color: '#003087',
-        route: null,
-        available: false,
+        route: '/dashboard/services/prabhu',
+        available: true,
+    },
+    {
+        id: 'remittance-all',
+        name: 'Remittance (All)',
+        logo: null,
+        fallback: 'REM',
+        color: '#0f766e',
+        route: '/dashboard/services/remittance',
+        available: true,
     },
 ];
 

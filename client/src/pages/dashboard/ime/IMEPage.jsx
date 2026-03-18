@@ -1,591 +1,638 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { Home, Search, Plus, X, Edit2, Send, Loader2, ChevronDown, AlertCircle } from 'lucide-react';
+import { Home, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const API = import.meta.env.VITE_API_URL || '/api';
+const api = axios.create({ baseURL: '/api', withCredentials: true });
 
-// ─── Axios instance with credentials ─────────────────────────────────────────
-const api = axios.create({ baseURL: API, withCredentials: true });
+const inputClass = 'w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-white dark:bg-[#2a2a2a] dark:text-white';
 
-// ─── Static data ──────────────────────────────────────────────────────────────
-const RELATIONSHIPS = [
-    'Father','Mother','Grand Father','Grand Mother','Husband','Wife',
-    'Father in Law','Mother in Law','Brother','Brother in Law','Sister',
-    'Sister in Law','Son','Daughter','Uncle','Aunty','Cousin','Nephew','Niece','Self','Other',
-];
-
-const GENDERS = ['Male', 'Female', 'Other'];
-
-const PURPOSES = [
-    'Family Maintenance','Education','Medical','Business','Gift','Other',
-];
-
-const EMPTY_FORM = {
-    receiverName:'', receiverMobile:'', gender:'', relationship:'',
-    country:'Nepal', districtId:'', municipalityId:'', municipalityName:'',
-    paymentType:'Bank Deposit',
-    bankId:'', bankName:'', bankBranchId:'', bankBranchName:'',
-    accountNumber:'', purposeId:'',
-};
-
-// ─── Small UI helpers ─────────────────────────────────────────────────────────
-const FieldGroup = ({ label, children }) => (
-    <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-gray-600 dark:text-gray-300">{label}</label>
+const Section = ({ title, children }) => (
+    <section className="bg-white dark:bg-[#1e1e1e] rounded-2xl p-5 shadow-sm space-y-4">
+        <h2 className="text-base font-semibold text-gray-800 dark:text-white">{title}</h2>
         {children}
+    </section>
+);
+
+const LabeledInput = ({ label, required, ...props }) => (
+    <div className="space-y-1">
+        <label className="text-xs text-gray-600 dark:text-gray-300">
+            {label}{required ? <span className="text-red-500"> *</span> : null}
+        </label>
+        <input {...props} className={inputClass} />
     </div>
 );
 
-const Input = ({ ...props }) => (
-    <input
-        {...props}
-        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm
-            bg-white dark:bg-[#2a2a2a] dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
-    />
-);
-
-const Select = ({ value, onChange, options, placeholder }) => (
-    <div className="relative">
-        <select
-            value={value}
-            onChange={onChange}
-            className="w-full appearance-none border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm
-                bg-white dark:bg-[#2a2a2a] dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 pr-8"
-        >
-            <option value="">{placeholder || 'Select'}</option>
-            {options.map(o => (
-                <option key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</option>
+const LabeledSelect = ({ label, required, options, value, onChange }) => (
+    <div className="space-y-1">
+        <label className="text-xs text-gray-600 dark:text-gray-300">
+            {label}{required ? <span className="text-red-500"> *</span> : null}
+        </label>
+        <select value={value} onChange={onChange} className={inputClass}>
+            <option value="">Select</option>
+            {options.map((opt) => (
+                <option key={opt.id} value={opt.id}>{opt.value}</option>
             ))}
         </select>
-        <ChevronDown size={14} className="absolute right-2 top-3 text-gray-400 pointer-events-none" />
     </div>
 );
 
-// ─── Receiver Form Modal ──────────────────────────────────────────────────────
-const ReceiverModal = ({ isOpen, onClose, onSave, customerMobile, editData }) => {
-    const [form, setForm]           = useState(EMPTY_FORM);
-    const [banks, setBanks]         = useState([]);
-    const [branches, setBranches]   = useState([]);
-    const [districts, setDistricts] = useState([]);
-    const [munis, setMunis]         = useState([]);
-    const [muniSearch, setMuniSearch] = useState('');
-    const [loading, setLoading]     = useState(false);
-    const [error, setError]         = useState('');
-
-    // Populate form when editing
-    useEffect(() => {
-        if (editData) setForm({ ...EMPTY_FORM, ...editData });
-        else          setForm(EMPTY_FORM);
-        setError('');
-    }, [editData, isOpen]);
-
-    // Load banks + districts once
-    useEffect(() => {
-        if (!isOpen) return;
-        Promise.all([
-            api.get('/ime/banks'),
-            api.get('/ime/districts'),
-        ]).then(([b, d]) => {
-            setBanks((b.data.data || []).map(x => ({ value: x.BankID || x.id, label: x.BankName || x.name })));
-            setDistricts((d.data.data || []).map(x => ({ value: x.DistrictID || x.id, label: x.DistrictName || x.name })));
-        }).catch(() => {});
-    }, [isOpen]);
-
-    // Load branches when bank changes
-    useEffect(() => {
-        if (!form.bankId) { setBranches([]); return; }
-        api.get(`/ime/banks/${form.bankId}/branches`)
-            .then(r => setBranches((r.data.data || []).map(x => ({ value: x.BranchID || x.id, label: x.BranchName || x.name }))))
-            .catch(() => {});
-    }, [form.bankId]);
-
-    // Load municipalities when district changes
-    useEffect(() => {
-        if (!form.districtId) { setMunis([]); return; }
-        api.get(`/ime/districts/${form.districtId}/municipalities`)
-            .then(r => setMunis((r.data.data || []).map(x => ({ value: x.MunicipalityID || x.id, label: x.MunicipalityName || x.name }))))
-            .catch(() => {});
-    }, [form.districtId]);
-
-    const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
-
-    const filteredMunis = munis.filter(m => m.label.toLowerCase().includes(muniSearch.toLowerCase()));
-
-    const handleSave = async () => {
-        if (!form.receiverName || !form.receiverMobile || !form.gender || !form.relationship) {
-            setError('Please fill all required fields.'); return;
-        }
-        setLoading(true); setError('');
-        try {
-            const payload = { ...form, txnMobileNo: customerMobile };
-            if (editData?.beneficiaryId) {
-                await api.put(`/ime/receivers/${editData.beneficiaryId}`, payload);
-            } else {
-                await api.post('/ime/receivers', payload);
-            }
-            onSave();
-        } catch (e) {
-            setError(e.response?.data?.message || 'Failed to save receiver.');
-        } finally { setLoading(false); }
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-            <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b dark:border-gray-700">
-                    <h2 className="text-lg font-semibold dark:text-white">Receiver Details</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
-                </div>
-
-                {/* Form */}
-                <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FieldGroup label="Receiver Full Name *">
-                        <Input value={form.receiverName} onChange={set('receiverName')} placeholder="Receiver full name" />
-                        <span className="text-xs text-teal-600">As per government ID</span>
-                    </FieldGroup>
-
-                    <FieldGroup label="Contact Number *">
-                        <Input value={form.receiverMobile} onChange={set('receiverMobile')} placeholder="Enter receiver mobile" />
-                    </FieldGroup>
-
-                    <FieldGroup label="Gender *">
-                        <Select value={form.gender} onChange={set('gender')} options={GENDERS} placeholder="Select" />
-                    </FieldGroup>
-
-                    <FieldGroup label="Relationship *">
-                        <Select value={form.relationship} onChange={set('relationship')} options={RELATIONSHIPS} placeholder="Select" />
-                    </FieldGroup>
-
-                    <FieldGroup label="Country">
-                        <Input value={form.country} onChange={set('country')} />
-                    </FieldGroup>
-
-                    <FieldGroup label="Municipality (गाउपलिका/नगरपालिका)">
-                        <div className="space-y-1">
-                            <Select
-                                value={form.districtId}
-                                onChange={e => setForm(f => ({ ...f, districtId: e.target.value, municipalityId: '', municipalityName: '' }))}
-                                options={districts}
-                                placeholder="Select district"
-                            />
-                            {form.districtId && (
-                                <>
-                                    <Input
-                                        value={muniSearch}
-                                        onChange={e => setMuniSearch(e.target.value)}
-                                        placeholder="Search municipality..."
-                                    />
-                                    <Select
-                                        value={form.municipalityId}
-                                        onChange={e => setForm(f => ({
-                                            ...f,
-                                            municipalityId: e.target.value,
-                                            municipalityName: filteredMunis.find(m => String(m.value) === e.target.value)?.label || '',
-                                        }))}
-                                        options={filteredMunis}
-                                        placeholder="Select municipality"
-                                    />
-                                </>
-                            )}
-                            {form.municipalityName && (
-                                <p className="text-xs text-gray-500">{form.municipalityName}</p>
-                            )}
-                        </div>
-                    </FieldGroup>
-
-                    <FieldGroup label="Payment Type">
-                        <Select
-                            value={form.paymentType}
-                            onChange={e => setForm(f => ({ ...f, paymentType: e.target.value, bankId: '', bankBranchId: '', accountNumber: '' }))}
-                            options={['Bank Deposit','Cash Payment']}
-                            placeholder="Select"
-                        />
-                    </FieldGroup>
-
-                    {form.paymentType === 'Bank Deposit' && (
-                        <>
-                            <FieldGroup label="Bank Name">
-                                <Select
-                                    value={form.bankId}
-                                    onChange={e => setForm(f => ({ ...f, bankId: e.target.value, bankBranchId: '' }))}
-                                    options={banks}
-                                    placeholder="Select"
-                                />
-                            </FieldGroup>
-
-                            <FieldGroup label="Bank Branch">
-                                <Select
-                                    value={form.bankBranchId}
-                                    onChange={set('bankBranchId')}
-                                    options={branches}
-                                    placeholder="Select"
-                                />
-                            </FieldGroup>
-
-                            <FieldGroup label="Account Number">
-                                <Input value={form.accountNumber} onChange={set('accountNumber')} placeholder="Enter account number" />
-                            </FieldGroup>
-                        </>
-                    )}
-
-                    <FieldGroup label="Purpose of Transaction">
-                        <Select value={form.purposeId} onChange={set('purposeId')} options={PURPOSES} placeholder="Select" />
-                    </FieldGroup>
-                </div>
-
-                {error && (
-                    <div className="mx-5 mb-3 flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
-                        <AlertCircle size={16}/> {error}
-                    </div>
-                )}
-
-                {/* Footer */}
-                <div className="flex justify-end gap-3 p-5 border-t dark:border-gray-700">
-                    <button onClick={onClose} className="px-5 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-sm font-medium hover:bg-gray-300 dark:text-white">
-                        Close
-                    </button>
-                    <button
-                        onClick={handleSave}
-                        disabled={loading}
-                        className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-60 flex items-center gap-2"
-                    >
-                        {loading && <Loader2 size={14} className="animate-spin"/>}
-                        Save
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
+const toDataList = (res) => {
+    const list = res?.data?.data?.DataList?.Data || [];
+    if (Array.isArray(list)) return list.map((item) => ({ id: String(item?.Id || ''), value: String(item?.Value || '') }));
+    if (list?.Id || list?.Value) return [{ id: String(list?.Id || ''), value: String(list?.Value || '') }];
+    return [];
 };
 
-// ─── Send Money Modal ─────────────────────────────────────────────────────────
-const SendMoneyModal = ({ isOpen, onClose, customerMobile, receiver }) => {
-    const [amount, setAmount]   = useState('');
-    const [purpose, setPurpose] = useState('');
-    const [remarks, setRemarks] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError]     = useState('');
-    const [success, setSuccess] = useState('');
-
-    useEffect(() => { if (!isOpen) { setAmount(''); setError(''); setSuccess(''); } }, [isOpen]);
-
-    const handleSend = async () => {
-        if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-            setError('Enter a valid amount.'); return;
-        }
-        setLoading(true); setError('');
-        try {
-            const res = await api.post('/ime/send-money', {
-                txnMobileNo: customerMobile,
-                beneficiaryId: receiver?.BeneficiaryID || receiver?.beneficiaryId,
-                amount: Number(amount),
-                purposeId: purpose,
-                remarks,
-            });
-            setSuccess(`Transaction sent! Ref: ${res.data.data?.ReferenceNo || 'N/A'}`);
-        } catch (e) {
-            setError(e.response?.data?.message || 'Transaction failed.');
-        } finally { setLoading(false); }
-    };
-
-    if (!isOpen || !receiver) return null;
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-            <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-2xl w-full max-w-md">
-                <div className="flex items-center justify-between p-5 border-b dark:border-gray-700">
-                    <h2 className="text-lg font-semibold dark:text-white">Send Money to {receiver.ReceiverName || receiver.receiverName}</h2>
-                    <button onClick={onClose}><X size={20} className="text-gray-400"/></button>
-                </div>
-                <div className="p-5 space-y-4">
-                    {success ? (
-                        <div className="text-green-600 bg-green-50 p-4 rounded-lg text-sm font-medium">{success}</div>
-                    ) : (
-                        <>
-                            <FieldGroup label="Amount (INR) *">
-                                <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="Enter amount" />
-                            </FieldGroup>
-                            <FieldGroup label="Purpose">
-                                <Select value={purpose} onChange={e => setPurpose(e.target.value)} options={PURPOSES} placeholder="Select" />
-                            </FieldGroup>
-                            <FieldGroup label="Remarks">
-                                <Input value={remarks} onChange={e => setRemarks(e.target.value)} placeholder="Optional remarks" />
-                            </FieldGroup>
-                            {error && (
-                                <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
-                                    <AlertCircle size={16}/> {error}
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-                <div className="flex justify-end gap-3 p-5 border-t dark:border-gray-700">
-                    <button onClick={onClose} className="px-5 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-sm hover:bg-gray-300 dark:text-white">
-                        {success ? 'Close' : 'Cancel'}
-                    </button>
-                    {!success && (
-                        <button onClick={handleSend} disabled={loading}
-                            className="px-5 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 disabled:opacity-60 flex items-center gap-2">
-                            {loading && <Loader2 size={14} className="animate-spin"/>}
-                            <Send size={14}/> Send
-                        </button>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
+const toNestedValue = (payload, keys = []) => {
+    for (const key of keys) {
+        if (payload?.[key] !== undefined && payload?.[key] !== null) return payload[key];
+    }
+    return '';
 };
 
-// ─── Main IME Page ────────────────────────────────────────────────────────────
+const pretty = (value) => {
+    try {
+        return JSON.stringify(value, null, 2);
+    } catch {
+        return String(value || '');
+    }
+};
+
+const fileToBase64 = (file) => new Promise((resolve, reject) => {
+    if (!file) {
+        resolve('');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+        const result = reader.result || '';
+        const base = String(result).includes(',') ? String(result).split(',')[1] : String(result);
+        resolve(base);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+});
+
 const IMEPage = () => {
     const navigate = useNavigate();
 
-    // ── State ──────────────────────────────────────────────────────────────────
-    const [step, setStep]               = useState('search'); // 'search' | 'details'
-    const [mobile, setMobile]           = useState('');
-    const [searching, setSearching]     = useState(false);
-    const [searchErr, setSearchErr]     = useState('');
-    const [customer, setCustomer]       = useState(null);
-    const [receivers, setReceivers]     = useState([]);
-    const [receiverModal, setReceiverModal] = useState(false);
-    const [editReceiver, setEditReceiver]   = useState(null);
-    const [sendModal, setSendModal]         = useState(false);
-    const [selectedReceiver, setSelectedReceiver] = useState(null);
+    const [loadingKey, setLoadingKey] = useState('');
+    const [latestResponse, setLatestResponse] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
 
-    // ── Search customer ────────────────────────────────────────────────────────
-    const handleSearch = async () => {
-        if (!mobile.trim()) { setSearchErr('Please enter a mobile number.'); return; }
-        setSearching(true); setSearchErr('');
+    const [step, setStep] = useState(1);
+    const [showConfirmOtpModal, setShowConfirmOtpModal] = useState(false);
+    const [confirmOtp, setConfirmOtp] = useState('');
+    const [confirmSendRefNo, setConfirmSendRefNo] = useState('');
+    const [confirmSendOtpToken, setConfirmSendOtpToken] = useState('');
+
+    const [checkMobile, setCheckMobile] = useState('');
+    const [customerCheck, setCustomerCheck] = useState(null);
+    const [customerToken, setCustomerToken] = useState('');
+    const [customerOtpToken, setCustomerOtpToken] = useState('');
+    const [customerVerified, setCustomerVerified] = useState(false);
+
+    const [lookups, setLookups] = useState({
+        countries: [],
+        genders: [],
+        marital: [],
+        occupations: [],
+        sources: [],
+        idTypes: [],
+        purpose: [],
+        relationship: [],
+        banks: [],
+        nepStates: [],
+        indiaStates: [],
+        permDistricts: [],
+        tempDistricts: [],
+        permMunicipalities: [],
+        bankBranches: [],
+    });
+
+    const [customerForm, setCustomerForm] = useState({
+        mobileNo: '',
+        membershipId: '',
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        nationality: 'NPL',
+        maritalStatus: '',
+        dob: '',
+        gender: '',
+        fatherOrMotherName: '',
+        email: '',
+        occupation: '',
+        sourceOfFund: '',
+        temporaryAddress_State: '',
+        temporaryAddress_District: '',
+        temporaryAddress_Address: '',
+        temporaryAddress_PostalCode: '',
+        temporaryAddress_HouseNo: '',
+        permanentAddress_State: '',
+        permanentAddress_District: '',
+        permanentAddress_Municipality: '',
+        permanentAddress_Address: '',
+        permanentAddress_WardNo: '',
+        permanentAddress_Tole: '',
+        permanentAddress_HouseNo: '',
+        idType: '',
+        idNo: '',
+        idPlaceOfIssue: '',
+        issueDate: '',
+        expiryDate: '',
+        idData: '',
+        idDataType: '',
+        photoData: '',
+        photoDataType: '',
+    });
+
+    const [txnForm, setTxnForm] = useState({
+        senderName: '',
+        senderMobileNo: '',
+        occupation: '',
+        receiverName: '',
+        receiverAddress: '',
+        receiverGender: '',
+        receiverMobileNo: '',
+        receiverCity: '',
+        receiverCountry: 'NPL',
+        forexSessionId: '',
+        agentTxnRefId: '',
+        collectAmount: '',
+        payoutAmount: '',
+        sourceOfFund: '',
+        relationship: '',
+        purposeOfRemittance: '',
+        paymentType: 'C',
+        bankId: '',
+        bankBranchId: '',
+        bankAccountNumber: '',
+        calcBy: 'C',
+    });
+
+    const [calcForm, setCalcForm] = useState({
+        payoutAgentId: '',
+        remitAmount: '',
+        paymentType: 'C',
+        payoutCountry: 'NPL',
+        calcBy: 'C',
+    });
+
+    const loadCommonLookups = async () => {
         try {
-            const res = await api.post('/ime/search-customer', { mobile: mobile.trim() });
-            setCustomer(res.data.data);
-            await fetchReceivers(mobile.trim());
-            setStep('details');
-        } catch (e) {
-            setSearchErr(e.response?.data?.message || 'Customer not found.');
-        } finally { setSearching(false); }
+            const [countries, genders, marital, occupations, sources, idTypes, purpose, relationship, banks, nepStates, indiaStates] = await Promise.all([
+                api.get('/IME/Countries'),
+                api.get('/IME/Genders'),
+                api.get('/IME/MaritalStatus'),
+                api.get('/IME/Occupation'),
+                api.get('/IME/SourceOfFundList'),
+                api.get('/IME/GetIdTypes?country=NPL'),
+                api.get('/IME/PurposeOfRemittance'),
+                api.get('/IME/RelationshipList'),
+                api.get('/IME/BankList/NPL'),
+                api.get('/IME/States/NPL'),
+                api.get('/IME/States/IND'),
+            ]);
+
+            setLookups((prev) => ({
+                ...prev,
+                countries: toDataList(countries),
+                genders: toDataList(genders),
+                marital: toDataList(marital),
+                occupations: toDataList(occupations),
+                sources: toDataList(sources),
+                idTypes: toDataList(idTypes),
+                purpose: toDataList(purpose),
+                relationship: toDataList(relationship),
+                banks: toDataList(banks),
+                nepStates: toDataList(nepStates),
+                indiaStates: toDataList(indiaStates),
+            }));
+        } catch (error) {
+            setErrorMessage(error?.response?.data?.message || error.message || 'Static data load failed');
+        }
     };
 
-    // ── Fetch receivers ────────────────────────────────────────────────────────
-    const fetchReceivers = useCallback(async (mob) => {
-        try {
-            const r = await api.get(`/ime/receivers/${mob || mobile}`);
-            setReceivers(r.data.data || []);
-        } catch { setReceivers([]); }
-    }, [mobile]);
+    useEffect(() => {
+        loadCommonLookups();
+    }, []);
 
-    // ── Normalise customer field names (API may vary) ─────────────────────────
-    const customerName     = customer?.CustomerName     || customer?.name         || '—';
-    const customerMobile   = customer?.MobileNo         || customer?.mobile       || mobile;
-    const canSend          = customer?.CanSendTransaction || customer?.canSend     || 'Yes';
-    const kycStatus        = customer?.KYCStatus         || customer?.kycStatus    || '—';
+    useEffect(() => {
+        const stateId = customerForm.permanentAddress_State;
+        if (!stateId) {
+            setLookups((prev) => ({ ...prev, permDistricts: [], permMunicipalities: [] }));
+            return;
+        }
+
+        api.get(`/IME/Districts/${stateId}`)
+            .then((res) => setLookups((prev) => ({ ...prev, permDistricts: toDataList(res), permMunicipalities: [] })))
+            .catch(() => setLookups((prev) => ({ ...prev, permDistricts: [], permMunicipalities: [] })));
+    }, [customerForm.permanentAddress_State]);
+
+    useEffect(() => {
+        const districtId = customerForm.permanentAddress_District;
+        if (!districtId) {
+            setLookups((prev) => ({ ...prev, permMunicipalities: [] }));
+            return;
+        }
+
+        api.get(`/IME/Municipalities/${districtId}`)
+            .then((res) => setLookups((prev) => ({ ...prev, permMunicipalities: toDataList(res) })))
+            .catch(() => setLookups((prev) => ({ ...prev, permMunicipalities: [] })));
+    }, [customerForm.permanentAddress_District]);
+
+    useEffect(() => {
+        const stateId = customerForm.temporaryAddress_State;
+        if (!stateId) {
+            setLookups((prev) => ({ ...prev, tempDistricts: [] }));
+            return;
+        }
+        api.get(`/IME/Districts/${stateId}`)
+            .then((res) => setLookups((prev) => ({ ...prev, tempDistricts: toDataList(res) })))
+            .catch(() => setLookups((prev) => ({ ...prev, tempDistricts: [] })));
+    }, [customerForm.temporaryAddress_State]);
+
+    useEffect(() => {
+        const bankId = txnForm.bankId;
+        if (!bankId) {
+            setLookups((prev) => ({ ...prev, bankBranches: [] }));
+            return;
+        }
+        api.get(`/IME/BankBranchList/${bankId}`)
+            .then((res) => setLookups((prev) => ({ ...prev, bankBranches: toDataList(res) })))
+            .catch(() => setLookups((prev) => ({ ...prev, bankBranches: [] })));
+    }, [txnForm.bankId]);
+
+    const runCall = async (key, method, url, data = undefined) => {
+        setLoadingKey(key);
+        setErrorMessage('');
+        try {
+            const res = await api({ method, url, data });
+            setLatestResponse({ ok: true, status: res.status, url, method: method.toUpperCase(), data: res.data });
+            return res;
+        } catch (error) {
+            const payload = error?.response?.data || { message: error.message };
+            setLatestResponse({ ok: false, status: error?.response?.status || 500, url, method: method.toUpperCase(), data: payload });
+            setErrorMessage(payload?.message || error.message || 'Request failed');
+            throw error;
+        } finally {
+            setLoadingKey('');
+        }
+    };
+
+    const paymentModeText = useMemo(() => (txnForm.paymentType === 'B' ? 'Bank Deposit' : 'Cash Payment'), [txnForm.paymentType]);
+
+    const handleCheckCustomer = async () => {
+        if (!checkMobile) return;
+        const res = await runCall('checkCustomer', 'get', `/IME/CheckCustomer/${checkMobile}`);
+        setCustomerCheck(res.data?.data || null);
+
+        const code = toNestedValue(res.data?.data, ['RESPONSE', 'Response'])?.Code || res.data?.code;
+        const name = toNestedValue(res.data?.data, ['Name']);
+
+        setCustomerForm((prev) => ({
+            ...prev,
+            mobileNo: checkMobile,
+            firstName: prev.firstName || String(name || '').split(' ')[0] || '',
+            lastName: prev.lastName || String(name || '').split(' ').slice(1).join(' ') || '',
+        }));
+
+        if (String(code) === '0') {
+            setCustomerVerified(true);
+            setStep(3);
+        } else {
+            setStep(2);
+        }
+    };
+
+    const handleCustomerRegistration = async () => {
+        const payload = {
+            ...customerForm,
+            mobileNo: customerForm.mobileNo || checkMobile,
+        };
+
+        const res = await runCall('registerCustomer', 'post', '/IME/CustomerRegistration', payload);
+        const token = toNestedValue(res.data?.data, ['CustomerToken']) || '';
+        setCustomerToken(token);
+        if (token) {
+            const otpRes = await runCall('sendOtpCR', 'post', '/IME/SendOTP', { module: 'CR', referenceValue: token });
+            setCustomerOtpToken(toNestedValue(otpRes.data?.data, ['OTPToken']) || '');
+        }
+    };
+
+    const handleConfirmCustomer = async () => {
+        if (!customerToken || !customerOtpToken) {
+            setErrorMessage('CustomerToken or OTPToken missing. Register customer first.');
+            return;
+        }
+
+        const otpValue = customerForm.confirmOtp || '';
+        await runCall('confirmCustomer', 'post', '/IME/ConfirmCustomerRegistration', {
+            otp: otpValue,
+            customerToken,
+            otpToken: customerOtpToken,
+        });
+
+        setCustomerVerified(true);
+        setStep(3);
+    };
+
+    const handleGetCalculation = async () => {
+        const res = await runCall('getCalculation', 'post', '/IME/GetCalculation', calcForm);
+        const data = res.data?.data || {};
+
+        setTxnForm((prev) => ({
+            ...prev,
+            forexSessionId: toNestedValue(data, ['ForexSessionId']),
+            collectAmount: toNestedValue(data, ['CollectAmount']),
+            payoutAmount: toNestedValue(data, ['PayoutAmount']),
+            paymentType: calcForm.paymentType,
+            calcBy: calcForm.calcBy,
+            bankId: calcForm.payoutAgentId,
+        }));
+    };
+
+    const handleSendTransaction = async () => {
+        const payload = {
+            ...txnForm,
+            senderMobileNo: customerForm.mobileNo || checkMobile,
+            senderName: `${customerForm.firstName} ${customerForm.lastName}`.trim(),
+            occupation: customerForm.occupation,
+            sourceOfFund: customerForm.sourceOfFund,
+            agentTxnRefId: txnForm.agentTxnRefId || `TXN-${Date.now()}`,
+        };
+
+        const res = await runCall('sendTxn', 'post', '/IME/SendTransaction', payload);
+        const refNo = toNestedValue(res.data?.data, ['RefNo']) || '';
+
+        if (!refNo) {
+            setErrorMessage('Reference number not returned from SendTransaction.');
+            return;
+        }
+
+        const otpRes = await runCall('sendOtpST', 'post', '/IME/SendOTP', { module: 'ST', referenceValue: refNo });
+        setConfirmSendRefNo(refNo);
+        setConfirmSendOtpToken(toNestedValue(otpRes.data?.data, ['OTPToken']) || '');
+        setShowConfirmOtpModal(true);
+    };
+
+    const handleConfirmSend = async () => {
+        if (!confirmSendRefNo || !confirmSendOtpToken || !confirmOtp) {
+            setErrorMessage('RefNo, OTPToken or OTP missing.');
+            return;
+        }
+
+        await runCall('confirmSendTxn', 'post', '/IME/ConfirmSendTransaction', {
+            refNo: confirmSendRefNo,
+            otpToken: confirmSendOtpToken,
+            otp: confirmOtp,
+        });
+
+        setShowConfirmOtpModal(false);
+        setConfirmOtp('');
+        setStep(4);
+    };
+
+    const handleFilePick = async (event, dataKey, typeKey) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        const base = await fileToBase64(file);
+        const ext = (file.name.split('.').pop() || '').toLowerCase();
+        setCustomerForm((prev) => ({ ...prev, [dataKey]: base, [typeKey]: ext }));
+    };
 
     return (
-        <div className="max-w-4xl mx-auto py-6 px-4 space-y-5">
-
-            {/* Header */}
+        <div className="max-w-7xl mx-auto py-6 px-4 space-y-5">
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/IME_Logo.svg/200px-IME_Logo.svg.png"
-                        alt="IME"
-                        className="h-8 object-contain"
-                        onError={e => { e.target.style.display = 'none'; }}
-                    />
-                    <h1 className="text-xl font-bold dark:text-white">Indo-Nepal Money Transfer</h1>
+                <div>
+                    <h1 className="text-xl font-bold dark:text-white">Send Money Indo-Nepal</h1>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Send Indo-Nepal Transaction / Check Customer</p>
                 </div>
-                <button
-                    onClick={() => navigate('/dashboard/services')}
-                    className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
-                >
-                    <Home size={14}/> Home
+                <button onClick={() => navigate('/dashboard/services')} className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                    <Home size={14} /> Home
                 </button>
             </div>
 
-            {/* ── STEP 1: Search ──────────────────────────────────────────────── */}
-            {step === 'search' && (
-                <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-sm p-8">
-                    <div className="flex flex-col items-center gap-6 max-w-md mx-auto">
-                        <img
-                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/IME_Logo.svg/200px-IME_Logo.svg.png"
-                            alt="IME"
-                            className="h-16 object-contain"
-                            onError={e => { e.target.style.display='none'; }}
-                        />
-                        <h2 className="text-xl font-semibold text-center dark:text-white">Search Customer</h2>
+            <div className="bg-red-600 text-white text-xs rounded-md px-3 py-2">
+                Please fill proper customer information as per ID document during KYC. Unclear/edited IDs are not accepted.
+            </div>
 
-                        <div className="w-full space-y-3">
-                            <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                                Customer Mobile Number
-                            </label>
-                            <div className="flex gap-2">
-                                <Input
-                                    value={mobile}
-                                    onChange={e => setMobile(e.target.value)}
-                                    placeholder="Mobile Number"
-                                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                                />
+            <Section title="1) Check Customer">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                    <div className="md:col-span-3">
+                        <LabeledInput
+                            label="Sender Mobile No."
+                            required
+                            placeholder="Enter sender mobile no"
+                            value={checkMobile}
+                            onChange={(e) => setCheckMobile(e.target.value)}
+                        />
+                    </div>
+                    <button
+                        onClick={handleCheckCustomer}
+                        disabled={!checkMobile || loadingKey === 'checkCustomer'}
+                        className="h-[42px] px-4 py-2 rounded-md bg-slate-800 text-white text-sm disabled:opacity-60"
+                    >
+                        {loadingKey === 'checkCustomer' ? <Loader2 size={14} className="animate-spin inline mr-1" /> : null}
+                        Search
+                    </button>
+                </div>
+
+                {customerCheck ? (
+                    <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3 text-sm dark:text-gray-200">
+                        <p><strong>Name:</strong> {toNestedValue(customerCheck, ['Name']) || '-'}</p>
+                        <p><strong>Mobile:</strong> {toNestedValue(customerCheck, ['MobileNo']) || checkMobile}</p>
+                        <p><strong>KYC Status:</strong> {toNestedValue(customerCheck, ['KYCStatus']) || '-'}</p>
+                    </div>
+                ) : null}
+            </Section>
+
+            {step >= 2 ? (
+                <Section title="2) Customer Registration">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <LabeledInput label="Mobile Number" required value={customerForm.mobileNo} onChange={(e) => setCustomerForm((p) => ({ ...p, mobileNo: e.target.value }))} />
+                        <LabeledInput label="Membership ID" value={customerForm.membershipId} onChange={(e) => setCustomerForm((p) => ({ ...p, membershipId: e.target.value }))} />
+                        <LabeledInput label="First Name" required value={customerForm.firstName} onChange={(e) => setCustomerForm((p) => ({ ...p, firstName: e.target.value }))} />
+                        <LabeledInput label="Middle Name" value={customerForm.middleName} onChange={(e) => setCustomerForm((p) => ({ ...p, middleName: e.target.value }))} />
+                        <LabeledInput label="Last Name" required value={customerForm.lastName} onChange={(e) => setCustomerForm((p) => ({ ...p, lastName: e.target.value }))} />
+                        <LabeledSelect label="Nationality" required options={lookups.countries} value={customerForm.nationality} onChange={(e) => setCustomerForm((p) => ({ ...p, nationality: e.target.value }))} />
+                        <LabeledSelect label="Marital Status" required options={lookups.marital} value={customerForm.maritalStatus} onChange={(e) => setCustomerForm((p) => ({ ...p, maritalStatus: e.target.value }))} />
+                        <LabeledInput type="date" label="Date of Birth" required value={customerForm.dob} onChange={(e) => setCustomerForm((p) => ({ ...p, dob: e.target.value }))} />
+                        <LabeledSelect label="Gender" required options={lookups.genders} value={customerForm.gender} onChange={(e) => setCustomerForm((p) => ({ ...p, gender: e.target.value }))} />
+                        <LabeledInput label="Father/Mother Name" required value={customerForm.fatherOrMotherName} onChange={(e) => setCustomerForm((p) => ({ ...p, fatherOrMotherName: e.target.value }))} />
+                        <LabeledInput label="Email" value={customerForm.email} onChange={(e) => setCustomerForm((p) => ({ ...p, email: e.target.value }))} />
+                        <LabeledSelect label="Occupation" required options={lookups.occupations} value={customerForm.occupation} onChange={(e) => setCustomerForm((p) => ({ ...p, occupation: e.target.value }))} />
+                        <LabeledSelect label="Source Of Fund" options={lookups.sources} value={customerForm.sourceOfFund} onChange={(e) => setCustomerForm((p) => ({ ...p, sourceOfFund: e.target.value }))} />
+                    </div>
+
+                    <h3 className="text-sm font-semibold mt-2 dark:text-white">Temporary Address (India)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <LabeledSelect label="State" required options={lookups.indiaStates} value={customerForm.temporaryAddress_State} onChange={(e) => setCustomerForm((p) => ({ ...p, temporaryAddress_State: e.target.value }))} />
+                        <LabeledSelect label="District" required options={lookups.tempDistricts} value={customerForm.temporaryAddress_District} onChange={(e) => setCustomerForm((p) => ({ ...p, temporaryAddress_District: e.target.value }))} />
+                        <LabeledInput label="Address" required value={customerForm.temporaryAddress_Address} onChange={(e) => setCustomerForm((p) => ({ ...p, temporaryAddress_Address: e.target.value }))} />
+                        <LabeledInput label="Postal Code" value={customerForm.temporaryAddress_PostalCode} onChange={(e) => setCustomerForm((p) => ({ ...p, temporaryAddress_PostalCode: e.target.value }))} />
+                    </div>
+
+                    <h3 className="text-sm font-semibold mt-2 dark:text-white">Permanent Address (Nepal)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <LabeledSelect label="State" required options={lookups.nepStates} value={customerForm.permanentAddress_State} onChange={(e) => setCustomerForm((p) => ({ ...p, permanentAddress_State: e.target.value }))} />
+                        <LabeledSelect label="District" required options={lookups.permDistricts} value={customerForm.permanentAddress_District} onChange={(e) => setCustomerForm((p) => ({ ...p, permanentAddress_District: e.target.value }))} />
+                        <LabeledSelect label="Municipality" options={lookups.permMunicipalities} value={customerForm.permanentAddress_Municipality} onChange={(e) => setCustomerForm((p) => ({ ...p, permanentAddress_Municipality: e.target.value }))} />
+                        <LabeledInput label="Address" required value={customerForm.permanentAddress_Address} onChange={(e) => setCustomerForm((p) => ({ ...p, permanentAddress_Address: e.target.value }))} />
+                    </div>
+
+                    <h3 className="text-sm font-semibold mt-2 dark:text-white">Identity Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <LabeledSelect label="ID Type" required options={lookups.idTypes} value={customerForm.idType} onChange={(e) => setCustomerForm((p) => ({ ...p, idType: e.target.value }))} />
+                        <LabeledInput label="ID Number" required value={customerForm.idNo} onChange={(e) => setCustomerForm((p) => ({ ...p, idNo: e.target.value }))} />
+                        <LabeledInput label="ID Issue Place" value={customerForm.idPlaceOfIssue} onChange={(e) => setCustomerForm((p) => ({ ...p, idPlaceOfIssue: e.target.value }))} />
+                        <LabeledInput type="date" label="Issue Date" required value={customerForm.issueDate} onChange={(e) => setCustomerForm((p) => ({ ...p, issueDate: e.target.value }))} />
+                        <LabeledInput type="date" label="Expiry Date" value={customerForm.expiryDate} onChange={(e) => setCustomerForm((p) => ({ ...p, expiryDate: e.target.value }))} />
+                    </div>
+
+                    <h3 className="text-sm font-semibold mt-2 dark:text-white">Upload Document</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="border border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-4">
+                            <p className="text-sm mb-2 dark:text-gray-300">ID Photo (required)</p>
+                            <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFilePick(e, 'idData', 'idDataType')} className="text-sm" />
+                        </div>
+                        <div className="border border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-4">
+                            <p className="text-sm mb-2 dark:text-gray-300">Personal Image (optional)</p>
+                            <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFilePick(e, 'photoData', 'photoDataType')} className="text-sm" />
+                        </div>
+                    </div>
+
+                    {!customerVerified ? (
+                        <div className="space-y-3">
+                            <div className="flex gap-2 flex-wrap">
                                 <button
-                                    onClick={handleSearch}
-                                    disabled={searching}
-                                    className="px-5 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-60 flex items-center gap-2 whitespace-nowrap"
+                                    onClick={handleCustomerRegistration}
+                                    disabled={loadingKey === 'registerCustomer'}
+                                    className="px-4 py-2 rounded-md bg-green-600 text-white text-sm"
                                 >
-                                    {searching ? <Loader2 size={15} className="animate-spin"/> : <Search size={15}/>}
-                                    Search
+                                    {loadingKey === 'registerCustomer' ? <Loader2 size={14} className="animate-spin inline mr-2" /> : null}
+                                    Save & Next
                                 </button>
                             </div>
-                            {searchErr && (
-                                <p className="text-sm text-red-500 flex items-center gap-1">
-                                    <AlertCircle size={14}/> {searchErr}
-                                </p>
-                            )}
+                            {customerToken ? (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                                    <LabeledInput label="Customer Token" value={customerToken} readOnly />
+                                    <LabeledInput label="OTP Token" value={customerOtpToken} readOnly />
+                                    <LabeledInput label="OTP" required value={customerForm.confirmOtp || ''} onChange={(e) => setCustomerForm((p) => ({ ...p, confirmOtp: e.target.value }))} />
+                                    <div>
+                                        <button onClick={handleConfirmCustomer} className="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm" disabled={loadingKey === 'confirmCustomer'}>
+                                            Verify OTP
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : null}
+                        </div>
+                    ) : (
+                        <div className="text-sm rounded-md bg-green-50 text-green-700 p-3">Customer verified. You can continue to send money flow.</div>
+                    )}
+                </Section>
+            ) : null}
+
+            {step >= 3 && customerVerified ? (
+                <Section title="3) Send Transaction Summary">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-slate-800 text-white rounded-xl p-4 space-y-1">
+                            <h3 className="font-semibold">Sender Details</h3>
+                            <p className="text-sm"><strong>Name:</strong> {`${customerForm.firstName} ${customerForm.lastName}`.trim() || '-'}</p>
+                            <p className="text-sm"><strong>Mobile:</strong> {customerForm.mobileNo || checkMobile}</p>
+                            <p className="text-sm"><strong>Address:</strong> {customerForm.temporaryAddress_Address || '-'}</p>
+                        </div>
+                        <div className="bg-orange-400 text-white rounded-xl p-4 space-y-1">
+                            <h3 className="font-semibold">Receiver Details</h3>
+                            <p className="text-sm"><strong>Name:</strong> {txnForm.receiverName || '-'}</p>
+                            <p className="text-sm"><strong>Mobile:</strong> {txnForm.receiverMobileNo || '-'}</p>
+                            <p className="text-sm"><strong>Address:</strong> {txnForm.receiverAddress || '-'}</p>
                         </div>
                     </div>
-                </div>
-            )}
 
-            {/* ── STEP 2: Customer Details + Receivers ────────────────────────── */}
-            {step === 'details' && customer && (
-                <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-sm overflow-hidden">
-                    {/* IME logo centered */}
-                    <div className="flex flex-col items-center py-5 border-b dark:border-gray-700">
-                        <img
-                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/IME_Logo.svg/200px-IME_Logo.svg.png"
-                            alt="IME" className="h-14 object-contain"
-                            onError={e => { e.target.style.display='none'; }}
-                        />
-                        <h2 className="mt-2 text-base font-semibold dark:text-white">Customer Details</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <LabeledInput label="Remit Amount (INR)" required value={calcForm.remitAmount} onChange={(e) => setCalcForm((p) => ({ ...p, remitAmount: e.target.value }))} />
+                        <LabeledSelect label="Payment Mode" required options={[{ id: 'C', value: 'Cash Payment' }, { id: 'B', value: 'Bank Deposit' }]} value={calcForm.paymentType} onChange={(e) => setCalcForm((p) => ({ ...p, paymentType: e.target.value }))} />
+                        <LabeledSelect label="Bank" options={lookups.banks} value={calcForm.payoutAgentId} onChange={(e) => setCalcForm((p) => ({ ...p, payoutAgentId: e.target.value }))} />
+                        <LabeledSelect label="Calc By" required options={[{ id: 'C', value: 'By Collect Amount' }, { id: 'P', value: 'By Payout Amount' }]} value={calcForm.calcBy} onChange={(e) => setCalcForm((p) => ({ ...p, calcBy: e.target.value }))} />
+                        <LabeledInput label="Sender Name" required value={txnForm.senderName} onChange={(e) => setTxnForm((p) => ({ ...p, senderName: e.target.value }))} />
+                        <LabeledInput label="Receiver Name" required value={txnForm.receiverName} onChange={(e) => setTxnForm((p) => ({ ...p, receiverName: e.target.value }))} />
+                        <LabeledInput label="Receiver Mobile" required value={txnForm.receiverMobileNo} onChange={(e) => setTxnForm((p) => ({ ...p, receiverMobileNo: e.target.value }))} />
+                        <LabeledInput label="Receiver Address" required value={txnForm.receiverAddress} onChange={(e) => setTxnForm((p) => ({ ...p, receiverAddress: e.target.value }))} />
+                        <LabeledSelect label="Receiver Gender" required options={lookups.genders} value={txnForm.receiverGender} onChange={(e) => setTxnForm((p) => ({ ...p, receiverGender: e.target.value }))} />
+                        <LabeledSelect label="Relationship" required options={lookups.relationship} value={txnForm.relationship} onChange={(e) => setTxnForm((p) => ({ ...p, relationship: e.target.value }))} />
+                        <LabeledSelect label="Purpose" required options={lookups.purpose} value={txnForm.purposeOfRemittance} onChange={(e) => setTxnForm((p) => ({ ...p, purposeOfRemittance: e.target.value }))} />
+                        <LabeledSelect label="Source Of Fund" required options={lookups.sources} value={txnForm.sourceOfFund} onChange={(e) => setTxnForm((p) => ({ ...p, sourceOfFund: e.target.value }))} />
+                        {calcForm.paymentType === 'B' ? (
+                            <>
+                                <LabeledSelect label="Bank Name" required options={lookups.banks} value={txnForm.bankId} onChange={(e) => setTxnForm((p) => ({ ...p, bankId: e.target.value }))} />
+                                <LabeledSelect label="Bank Branch" required options={lookups.bankBranches} value={txnForm.bankBranchId} onChange={(e) => setTxnForm((p) => ({ ...p, bankBranchId: e.target.value }))} />
+                                <LabeledInput label="Account No" required value={txnForm.bankAccountNumber} onChange={(e) => setTxnForm((p) => ({ ...p, bankAccountNumber: e.target.value }))} />
+                            </>
+                        ) : null}
                     </div>
 
-                    {/* Customer info table */}
-                    <div className="p-5">
-                        <table className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                            <tbody>
-                                <tr className="border-b dark:border-gray-700">
-                                    <td className="px-4 py-3 font-semibold bg-gray-50 dark:bg-[#252525] dark:text-white w-1/4">Name</td>
-                                    <td className="px-4 py-3 dark:text-gray-200">{customerName}</td>
-                                    <td className="px-4 py-3 font-semibold bg-gray-50 dark:bg-[#252525] dark:text-white w-1/4">Mobile</td>
-                                    <td className="px-4 py-3 dark:text-gray-200">{customerMobile}</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-3 font-semibold bg-gray-50 dark:bg-[#252525] dark:text-white">Can Send Transaction</td>
-                                    <td className="px-4 py-3 dark:text-gray-200">{canSend}</td>
-                                    <td className="px-4 py-3 font-semibold bg-gray-50 dark:bg-[#252525] dark:text-white">KYC Status</td>
-                                    <td className="px-4 py-3">
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                            kycStatus === 'Approved'
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-amber-100 text-amber-700'
-                                        }`}>{kycStatus}</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <LabeledInput label="Collect Amount" value={txnForm.collectAmount} readOnly />
+                        <LabeledInput label="Payout Amount" value={txnForm.payoutAmount} readOnly />
+                        <LabeledInput label="Forex Session ID" value={txnForm.forexSessionId} readOnly />
                     </div>
 
-                    {/* Receiver list */}
-                    <div className="px-5 pb-6">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="font-semibold text-gray-800 dark:text-white">Receiver Details</h3>
-                            <button
-                                onClick={() => { setEditReceiver(null); setReceiverModal(true); }}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-sm rounded-md hover:bg-green-700"
-                            >
-                                <Plus size={14}/> Add
-                            </button>
-                        </div>
+                    <div className="rounded-lg bg-gray-50 dark:bg-[#232323] p-3 text-sm dark:text-gray-300">
+                        <p><strong>Payment Mode:</strong> {paymentModeText}</p>
+                        <p><strong>Purpose Of Remittance:</strong> {txnForm.purposeOfRemittance || '-'}</p>
+                        <p><strong>Source Of Fund:</strong> {txnForm.sourceOfFund || '-'}</p>
+                    </div>
 
-                        <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                            <table className="w-full text-sm">
-                                <thead className="bg-gray-50 dark:bg-[#252525]">
-                                    <tr>
-                                        {['#','Name','Mobile','Payment Type','Collect','Payout','Action'].map(h => (
-                                            <th key={h} className="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300 text-xs">{h}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {receivers.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={7} className="text-center py-6 text-sm text-amber-600">
-                                                No receivers found. Please add a receiver.
-                                            </td>
-                                        </tr>
-                                    ) : receivers.map((r, i) => {
-                                        const name         = r.ReceiverName     || r.receiverName     || r.name          || '—';
-                                        const rmobile      = r.ReceiverMobile   || r.receiverMobile   || r.mobile        || '—';
-                                        const pType        = r.PaymentType      || r.paymentType      || '—';
-                                        const relationship = r.Relationship     || r.relationship     || '';
-                                        return (
-                                            <tr key={r.BeneficiaryID || r.beneficiaryId || i} className="border-t dark:border-gray-700">
-                                                <td className="px-3 py-2 dark:text-gray-300">{i+1}</td>
-                                                <td className="px-3 py-2 dark:text-gray-300">
-                                                    {name}{relationship ? ` (${relationship})` : ''}
-                                                </td>
-                                                <td className="px-3 py-2 dark:text-gray-300">{rmobile}</td>
-                                                <td className="px-3 py-2 dark:text-gray-300">{pType}</td>
-                                                <td className="px-3 py-2">
-                                                    <input placeholder="Collect"
-                                                        className="border rounded px-2 py-1 text-xs w-20 dark:bg-[#2a2a2a] dark:border-gray-600 dark:text-white" readOnly />
-                                                </td>
-                                                <td className="px-3 py-2">
-                                                    <input placeholder="Payout"
-                                                        className="border rounded px-2 py-1 text-xs w-20 dark:bg-[#2a2a2a] dark:border-gray-600 dark:text-white" readOnly />
-                                                </td>
-                                                <td className="px-3 py-2">
-                                                    <div className="flex gap-1">
-                                                        <button
-                                                            onClick={() => { setSelectedReceiver(r); setSendModal(true); }}
-                                                            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 flex items-center gap-1"
-                                                        >
-                                                            <Send size={10}/> Send
-                                                        </button>
-                                                        <button
-                                                            onClick={() => { setEditReceiver(r); setReceiverModal(true); }}
-                                                            className="px-2 py-1 bg-gray-200 dark:bg-gray-700 dark:text-white text-xs rounded hover:bg-gray-300 flex items-center gap-1"
-                                                        >
-                                                            <Edit2 size={10}/> Edit
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Back to search */}
-                        <button
-                            onClick={() => { setStep('search'); setCustomer(null); setReceivers([]); }}
-                            className="mt-4 text-sm text-blue-600 hover:underline"
-                        >
-                            ← Search another customer
+                    <div className="flex flex-wrap gap-2">
+                        <button onClick={handleGetCalculation} disabled={loadingKey === 'getCalculation'} className="px-4 py-2 rounded-md bg-blue-600 text-white text-sm">
+                            {loadingKey === 'getCalculation' ? <Loader2 size={14} className="animate-spin inline mr-1" /> : null}
+                            Get Calculation
+                        </button>
+                        <button onClick={handleSendTransaction} disabled={loadingKey === 'sendTxn'} className="px-4 py-2 rounded-md bg-green-600 text-white text-sm">
+                            {loadingKey === 'sendTxn' ? <Loader2 size={14} className="animate-spin inline mr-1" /> : null}
+                            Submit Transaction
                         </button>
                     </div>
+                </Section>
+            ) : null}
+
+            {showConfirmOtpModal ? (
+                <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+                    <div className="w-full max-w-md bg-white dark:bg-[#1e1e1e] rounded-lg overflow-hidden">
+                        <div className="bg-red-600 text-white px-4 py-3 font-semibold">Enter OTP</div>
+                        <div className="p-4 space-y-3">
+                            <LabeledInput label="OTP" required placeholder="Enter OTP" value={confirmOtp} onChange={(e) => setConfirmOtp(e.target.value)} />
+                            <p className="text-xs text-red-500">Please try again after a few seconds if OTP not received.</p>
+                            <div className="flex justify-end gap-2">
+                                <button onClick={() => setShowConfirmOtpModal(false)} className="px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-sm">Cancel</button>
+                                <button onClick={handleConfirmSend} disabled={loadingKey === 'confirmSendTxn'} className="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm">
+                                    {loadingKey === 'confirmSendTxn' ? <Loader2 size={14} className="animate-spin inline mr-1" /> : null}
+                                    Proceed
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            )}
+            ) : null}
 
-            {/* Receiver Modal */}
-            <ReceiverModal
-                isOpen={receiverModal}
-                onClose={() => setReceiverModal(false)}
-                onSave={() => { setReceiverModal(false); fetchReceivers(); }}
-                customerMobile={mobile}
-                editData={editReceiver}
-            />
-
-            {/* Send Money Modal */}
-            <SendMoneyModal
-                isOpen={sendModal}
-                onClose={() => setSendModal(false)}
-                customerMobile={mobile}
-                receiver={selectedReceiver}
-            />
+            <Section title="Latest API Response">
+                {errorMessage ? <p className="text-sm text-red-600">{errorMessage}</p> : null}
+                {!latestResponse ? (
+                    <p className="text-sm text-gray-500">Flow execute karne ke baad response yahan dikhega.</p>
+                ) : (
+                    <div className={`rounded-lg p-3 text-sm ${latestResponse.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                            {latestResponse.ok ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                            <span className="font-semibold">{latestResponse.method} {latestResponse.url}</span>
+                            <span className="ml-auto">HTTP {latestResponse.status}</span>
+                        </div>
+                        <textarea rows={14} value={pretty(latestResponse.data)} readOnly className={`${inputClass} text-xs`} />
+                    </div>
+                )}
+            </Section>
         </div>
     );
 };

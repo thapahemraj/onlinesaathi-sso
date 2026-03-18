@@ -47,7 +47,7 @@ const Overview = () => {
 
             {/* Quick Links Grid */}
             <h1 className="text-3xl font-bold text-[#323130] dark:text-white mb-2">Welcome, {user?.firstName || user?.username}!</h1>
-            <p className="text-[#323130] dark:text-gray-300 mb-8">Manage your info, privacy, and security to make Microsoft work better for you.</p>
+            <p className="text-[#323130] dark:text-gray-300 mb-8">Manage your info, privacy, and security to make Online Saathi work better for you.</p>
 
             <ProfileCompletion user={user} />
 
