@@ -5,6 +5,60 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 
+// ============================================
+// STARTUP ENVIRONMENT VALIDATION
+// ============================================
+function validateRequiredEnv() {
+    const required = ['MONGODB_URI', 'JWT_SECRET'];
+    const missing = [];
+    
+    required.forEach(env => {
+        if (!process.env[env]) {
+            missing.push(env);
+        }
+    });
+    
+    if (missing.length > 0) {
+        console.error('❌ FATAL: Missing required environment variables:');
+        missing.forEach(env => console.error(`   - ${env}`));
+        console.error('\n📖 See server/.env.example for required variables');
+        console.error('📝 Run: cp .env.example .env && nano .env');
+        process.exit(1);
+    }
+    
+    console.log('✓ Required environment variables validated');
+}
+
+// ============================================
+// STARTUP SERVICE VALIDATION
+// ============================================
+function validateOptionalServices() {
+    const warnings = [];
+    
+    // Warn if IME credentials missing
+    if (!process.env.IME_SOAP_BASE_URL || !process.env.IME_ACCESS_CODE) {
+        warnings.push('⚠️  IME SOAP credentials not set - IME payments will fail');
+    }
+    
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
+        warnings.push('⚠️  Email SMTP not configured - email notifications disabled');
+    }
+    
+    if (warnings.length > 0) {
+        console.warn('\n═══ SERVICE WARNINGS ═══');
+        warnings.forEach(w => console.warn(w));
+        console.warn('════════════════════════\n');
+    }
+    
+    console.log('✓ Optional services validated');
+}
+
+// Run validation before app startup
+if (require.main === module) {
+    validateRequiredEnv();
+    validateOptionalServices();
+}
+
 const app = express();
 const path = require('path');
 const helmet = require('helmet');
@@ -97,7 +151,13 @@ try {
 // Only listen if run directly (Vercel imports this file so require.main !== module)
 if (require.main === module) {
     app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
+        console.log('\n🚀 SSO Backend Server Started');
+        console.log('═════════════════════════════════════');
+        console.log(`📍 Port: ${PORT}`);
+        console.log(`🔗 API Docs: http://localhost:${PORT}/api-docs`);
+        console.log(`🌍 CORS Origins: ${allowedOrigins.length} allowed`);
+        console.log(`📦 Node Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log('═════════════════════════════════════\n');
     });
 }
 
