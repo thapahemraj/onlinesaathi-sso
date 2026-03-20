@@ -23,7 +23,6 @@ const staticAllowedOrigins = [
     'http://localhost:5175',
     'http://localhost:3000',
     'http://localhost:3001',
-    'https://onlinesaathi-sso.vercel.app',
     'https://docs.i-sewa.in',
     'https://accounts.i-sewa.in',
     'https://api.i-sewa.in',
