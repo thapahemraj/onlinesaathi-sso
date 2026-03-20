@@ -11,8 +11,29 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
+const hasRequiredFirebaseConfig = Boolean(
+    firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
+    firebaseConfig.projectId &&
+    firebaseConfig.appId
+);
+
+let app = null;
+let auth = null;
+let googleProvider = null;
+
+try {
+    if (!hasRequiredFirebaseConfig) {
+        throw new Error('Missing Firebase config env values');
+    }
+
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    googleProvider = new GoogleAuthProvider();
+} catch (error) {
+    console.error('[Firebase] Initialization failed:', error?.message || error);
+}
+
+export { app, auth, googleProvider };
+export const isFirebaseReady = Boolean(auth && googleProvider);
 

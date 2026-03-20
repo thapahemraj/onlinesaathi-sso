@@ -185,6 +185,10 @@ const RegisterPage = () => {
             setIsSendingCode(true);
             if (usePhone) {
                 try {
+                    if (!auth) {
+                        showAlert('Phone verification is not configured. Please set valid Firebase keys.', 'error');
+                        return;
+                    }
                     showAlert('Sending verification code to phone...', 'loading');
                     if (!window.recaptchaVerifier) {
                         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
@@ -247,6 +251,10 @@ const RegisterPage = () => {
 
         try {
             if (usePhone) {
+                if (!auth) {
+                    showAlert('Phone verification is not configured. Please set valid Firebase keys.', 'error');
+                    return;
+                }
                 showAlert('Resending verification code to phone...', 'loading');
                 if (!window.recaptchaVerifier) {
                     window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {

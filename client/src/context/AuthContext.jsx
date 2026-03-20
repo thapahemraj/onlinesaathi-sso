@@ -102,7 +102,10 @@ export const AuthProvider = ({ children }) => {
 
     const loginWithGoogle = async () => {
         const { signInWithPopup } = await import('firebase/auth');
-        const { auth, googleProvider } = await import('../firebase');
+        const { auth, googleProvider, isFirebaseReady } = await import('../firebase');
+        if (!isFirebaseReady || !auth || !googleProvider) {
+            throw new Error('Google login is not configured. Please set valid Firebase env values.');
+        }
         const result = await signInWithPopup(auth, googleProvider);
 
         const { user: firebaseUser } = result;

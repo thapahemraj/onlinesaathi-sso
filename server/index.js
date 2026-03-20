@@ -17,21 +17,29 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(generalLimiter);
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-    origin: [
-        'http://localhost:5173',
-        'http://localhost:5174', // Vite fallback port
-        'http://localhost:5175', // Vite fallback port
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'https://onlinesaathi-sso.vercel.app', // Legacy Vercel Domain
-        'https://docs.i-sewa.in', // Production Docs
-        'https://accounts.i-sewa.in', // Production Client
-        'https://api.i-sewa.in', // Production API
-        'https://www.i-sewa.in',
-        'https://i-sewa.in'
+const staticAllowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://onlinesaathi-sso.vercel.app',
+    'https://docs.i-sewa.in',
+    'https://accounts.i-sewa.in',
+    'https://api.i-sewa.in',
+    'https://www.i-sewa.in',
+    'https://i-sewa.in',
+];
 
-    ],
+const envAllowedOrigins = [
+    process.env.CLIENT_URL,
+    ...(process.env.ALLOWED_ORIGINS || '').split(',').map((origin) => origin.trim()),
+].filter(Boolean);
+
+const allowedOrigins = [...new Set([...staticAllowedOrigins, ...envAllowedOrigins])];
+
+app.use(cors({
+    origin: allowedOrigins,
     credentials: true
 }));
 
